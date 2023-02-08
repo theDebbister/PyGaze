@@ -49,11 +49,9 @@
 
 
 class BaseScreen:
-
     """A class for PyGame Screen objects, for visual stimuli (to be displayed via a Display object)"""
-    
+
     def __init__(self):
-        
         """
         Initializes a Screen instance
         
@@ -75,12 +73,10 @@ class BaseScreen:
         screen    --    a pygaze.screen.Screen instance that is to be
                     copied onto the current screen
         """
-        
+
         pass
 
-
     def create(self):
-
         """
         Creates a new Screen instance, filled with either the background
         colour or specified screen (this method is sort of a secondary
@@ -105,9 +101,7 @@ class BaseScreen:
 
         pass
 
-
     def clear(self):
-
         """
         Clears the screen and fills it with a colour
         
@@ -128,9 +122,7 @@ class BaseScreen:
 
         pass
 
-
     def copy(self):
-
         """
         Copies a screen to the current screen
         
@@ -149,10 +141,8 @@ class BaseScreen:
         """
 
         pass
-            
 
     def draw_circle(self):
-
         """
         Draws a circle on the Screen
         
@@ -178,10 +168,8 @@ class BaseScreen:
         """
 
         pass
-        
 
     def draw_ellipse(self):
-
         """
         Draws an ellipse on the Screen
         
@@ -215,9 +203,7 @@ class BaseScreen:
 
         pass
 
-        
     def draw_rect(self):
-
         """
         Draws a rectangle on the Screen
         
@@ -247,9 +233,7 @@ class BaseScreen:
 
         pass
 
-
     def draw_line(self):
-
         """
         Draws a line on the Screen
         
@@ -276,9 +260,7 @@ class BaseScreen:
 
         pass
 
-
     def draw_polygon(self):
-
         """
         Draws a polygon on the Screen
         
@@ -303,9 +285,7 @@ class BaseScreen:
 
         pass
 
-
     def draw_fixation(self):
-
         """
         Draws a fixation target (cross, x or dot) on the Screen
         
@@ -336,9 +316,7 @@ class BaseScreen:
 
         pass
 
-
     def draw_text(self):
-
         """
         Draws a text on the Screen
         
@@ -371,10 +349,8 @@ class BaseScreen:
         """
 
         pass
-    
-    
+
     def draw_image(self):
-        
         """
         Draws an image on the Screen
         
@@ -398,12 +374,10 @@ class BaseScreen:
 
         None        --    loads and draws an image on the Screen
         """
-        
+
         pass
 
-
     def set_background_colour(self):
-
         """
         Set the background colour
         

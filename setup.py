@@ -75,7 +75,7 @@ def get_readme():
 
 
 setup(
-	name='pygaze' if 'bdist_deb' in sys.argv else u'python-pygaze',
+	name='pygaze' if 'bdist_deb' in sys.argv else u'pygaze',
 	python_requires=">=3",
 	version=pygaze.__version__,
 	description="A Python library for eye tracking",

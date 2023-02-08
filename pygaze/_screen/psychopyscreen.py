@@ -24,6 +24,7 @@ import pygaze
 from pygaze._misc.misc import pos2psychopos, psychopos2pos, rgb2psychorgb
 
 from pygaze._screen.basescreen import BaseScreen
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -42,30 +43,33 @@ from psychopy.visual import Rect
 from psychopy.visual import ShapeStim
 from psychopy.visual import TextStim
 from psychopy.visual import ImageStim
+
 # Line seems to be broken; see PsychoPyScreen.draw_line below
-#from psychopy.visual import Line
+# from psychopy.visual import Line
 
 # try importing PIL
 try:
     from PIL import Image
+
     pilimp = True
 except:
     try:
         import Image
+
         pilimp = True
     except:
         pilimp = False
-        print("pygaze.screen.psychopyscreen: PIL's Image class could not be loaded; image scaling with PsychoPy disptype is now impossible!")
+        print(
+            "pygaze.screen.psychopyscreen: PIL's Image class could not be loaded; image scaling with PsychoPy disptype is now impossible!")
 
 
 class PsychoPyScreen(BaseScreen):
-
     """A class for PsychoPy Screen objects, for visual stimuli (to be displayed via a Display object)"""
-    
+
     def __init__(self, dispsize=settings.DISPSIZE, fgc=settings.FGC,
-        bgc=settings.BGC, screennr=settings.SCREENNR,
-        mousevisible=settings.MOUSEVISIBLE, screen=None, **args):
-        
+                 bgc=settings.BGC, screennr=settings.SCREENNR,
+                 mousevisible=settings.MOUSEVISIBLE, screen=None, **args):
+
         """
         Constructor.
         
@@ -81,7 +85,7 @@ class PsychoPyScreen(BaseScreen):
             # docstring is useful for code editors; these load the docs
             # in a non-verbose manner, so warning messages would be lost
             pass
-        
+
         self.dispsize = dispsize
         self.fgc = fgc
         self.bgc = bgc
@@ -135,15 +139,16 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
+
         if colour == None:
             colour = self.bgc
-        
+
         self.screen = []
         self.draw_rect(colour=colour, x=0, y=0, w=self.dispsize[0], \
-            h=self.dispsize[1], fill=True)
-
+                       h=self.dispsize[1], fill=True)
 
     def copy(self, screen):
 
@@ -158,10 +163,9 @@ class PsychoPyScreen(BaseScreen):
         """
 
         self.screen = copy.copy(screen.screen)
-            
 
     def draw_circle(self, colour=None, color=None, pos=None, r=50, pw=1, \
-        fill=False):
+                    fill=False):
 
         """Draws a circle on the screen
         
@@ -184,7 +188,7 @@ class PsychoPyScreen(BaseScreen):
         Nothing    -- draws a circle on (PyGame) or adds a Circle stimulus
                    to (PsychoPy) the self.screen property
         """
-        
+
         if color is None and colour is None:
             pass
         elif color is None and colour is not None:
@@ -192,28 +196,29 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
         if colour is None:
             colour = self.fgc
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
 
         colour = rgb2psychorgb(colour)
-        pos = pos2psychopos(pos,dispsize=self.dispsize)
+        pos = pos2psychopos(pos, dispsize=self.dispsize)
 
         if fill:
             self.screen.append(Circle(pygaze.expdisplay, radius=r, edges=32, \
-                pos=pos, lineWidth=pw, lineColor=colour, \
-                lineColorSpace='rgb', fillColor=colour, fillColorSpace='rgb'))
+                                      pos=pos, lineWidth=pw, lineColor=colour, \
+                                      lineColorSpace='rgb', fillColor=colour, fillColorSpace='rgb'))
         else:
-            self.screen.append(Circle(pygaze.expdisplay, radius=r-pw, \
-                edges=32, pos=pos, lineWidth=pw, lineColor=colour, \
-                lineColorSpace='rgb'))
-        
+            self.screen.append(Circle(pygaze.expdisplay, radius=r - pw, \
+                                      edges=32, pos=pos, lineWidth=pw, lineColor=colour, \
+                                      lineColorSpace='rgb'))
 
     def draw_ellipse(self, colour=None, color=None, x=None, y=None, w=50, \
-        h=50, pw=1, fill=False):
+                     h=50, pw=1, fill=False):
 
         """Draws an ellipse on the screen
         
@@ -251,7 +256,9 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
         if colour is None:
             colour = self.fgc
@@ -260,23 +267,22 @@ class PsychoPyScreen(BaseScreen):
         if y is None:
             y = 0
 
-        pos = x,y
+        pos = x, y
         colour = rgb2psychorgb(colour)
-        pos = pos2psychopos(pos,dispsize=self.dispsize)
-        pos = pos[0] + w/2, pos[1] - h/2
+        pos = pos2psychopos(pos, dispsize=self.dispsize)
+        pos = pos[0] + w / 2, pos[1] - h / 2
 
         if fill:
             self.screen.append(Circle(pygaze.expdisplay, lineWidth=pw, \
-                lineColor=colour, lineColorSpace='rgb', fillColor=colour, \
-                fillColorSpace='rgb', pos=pos, size=(w,h)))
+                                      lineColor=colour, lineColorSpace='rgb', fillColor=colour, \
+                                      fillColorSpace='rgb', pos=pos, size=(w, h)))
         else:
             self.screen.append(Circle(pygaze.expdisplay, lineWidth=pw, \
-                lineColor=colour, lineColorSpace='rgb', fillColor=None, \
-                pos=pos, size=(w,h)))
+                                      lineColor=colour, lineColorSpace='rgb', fillColor=None, \
+                                      pos=pos, size=(w, h)))
 
-        
     def draw_rect(self, colour=None, color=None, x=None, y=None, w=50, h=50, \
-        pw=1, fill=False):
+                  pw=1, fill=False):
 
         """Draws a rectangle on the screen
         
@@ -310,29 +316,30 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
         if colour is None:
             colour = self.fgc
         if x is None:
-            x = self.dispsize[0]/2
+            x = self.dispsize[0] / 2
         if y is None:
-            y = self.dispsize[1]/2
+            y = self.dispsize[1] / 2
 
-        pos = x,y
+        pos = x, y
         colour = rgb2psychorgb(colour)
-        pos = pos2psychopos(pos,dispsize=self.dispsize)
-        pos = pos[0] + w/2, pos[1] - h/2
+        pos = pos2psychopos(pos, dispsize=self.dispsize)
+        pos = pos[0] + w / 2, pos[1] - h / 2
 
         if fill:
             self.screen.append(Rect(pygaze.expdisplay, width=w, height=h, \
-                lineWidth=pw, lineColor=colour, lineColorSpace='rgb', \
-                fillColor=colour, fillColorSpace='rgb', pos=pos))
+                                    lineWidth=pw, lineColor=colour, lineColorSpace='rgb', \
+                                    fillColor=colour, fillColorSpace='rgb', pos=pos))
         else:
             self.screen.append(Rect(pygaze.expdisplay, width=w, height=h, \
-                lineWidth=pw, lineColor=colour, lineColorSpace='rgb', \
-                fillColor=None, pos=pos))
-
+                                    lineWidth=pw, lineColor=colour, lineColorSpace='rgb', \
+                                    fillColor=None, pos=pos))
 
     def draw_line(self, colour=None, color=None, spos=None, epos=None, pw=1):
 
@@ -365,32 +372,33 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
         if colour is None:
             colour = self.fgc
         if spos is None:
-            spos = (int(self.dispsize[0]*0.25), self.dispsize[1]/2)
+            spos = (int(self.dispsize[0] * 0.25), self.dispsize[1] / 2)
         if epos is None:
-            epos = (int(self.dispsize[0]*0.75), self.dispsize[1]/2)
+            epos = (int(self.dispsize[0] * 0.75), self.dispsize[1] / 2)
 
         colour = rgb2psychorgb(colour)
-        spos = pos2psychopos(spos,dispsize=self.dispsize)
-        epos = pos2psychopos(epos,dispsize=self.dispsize)
-        
+        spos = pos2psychopos(spos, dispsize=self.dispsize)
+        epos = pos2psychopos(epos, dispsize=self.dispsize)
+
         # The `Line` class appears to be broken in a recent update of
         # PsychoPy. Hence the fallback to `ShapeStim`. See also:
         # <https://groups.google.com/forum/#!topic/psychopy-dev/1sKn6RrqH-8>
-        #self.screen.append(Line(pygaze.expdisplay, start=spos, end=epos, \
+        # self.screen.append(Line(pygaze.expdisplay, start=spos, end=epos, \
         #    lineColor=colour, lineColorSpace='rgb', lineWidth=pw))
         stim = ShapeStim(pygaze.expdisplay, lineWidth=pw, \
-            vertices=[spos, epos], lineColor=colour)
+                         vertices=[spos, epos], lineColor=colour)
 
         self.screen.append(stim)
 
-
     def draw_polygon(self, pointlist, colour=None, color=None, pw=1, \
-        fill=True):
+                     fill=True):
 
         """Draws a polygon on the screen
         
@@ -419,7 +427,9 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
         if colour is None:
             colour = self.fgc
@@ -427,21 +437,20 @@ class PsychoPyScreen(BaseScreen):
         colour = rgb2psychorgb(colour)
         pl = []
         for pos in pointlist:
-            pl.append(pos2psychopos(pos,dispsize=self.dispsize))
+            pl.append(pos2psychopos(pos, dispsize=self.dispsize))
 
         if fill:
             self.screen.append(ShapeStim(pygaze.expdisplay, lineWidth=pw, \
-                lineColor=colour, lineColorSpace='rgb', fillColor=colour, \
-                fillColorSpace='rgb',vertices=pl, closeShape=True))
+                                         lineColor=colour, lineColorSpace='rgb', fillColor=colour, \
+                                         fillColorSpace='rgb', vertices=pl, closeShape=True))
         else:
             self.screen.append(ShapeStim(pygaze.expdisplay, lineWidth=pw, \
-                lineColor=colour, lineColorSpace='rgb', \
-                fillColor=rgb2psychorgb(self.bgc), fillColorSpace='rgb', \
-                vertices=pl, closeShape=True))
+                                         lineColor=colour, lineColorSpace='rgb', \
+                                         fillColor=rgb2psychorgb(self.bgc), fillColorSpace='rgb', \
+                                         vertices=pl, closeShape=True))
 
-            
     def draw_fixation(self, fixtype="cross", colour=None, color=None, \
-        pos=None, pw=1, diameter=12):
+                      pos=None, pw=1, diameter=12):
 
         """Draws a fixation (cross, x or dot) on the screen
         
@@ -469,7 +478,7 @@ class PsychoPyScreen(BaseScreen):
         Nothing    -- draws on (PyGame) or adds stimuli to (PsychoPy) the
                    self.screen property
         """
-        
+
         if color is None and colour is None:
             pass
         elif color is None and colour is not None:
@@ -477,35 +486,38 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
-        if fixtype not in ["cross","x","dot"]:
-            raise Exception("Error in libscreen.Screen.draw_fixation: fixtype {} not recognized; fixtype should be one of 'cross','x','dot'".format(fixtype))
+        if fixtype not in ["cross", "x", "dot"]:
+            raise Exception(
+                "Error in libscreen.Screen.draw_fixation: fixtype {} not recognized; fixtype should be one of 'cross','x','dot'".format(
+                    fixtype))
         if colour is None:
             colour = self.fgc
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
 
-        r = int(diameter/2.0)
+        r = int(diameter / 2.0)
         if fixtype == "cross":
-            self.draw_line(colour=colour, spos=(pos[0]-r, pos[1]), \
-                epos=(pos[0]+r, pos[1]), pw=pw)
-            self.draw_line(colour=colour, spos=(pos[0], pos[1]+r), \
-                epos=(pos[0], pos[1]-r), pw=pw)
+            self.draw_line(colour=colour, spos=(pos[0] - r, pos[1]), \
+                           epos=(pos[0] + r, pos[1]), pw=pw)
+            self.draw_line(colour=colour, spos=(pos[0], pos[1] + r), \
+                           epos=(pos[0], pos[1] - r), pw=pw)
         elif fixtype == "x":
             x = int(math.cos(math.radians(45)) * r)
             y = int(math.sin(math.radians(45)) * r)
-            self.draw_line(colour=colour, spos=(pos[0]-x, pos[1]-y), \
-                epos=(pos[0]+x, pos[1]+y), pw=pw)
-            self.draw_line(colour=colour, spos=(pos[0]-x, pos[1]+y), \
-                epos=(pos[0]+x, pos[1]-y), pw=pw)
+            self.draw_line(colour=colour, spos=(pos[0] - x, pos[1] - y), \
+                           epos=(pos[0] + x, pos[1] + y), pw=pw)
+            self.draw_line(colour=colour, spos=(pos[0] - x, pos[1] + y), \
+                           epos=(pos[0] + x, pos[1] - y), pw=pw)
         elif fixtype == "dot":
             self.draw_circle(colour=colour, pos=pos, r=r, pw=0, fill=True)
 
-
-    def draw_text(self, text="text", colour=None, color=None, pos=None, \
-            centre=None, center=None, font="mono", fontsize=12, \
-            antialias=True, wrap_width=None):
+    def draw_text(self, text="text", colour=None, color=None, pos=None, centre=None, center=None,
+                  font="mono", fontsize=12, antialias=True, wrap_width=None, anchor_horiz='left',
+                  anchor_vert='top', align_text='left'):
 
         """Draws a text on the screen
         
@@ -522,11 +534,11 @@ class PsychoPyScreen(BaseScreen):
         pos        -- text position, an (x,y) position tuple or None for a
                    central position (default = None)
         center    -- Boolean indicating is the pos keyword argument should
-                   indicate the text centre (True) or the top right
+                   indicate the text centre (True) or the top left
                    coordinate (False) (default = True)
         font        -- font name (a string value); should be the name of a
                    font included in the PyGaze resources/fonts directory
-                   (default = 'mono')
+                   (default = 'mono') or a font that is installed on your system
         fontsize    -- fontsize in pixels (an integer value) (default = 12)
         antialias    -- Boolean indicating whether text should be antialiased
                    or not (default = True)
@@ -544,7 +556,9 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
         if center is None and centre is None:
             centre = True
@@ -553,12 +567,14 @@ class PsychoPyScreen(BaseScreen):
         elif center is not None and centre is None:
             centre = center
         elif centre != center:
-            raise Exception("The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(center,centre))
+            raise Exception(
+                "The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(
+                    center, centre))
 
         if colour is None:
             colour = self.fgc
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
 
         if centre:
             align = "center"
@@ -566,24 +582,36 @@ class PsychoPyScreen(BaseScreen):
             align = "left"
 
         colour = rgb2psychorgb(colour)
-        pos = pos2psychopos(pos,dispsize=self.dispsize)
+        pos = pos2psychopos(pos, dispsize=self.dispsize)
 
-        self.screen.append(TextStim(pygaze.expdisplay, text=str(text), \
-            font=font, pos=pos, color=colour, height=fontsize, \
-            antialias=antialias, alignHoriz=align, \
-            fontFiles=pygaze.FONTFILES, wrapWidth=wrap_width))
+        self.screen.append(TextStim(
+            pygaze.expdisplay,
+            text=str(text),
+            font=font,
+            pos=pos,
+            color='black',
+            height=fontsize,
+            antialias=antialias,
+            anchorHoriz=anchor_horiz,
+            fontFiles=pygaze.FONTFILES,
+            wrapWidth=wrap_width,
+            anchorVert=anchor_vert,
+            alignText=align_text,
+            # languageStyle='RTL'
+            )
+        )
         # PsychoPy deprecated "alignHoriz", but in version 3.2.4 (and maybe
         # also others, who knows?) its replacements "alignText" and
         # "anchorHoriz" are unknown keyword arguments to __init__. Yet,
         # "alignHoriz" does NOT work any longer. I guess alignment is just
         # broken now? The ugly workaround below will NOT work for those broken
         # versions of PsychoPy, but will at least not crash them.
-        self.screen[-1].anchorHoriz = align
-        self.screen[-1].alignText = align
+        # self.screen[-1].anchorHoriz = align
+        # self.screen[-1].alignText = align
 
 
     def draw_image(self, image, pos=None, scale=None):
-        
+
         """Draws an image on the screen
         
         arguments
@@ -600,25 +628,25 @@ class PsychoPyScreen(BaseScreen):
                    adds SimpleImageStim to (PsychoPy) the self.screen
                    property
         """
-        
+
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
-        
-        pos = pos2psychopos(pos,dispsize=self.dispsize)
-        
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
+
+        pos = pos2psychopos(pos, dispsize=self.dispsize)
+
         if scale is None:
             imgsize = None
         else:
             if pilimp:
                 img = Image.open(image)
-                imgsize = (img.size[0]*scale, img.size[1]*scale)
+                imgsize = (img.size[0] * scale, img.size[1] * scale)
             else:
                 imgsize = None
-                print("WARNING! libscreen.Screen: PIL's Image class could not be loaded; image scaling with PsychoPy disptype is now impossible!")
-            
-        self.screen.append(ImageStim(pygaze.expdisplay, image=image, \
-            pos=pos, size=imgsize))
+                print(
+                    "WARNING! libscreen.Screen: PIL's Image class could not be loaded; image scaling with PsychoPy disptype is now impossible!")
 
+        self.screen.append(ImageStim(pygaze.expdisplay, image=image, \
+                                     pos=pos, size=imgsize))
 
     def set_background_colour(self, colour=None, color=None):
 
@@ -644,7 +672,9 @@ class PsychoPyScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
 
         if colour is not None:
             self.bgc = colour
