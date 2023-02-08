@@ -316,7 +316,7 @@ class BaseScreen:
 
         pass
 
-    def draw_text(self):
+    def draw_text(self, **kwargs):
         """
         Draws a text on the Screen
         
@@ -348,6 +348,9 @@ class BaseScreen:
         None        --    renders and draws text on the Screen
         """
 
+        pass
+
+    def draw_text_box(self, **kwargs):
         pass
 
     def draw_image(self):

@@ -38,7 +38,7 @@ import math
 import os.path
 
 import psychopy
-from psychopy.visual import Circle
+from psychopy.visual import Circle, TextBox2
 from psychopy.visual import Rect
 from psychopy.visual import ShapeStim
 from psychopy.visual import TextStim
@@ -597,18 +597,92 @@ class PsychoPyScreen(BaseScreen):
             wrapWidth=wrap_width,
             anchorVert=anchor_vert,
             alignText=align_text,
-            # languageStyle='RTL'
+            languageStyle='RTL'
             )
         )
-        # PsychoPy deprecated "alignHoriz", but in version 3.2.4 (and maybe
-        # also others, who knows?) its replacements "alignText" and
-        # "anchorHoriz" are unknown keyword arguments to __init__. Yet,
-        # "alignHoriz" does NOT work any longer. I guess alignment is just
-        # broken now? The ugly workaround below will NOT work for those broken
-        # versions of PsychoPy, but will at least not crash them.
-        # self.screen[-1].anchorHoriz = align
-        # self.screen[-1].alignText = align
 
+    def draw_text_box(self, text="text", colour=None, color=None, pos=None, centre=None, center=None,
+                  font="mono", fontsize=12, align_text='top_left', size=(1050, None)):
+
+        """Draws a text on the screen
+
+        arguments
+        None
+
+        keyword arguments
+        text        -- string to be displayed (newlines are allowed and will
+                   be recognized) (default = 'text')
+        colour    -- colour for the circle (a colour name (e.g. 'red') or
+                   a RGB(A) tuple (e.g. (255,0,0) or (255,0,0,255))) or
+                   None for the default foreground colour, self.fgc
+                   (default = None)
+        pos        -- text position, an (x,y) position tuple or None for a
+                   central position (default = None)
+        center    -- Boolean indicating is the pos keyword argument should
+                   indicate the text centre (True) or the top left
+                   coordinate (False) (default = True)
+        font        -- font name (a string value); should be the name of a
+                   font included in the PyGaze resources/fonts directory
+                   (default = 'mono') or a font that is installed on your system
+        fontsize    -- fontsize in pixels (an integer value) (default = 12)
+        antialias    -- Boolean indicating whether text should be antialiased
+                   or not (default = True)
+
+        returns
+        Nothing    -- renders and draws a surface with text on (PyGame) or
+                   adds SimpleTextStim to (PsychoPy) the self.screen
+                   property
+        """
+
+        if color is None and colour is None:
+            pass
+        elif color is None and colour is not None:
+            pass
+        elif color is not None and colour is None:
+            colour = color
+        elif colour != color:
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour))
+
+        if center is None and centre is None:
+            centre = True
+        elif center is None and centre is not None:
+            pass
+        elif center is not None and centre is None:
+            centre = center
+        elif centre != center:
+            raise Exception(
+                "The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(
+                    center, centre))
+
+        if colour is None:
+            colour = self.fgc
+        if pos is None:
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
+
+        if centre:
+            align = "center"
+        else:
+            align = "left"
+
+        colour = rgb2psychorgb(colour)
+        pos = pos2psychopos(pos, dispsize=self.dispsize)
+
+        self.screen.append(TextBox2(
+            pygaze.expdisplay,
+            text=str(text),
+            font=font,
+            pos=pos,
+            color='black',
+            letterHeight=fontsize,
+            alignment=align_text,
+            anchor='top_left',
+            lineSpacing=2.0,
+            size=size,
+            # languageStyle='RTL'
+        )
+        )
 
     def draw_image(self, image, pos=None, scale=None):
 
