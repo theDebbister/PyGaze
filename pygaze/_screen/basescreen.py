@@ -51,7 +51,7 @@
 class BaseScreen:
     """A class for PyGame Screen objects, for visual stimuli (to be displayed via a Display object)"""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """
         Initializes a Screen instance
         
@@ -76,7 +76,7 @@ class BaseScreen:
 
         pass
 
-    def create(self):
+    def create(self, **kwargs):
         """
         Creates a new Screen instance, filled with either the background
         colour or specified screen (this method is sort of a secondary
@@ -101,7 +101,7 @@ class BaseScreen:
 
         pass
 
-    def clear(self):
+    def clear(self, **kwargs):
         """
         Clears the screen and fills it with a colour
         
@@ -142,7 +142,7 @@ class BaseScreen:
 
         pass
 
-    def draw_circle(self):
+    def draw_circle(self, **kwargs):
         """
         Draws a circle on the Screen
         
@@ -169,7 +169,7 @@ class BaseScreen:
 
         pass
 
-    def draw_ellipse(self):
+    def draw_ellipse(self, **kwargs):
         """
         Draws an ellipse on the Screen
         
@@ -203,7 +203,7 @@ class BaseScreen:
 
         pass
 
-    def draw_rect(self):
+    def draw_rect(self, **kwargs):
         """
         Draws a rectangle on the Screen
         
@@ -233,7 +233,7 @@ class BaseScreen:
 
         pass
 
-    def draw_line(self):
+    def draw_line(self, **kwargs):
         """
         Draws a line on the Screen
         
@@ -260,7 +260,7 @@ class BaseScreen:
 
         pass
 
-    def draw_polygon(self):
+    def draw_polygon(self, **kwargs):
         """
         Draws a polygon on the Screen
         
@@ -285,7 +285,7 @@ class BaseScreen:
 
         pass
 
-    def draw_fixation(self):
+    def draw_fixation(self, **kwargs):
         """
         Draws a fixation target (cross, x or dot) on the Screen
         
@@ -351,9 +351,40 @@ class BaseScreen:
         pass
 
     def draw_text_box(self, **kwargs):
+        """
+        Draws a text box on the Screen. It is very similar to the draw text function, but the psychopy textbox stimulus
+        provides more functionality and can be used more flexibly.
+
+        arguments
+
+        None
+
+        keyword arguments
+
+        text        --    string to be displayed (newlines are allowed and
+                    will be recognized) (default = 'text')
+        colour    --    drawing colour colour: a RGB tuple, e.g. (255,0,0)
+                    for red or (0,0,0) for black; or None for the
+                    default foreground colour, self.fgc (default = None)
+        pos        --    text position, a (x,y) position tuple or None for a
+                    central position (default = None)
+        centre    --    Boolean indicating is the pos keyword argument should
+                    indicate the text centre (True) or the top left
+                    coordinate (False) (default = True)
+        font        --    font name (a string value); should be the name of a
+                    font included in the PyGaze resources/fonts directory
+                    (default = 'mono')
+        fontsize    --    fontsize in pixels (an integer value) (default = 12)
+        antialias    --    Boolean indicating whether text should be antialiased
+                    or not (default = True)
+
+        returns
+
+        None        --    renders and draws text on the Screen
+        """
         pass
 
-    def draw_image(self):
+    def draw_image(self, **kwargs):
         """
         Draws an image on the Screen
         
@@ -380,7 +411,7 @@ class BaseScreen:
 
         pass
 
-    def set_background_colour(self):
+    def set_background_colour(self, **kwargs):
         """
         Set the background colour
         

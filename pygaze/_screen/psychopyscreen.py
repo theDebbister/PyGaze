@@ -18,6 +18,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
+from typing import Optional
 
 from pygaze import settings
 import pygaze
@@ -589,7 +590,7 @@ class PsychoPyScreen(BaseScreen):
             text=str(text),
             font=font,
             pos=pos,
-            color='black',
+            color=colour,
             height=fontsize,
             antialias=antialias,
             anchorHoriz=anchor_horiz,
@@ -597,36 +598,53 @@ class PsychoPyScreen(BaseScreen):
             wrapWidth=wrap_width,
             anchorVert=anchor_vert,
             alignText=align_text,
-            languageStyle='RTL'
-            )
+            languageStyle='LTR'
+        )
         )
 
-    def draw_text_box(self, text="text", colour=None, color=None, pos=None, centre=None, center=None,
-                  font="mono", fontsize=12, align_text='top_left', size=(1050, None)):
-
-        """Draws a text on the screen
+    def draw_text_box(
+            self,
+            text: str = "text",
+            color: str = 'black',
+            pos: Optional[tuple[float, float]] = None,
+            font: str = 'Open Sans',
+            fontsize: int = 12,
+            align_text: str = 'center',
+            anchor: str = 'center',
+            size: tuple[Optional[int], Optional[int]] = (None, None),
+            language_style: str = 'LTR',
+            line_spacing: float = 1.0,
+    ) -> None:
+        """Draws a text box on the screen
 
         arguments
         None
 
         keyword arguments
-        text        -- string to be displayed (newlines are allowed and will
-                   be recognized) (default = 'text')
-        colour    -- colour for the circle (a colour name (e.g. 'red') or
-                   a RGB(A) tuple (e.g. (255,0,0) or (255,0,0,255))) or
-                   None for the default foreground colour, self.fgc
-                   (default = None)
-        pos        -- text position, an (x,y) position tuple or None for a
-                   central position (default = None)
-        center    -- Boolean indicating is the pos keyword argument should
-                   indicate the text centre (True) or the top left
-                   coordinate (False) (default = True)
-        font        -- font name (a string value); should be the name of a
-                   font included in the PyGaze resources/fonts directory
-                   (default = 'mono') or a font that is installed on your system
-        fontsize    -- fontsize in pixels (an integer value) (default = 12)
-        antialias    -- Boolean indicating whether text should be antialiased
-                   or not (default = True)
+        text            -- string to be displayed (newlines are allowed and will
+                        be recognized) (default = 'text')
+        color           -- color for the text (a colour name (e.g. 'red') or
+                        a RGB(A) tuple (e.g. (255,0,0) or (255,0,0,255))) or
+                        None for the default foreground color, self.fgc
+                        (default = 'black')
+        pos             -- text position, an (x,y) position tuple or None for a
+                        central position (default = None)
+        font            -- font name (a string value); should be the name of a
+                        font included in the PyGaze resources/fonts directory
+                        (default = 'Open Sans') or a font that is installed on your system
+        fontsize        -- fontsize in pixels (an integer value) (default = 12)
+        align_text      -- string indicating how text should be aligned, can be any combination
+                        of top / bottom / center and left / right / center
+                        e.g. top_left, bottom_right, center, etc.
+        anchor          -- string indicating what the anchor point of the text should be.
+                        This defines what the pos argument refers to. E.g. if it
+                        is center, then the position defined in the
+                        pos argument will be made the center of the text, if it is top_left,
+                        the position argument refers to the top_left corner of the text
+        size            -- tuple containing two ints that defines the size of the text box. Both
+                        ints can be None. Then the box will adapt to the text and not be bounded
+                        on the vertical or horizontal axis or both. (default = (None, None))
+        language_style  -- either LTR (left-to-right), RTL (right-to-left) or arabic
 
         returns
         Nothing    -- renders and draws a surface with text on (PyGame) or
@@ -634,55 +652,27 @@ class PsychoPyScreen(BaseScreen):
                    property
         """
 
-        if color is None and colour is None:
-            pass
-        elif color is None and colour is not None:
-            pass
-        elif color is not None and colour is None:
-            colour = color
-        elif colour != color:
-            raise Exception(
-                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
-                    color, colour))
-
-        if center is None and centre is None:
-            centre = True
-        elif center is None and centre is not None:
-            pass
-        elif center is not None and centre is None:
-            centre = center
-        elif centre != center:
-            raise Exception(
-                "The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(
-                    center, centre))
-
-        if colour is None:
-            colour = self.fgc
         if pos is None:
             pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
 
-        if centre:
-            align = "center"
-        else:
-            align = "left"
-
-        colour = rgb2psychorgb(colour)
+        color = rgb2psychorgb(color)
         pos = pos2psychopos(pos, dispsize=self.dispsize)
 
-        self.screen.append(TextBox2(
+        psychopy_textbox = TextBox2(
             pygaze.expdisplay,
             text=str(text),
             font=font,
             pos=pos,
-            color='black',
+            color=color,
             letterHeight=fontsize,
             alignment=align_text,
-            anchor='top_left',
-            lineSpacing=2.0,
+            anchor=anchor,
+            lineSpacing=line_spacing,
             size=size,
-            # languageStyle='RTL'
+            languageStyle=language_style,
         )
-        )
+
+        self.screen.append(psychopy_textbox)
 
     def draw_image(self, image, pos=None, scale=None):
 
