@@ -120,7 +120,7 @@ class BaseKeyboard:
           pass
 
 
-     def get_key(self):
+     def get_key(self, **kwargs):
 
           """
           Wait for keyboard input

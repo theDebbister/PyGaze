@@ -28,6 +28,7 @@ from pygaze.keyboard import Keyboard
 from pygaze.sound import Sound
 
 from pygaze._eyetracker.libdumbdummy import DumbDummy
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -37,11 +38,8 @@ except:
     pass
 
 
-
 class Dummy(DumbDummy):
-
     """A dummy class to run experiments in dummy mode, where eye movements are simulated by the mouse"""
-    
 
     def __init__(self, display):
 
@@ -66,14 +64,14 @@ class Dummy(DumbDummy):
 
         self.recording = False
         self.blinking = False
-        self.bbpos = (settings.DISPSIZE[0]/2, settings.DISPSIZE[1]/2)
+        self.bbpos = (settings.DISPSIZE[0] / 2, settings.DISPSIZE[1] / 2)
         self.resolution = settings.DISPSIZE[:]
         self.simulator = Mouse(disptype=settings.DISPTYPE, mousebuttonlist=None,
-            timeout=2, visible=False)
+                               timeout=2, visible=False)
         self.kb = Keyboard(disptype=settings.DISPTYPE, keylist=None,
-            timeout=None)
-        self.angrybeep = Sound(osc='saw',freq=100, length=100, attack=0,
-            decay=0, soundfile=None)
+                           timeout=None)
+        self.angrybeep = Sound(osc='saw', freq=100, length=100, attack=0,
+                               decay=0, soundfile=None)
         self.display = display
         self.screen = Screen(disptype=settings.DISPTYPE, mousevisible=False)
 
@@ -89,38 +87,38 @@ class Dummy(DumbDummy):
         """Dummy drift correction"""
 
         print("Drift correction would now take place")
-        
+
         if fix_triggered:
             return self.fix_triggered_drift_correction(pos)
-        
+
         if pos == None:
             pos = settings.DISPSIZE[0] / 2, settings.DISPSIZE[1] / 2
 
         # show mouse
         self.simulator.set_visible(visible=True)
-        
+
         # show fixation dot
         self.draw_drift_correction_target(pos[0], pos[1])
 
         # perform drift check
-        errdist = 60 # pixels (on a 1024x768px and 39.9x29.9cm monitor at 67 cm, this is about 2 degrees of visual angle)
+        errdist = 60  # pixels (on a 1024x768px and 39.9x29.9cm monitor at 67 cm, this is about 2 degrees of visual angle)
         pressed = None
         while True:
             # check for keyboard input
-            pressed, presstime = self.kb.get_key(keylist=['q','escape','space'], timeout=1)
-            
+            pressed, presstime = self.kb.get_key(keylist=['q', 'escape', 'space'], timeout=1)
+
             # quit key
-            if pressed in ['q','escape']:
+            if pressed in ['q', 'escape']:
                 # hide mouse
                 self.simulator.set_visible(visible=False)
                 return False
-                
+
             # space bar
             elif pressed == 'space':
                 # get sample
                 gazepos = self.sample()
                 # sample is close enough to fixation dot
-                if ((gazepos[0]-pos[0])**2  + (gazepos[1]-pos[1])**2)**0.5 < errdist:
+                if ((gazepos[0] - pos[0]) ** 2 + (gazepos[1] - pos[1]) ** 2) ** 0.5 < errdist:
                     # hide mouse
                     self.simulator.set_visible(visible=False)
                     return True
@@ -128,7 +126,6 @@ class Dummy(DumbDummy):
                 else:
                     # show discontent
                     self.angrybeep.play()
-
 
     def fix_triggered_drift_correction(self, pos=None, min_samples=30, max_dev=60, reset_threshold=10):
 
@@ -150,24 +147,24 @@ class Dummy(DumbDummy):
             lx = []
             ly = []
             while len(lx) < min_samples:
-    
+
                 # pressing escape enters the calibration screen
                 if self.kb.get_key(keylist=["escape", "q"], timeout=0)[0] != None:
                     self.recording = False
                     print("libeyetracker.libeyetracker.fix_triggered_drift_correction(): 'q' pressed")
                     self.simulator.set_visible(visible=False)
                     return False
-    
+
                 # collect a sample
                 x, y = self.sample()
-    
+
                 if len(lx) == 0 or x != lx[-1] or y != ly[-1]:
-    
+
                     # if present sample deviates too much from previous sample, reset counting
                     if len(lx) > 0 and (abs(x - lx[-1]) > reset_threshold or abs(y - ly[-1]) > reset_threshold):
                         lx = []
                         ly = []
-    
+
                     # collect samples
                     else:
                         lx.append(x)
@@ -175,18 +172,17 @@ class Dummy(DumbDummy):
 
                 # check if samples are within max. deviation
                 if len(lx) == min_samples:
-    
+
                     avg_x = sum(lx) / len(lx)
                     avg_y = sum(ly) / len(ly)
-                    d = ((avg_x - pos[0]) ** 2 + (avg_y - pos[1]) ** 2)**0.5
-    
+                    d = ((avg_x - pos[0]) ** 2 + (avg_y - pos[1]) ** 2) ** 0.5
+
                     if d < max_dev:
                         self.simulator.set_visible(visible=False)
                         return True
                     else:
                         lx = []
                         ly = []
-                        
 
     def start_recording(self):
 
@@ -196,9 +192,8 @@ class Dummy(DumbDummy):
         dumrectime = clock.get_time()
 
         self.recording = True
-        
-        print("Recording would have started at: " + str(dumrectime))
 
+        print("Recording would have started at: " + str(dumrectime))
 
     def stop_recording(self):
 
@@ -211,41 +206,39 @@ class Dummy(DumbDummy):
 
         print("Recording would have stopped at: " + str(dumrectime))
 
-
     def close(self):
 
         """Dummy for closing connection with eyetracker, prints what would have been connection closing time"""
 
         if self.recording:
             self.stop_recording()
-        
+
         closetime = clock.get_time()
 
         print("eyetracker connection would have closed at: " + str(closetime))
 
     def pupil_size(self):
-        
-        """Returns dummy pupil size"""
-        
-        return 19
 
+        """Returns dummy pupil size"""
+
+        return 19
 
     def sample(self):
 
         """Returns simulated gaze position (=mouse position)"""
 
         if self.blinking:
-            if self.simulator.get_pressed()[2]: # buttondown
-                self.simulator.set_pos(pos=(self.bbpos[0],self.resolution[1])) # set position to blinking position
-            elif not self.simulator.get_pressed()[2]: # buttonup
-                self.simulator.set_pos(pos=self.bbpos) # set position to position before blinking
-                self.blinking = False # 'blink' stopped
+            if self.simulator.get_pressed()[2]:  # buttondown
+                self.simulator.set_pos(pos=(self.bbpos[0], self.resolution[1]))  # set position to blinking position
+            elif not self.simulator.get_pressed()[2]:  # buttonup
+                self.simulator.set_pos(pos=self.bbpos)  # set position to position before blinking
+                self.blinking = False  # 'blink' stopped
 
         elif not self.blinking:
-            if self.simulator.get_pressed()[2]: # buttondown
-                self.blinking = True # 'blink' started
-                self.bbpos =  self.simulator.get_pos() # position before blinking
-                self.simulator.set_pos(pos=(self.bbpos[0],self.resolution[1])) # set position to blinking position
+            if self.simulator.get_pressed()[2]:  # buttondown
+                self.blinking = True  # 'blink' started
+                self.bbpos = self.simulator.get_pos()  # position before blinking
+                self.simulator.set_pos(pos=(self.bbpos[0], self.resolution[1]))  # set position to blinking position
 
         return self.simulator.get_pos()
 
@@ -256,15 +249,14 @@ class Dummy(DumbDummy):
         # function assumes that a 'saccade' has been started when a deviation of more than
         # maxerr from the initial 'gaze' position has been detected (using Pythagoras, ofcourse)
 
-        spos = self.sample() # starting position
-        maxerr = 3 # pixels
+        spos = self.sample()  # starting position
+        maxerr = 3  # pixels
         while True:
-            npos = self.sample() # get newest sample
-            if ((spos[0]-npos[0])**2  + (spos[1]-npos[1])**2)**0.5 > maxerr: # Pythagoras
+            npos = self.sample()  # get newest sample
+            if ((spos[0] - npos[0]) ** 2 + (spos[1] - npos[1]) ** 2) ** 0.5 > maxerr:  # Pythagoras
                 break
 
         return clock.get_time(), spos
-
 
     def wait_for_saccade_end(self):
 
@@ -275,28 +267,28 @@ class Dummy(DumbDummy):
         # for saccade start algorithm, see wait_for_fixation_start
 
         stime, spos = self.wait_for_saccade_start()
-        maxerr = 3 # pixels
-        
+        maxerr = 3  # pixels
+
         # wait for reasonably stable position
-        xl = [] # list for last five samples (x coordinate)
-        yl = [] # list for last five samples (y coordinate)
+        xl = []  # list for last five samples (x coordinate)
+        yl = []  # list for last five samples (y coordinate)
         moving = True
         while moving:
             # check positions
             npos = self.sample()
-            xl.append(npos[0]) # add newest sample
-            yl.append(npos[1]) # add newest sample
+            xl.append(npos[0])  # add newest sample
+            yl.append(npos[1])  # add newest sample
             if len(xl) == 5:
                 # check if deviation is small enough
-                if max(xl)-min(xl) < maxerr and max(yl)-min(yl) < maxerr:
+                if max(xl) - min(xl) < maxerr and max(yl) - min(yl) < maxerr:
                     moving = False
                 # remove oldest sample
-                xl.pop(0); yl.pop(0)
+                xl.pop(0);
+                yl.pop(0)
             # wait for a bit, to avoid immediately returning (runs go faster than mouse moves)
             clock.pause(10)
 
-        return clock.get_time(), spos, (xl[len(xl)-1],yl[len(yl)-1])
-
+        return clock.get_time(), spos, (xl[len(xl) - 1], yl[len(yl) - 1])
 
     def wait_for_fixation_start(self):
 
@@ -305,27 +297,27 @@ class Dummy(DumbDummy):
         # function assumes a 'fixation' has started when 'gaze' position remains reasonably
         # stable for five samples in a row (same as saccade end)
 
-        maxerr = 3 # pixels
-        
+        maxerr = 3  # pixels
+
         # wait for reasonably stable position
-        xl = [] # list for last five samples (x coordinate)
-        yl = [] # list for last five samples (y coordinate)
+        xl = []  # list for last five samples (x coordinate)
+        yl = []  # list for last five samples (y coordinate)
         moving = True
         while moving:
             npos = self.sample()
-            xl.append(npos[0]) # add newest sample
-            yl.append(npos[1]) # add newest sample
+            xl.append(npos[0])  # add newest sample
+            yl.append(npos[1])  # add newest sample
             if len(xl) == 5:
                 # check if deviation is small enough
-                if max(xl)-min(xl) < maxerr and max(yl)-min(yl) < maxerr:
+                if max(xl) - min(xl) < maxerr and max(yl) - min(yl) < maxerr:
                     moving = False
                 # remove oldest sample
-                xl.pop(0); yl.pop(0)
+                xl.pop(0);
+                yl.pop(0)
             # wait for a bit, to avoid immediately returning (runs go faster than mouse moves)
             clock.pause(10)
 
-        return clock.get_time(), (xl[len(xl)-1],yl[len(yl)-1])
-
+        return clock.get_time(), (xl[len(xl) - 1], yl[len(yl) - 1])
 
     def wait_for_fixation_end(self):
 
@@ -335,15 +327,14 @@ class Dummy(DumbDummy):
         # from the initial 'fixation' position has been detected (using Pythagoras, ofcourse)
 
         stime, spos = self.wait_for_fixation_start()
-        maxerr = 3 # pixels
-        
+        maxerr = 3  # pixels
+
         while True:
-            npos = self.sample() # get newest sample
-            if ((spos[0]-npos[0])**2  + (spos[1]-npos[1])**2)**0.5 > maxerr: # Pythagoras
+            npos = self.sample()  # get newest sample
+            if ((spos[0] - npos[0]) ** 2 + (spos[1] - npos[1]) ** 2) ** 0.5 > maxerr:  # Pythagoras
                 break
 
         return clock.get_time(), spos
-
 
     def wait_for_blink_start(self):
 
@@ -357,11 +348,10 @@ class Dummy(DumbDummy):
 
         return clock.get_time(), pos
 
-
     def wait_for_blink_end(self):
 
         """Returns ending time and position of a simulated blink (mousebuttonup)"""
-        
+
         # blinks are simulated with mouseclicks: a right mouseclick simulates the closing
         # of the eyes, a mousebuttonup the opening.
 
@@ -373,13 +363,13 @@ class Dummy(DumbDummy):
             epos = self.sample()
 
         return clock.get_time(), epos
-    
+
     def set_draw_drift_correction_target_func(self, func):
-        
+
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
-        
+
         self.draw_drift_correction_target = func
-    
+
     # ***
     #
     # Internal functions below
@@ -387,7 +377,7 @@ class Dummy(DumbDummy):
     # ***
 
     def draw_drift_correction_target(self, x, y):
-        
+
         """
         Draws the drift-correction target.
         
@@ -396,10 +386,10 @@ class Dummy(DumbDummy):
         x        --    The X coordinate
         y        --    The Y coordinate
         """
-        
-        self.screen.clear()
-        self.screen.draw_fixation(fixtype='dot', colour=settings.FGC, \
-            pos=(x,y), pw=0, diameter=12)
+
+        # self.screen.clear()
+        self.screen.draw_fixation(fixtype='circle', colour=settings.FGC,
+                                  pos=(x, y), pw=0, diameter=12)
+
         self.display.fill(self.screen)
         self.display.show()
-        

@@ -269,7 +269,7 @@ class EyelinkGraphics(custom_display):
 
         self.play_beep(pylink.CAL_TARG_BEEP)
         self.screen.clear()
-        self.screen.draw_fixation(fixtype='dot', pos=(x,y))
+        self.screen.draw_fixation(fixtype='circle', pos=(x,y))
         self.display.fill(screen=self.screen)
         self.display.show()
 

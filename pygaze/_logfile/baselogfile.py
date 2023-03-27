@@ -73,7 +73,7 @@ class BaseLogfile:
         pass
 
 
-    def write(self):
+    def write(self, vallist: list[str], **kwargs) -> None:
 
         """
         Writes given values to logfile (each value separated with a tab)

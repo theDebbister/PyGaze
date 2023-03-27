@@ -491,7 +491,7 @@ class PsychoPyScreen(BaseScreen):
                 "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
                     color, colour))
 
-        if fixtype not in ["cross", "x", "dot"]:
+        if fixtype not in ["cross", "x", "dot", "circle"]:
             raise Exception(
                 "Error in libscreen.Screen.draw_fixation: fixtype {} not recognized; fixtype should be one of 'cross','x','dot'".format(
                     fixtype))
@@ -513,8 +513,12 @@ class PsychoPyScreen(BaseScreen):
                            epos=(pos[0] + x, pos[1] + y), pw=pw)
             self.draw_line(colour=colour, spos=(pos[0] - x, pos[1] + y), \
                            epos=(pos[0] + x, pos[1] - y), pw=pw)
+
         elif fixtype == "dot":
             self.draw_circle(colour=colour, pos=pos, r=r, pw=0, fill=True)
+
+        elif fixtype == "circle":
+            self.draw_circle(colour=colour, pos=pos, r=8, pw=4, fill=False)
 
     def draw_text(self, text="text", colour=None, color=None, pos=None, centre=None, center=None,
                   font="mono", fontsize=12, antialias=True, wrap_width=None, anchor_horiz='left',
@@ -628,7 +632,7 @@ class PsychoPyScreen(BaseScreen):
                         None for the default foreground color, self.fgc
                         (default = 'black')
         pos             -- text position, an (x,y) position tuple or None for a
-                        central position (default = None)
+                        central position (default = None), will be set to screen center if None
         font            -- font name (a string value); should be the name of a
                         font included in the PyGaze resources/fonts directory
                         (default = 'Open Sans') or a font that is installed on your system
@@ -641,10 +645,11 @@ class PsychoPyScreen(BaseScreen):
                         is center, then the position defined in the
                         pos argument will be made the center of the text, if it is top_left,
                         the position argument refers to the top_left corner of the text
-        size            -- tuple containing two ints that defines the size of the text box. Both
+        size            -- tuple containing two ints that define the size of the text box. Both
                         ints can be None. Then the box will adapt to the text and not be bounded
                         on the vertical or horizontal axis or both. (default = (None, None))
         language_style  -- either LTR (left-to-right), RTL (right-to-left) or arabic
+        line_spacing    -- float defining line spacing
 
         returns
         Nothing    -- renders and draws a surface with text on (PyGame) or
