@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #     
 #     """An example child of BaseDisplay"""
 #     
@@ -49,109 +49,101 @@
 
 
 class BaseKeyboard:
+    """A keyboard for collecting responses"""
 
-     """A keyboard for collecting responses"""
+    def __init__(self):
+        """
+        Initializes the Keyboard object
 
-     def __init__(self):
+        arguments
 
-          """
-          Initializes the Keyboard object
-          
-          arguments
+        None
 
-          None
-          
-          keyword arguments
+        keyword arguments
 
-          keylist     --     list of keys that are allowed, e.g. ["1","a","enter"]
-                         for the 1, A and Enter keys (default =
-                         KEYLIST)
-          timeout     --     time in milliseconds after which None is returned
-                         on a call to the get_key method when no keypress is
-                         registered (default = KEYTIMEOUT)
-          """
+        keylist     --     list of keys that are allowed, e.g. ["1","a","enter"]
+                       for the 1, A and Enter keys (default =
+                       KEYLIST)
+        timeout     --     time in milliseconds after which None is returned
+                       on a call to the get_key method when no keypress is
+                       registered (default = KEYTIMEOUT)
+        """
 
-          pass
+        pass
 
-     
-     def set_keylist(self):
+    def set_keylist(self):
+        """
+        Set a list of accepted keys
 
-          """
-          Set a list of accepted keys
-          
-          arguments
+        arguments
 
-          None
-          
-          keyword arguments
+        None
 
-          keylist     --     list of keys that are allowed (e.g.
-                         ["1","a","enter"]) or None to allow all keys
-                         (default = None)
-          
-          returns
+        keyword arguments
 
-          None          --     sets klist property
-          """
-          
-          pass
+        keylist     --     list of keys that are allowed (e.g.
+                       ["1","a","enter"]) or None to allow all keys
+                       (default = None)
 
+        returns
 
-     def set_timeout(self):
+        None          --     sets klist property
+        """
 
-          """
-          Set a timeout (in milliseconds)
-          
-          arguments
+        pass
 
-          None
-          
-          keyword arguments
+    def set_timeout(self):
+        """
+        Set a timeout (in milliseconds)
 
-          timeout     --     time in milliseconds after which None is returned
-                         on a call to get_key method when no keypress is
-                         registered (default = None)
-          
-          returns
-          
-          None     --     sets timeout property
-          """
+        arguments
 
-          pass
+        None
 
+        keyword arguments
 
-     def get_key(self, **kwargs):
+        timeout     --     time in milliseconds after which None is returned
+                       on a call to get_key method when no keypress is
+                       registered (default = None)
 
-          """
-          Wait for keyboard input
-          
-          arguments
+        returns
 
-          None
-          
-          keyword arguments
+        None     --     sets timeout property
+        """
 
-          keylist     --     list of keys that are allowed (e.g.
-                         ["1","a","enter"]), None to allow all keys or
-                         "default" to use klist property (default = "default")
-          timeout     --     time in milliseconds after which None is returned
-                         when no keypress is registered (default = None);
-                         None for no timeout or "default" to use the timeout
-                         property (default = "default")
-          flush          --     Boolean indicating if all input from before
-                         calling get_key should be ignored, if set to
-                         False keypresses from before calling this
-                         function will be registered, otherwise every
-                         keyboard input from before calling this function
-                         will be flushed (default = False)
-          
-          returns
+        pass
 
-          key, presstime     --     key is a string, indicating which button has
-                              been pressed or None when no key has been
-                              pressed
-                              presstime is the time (measured from
-                              expbegintime) a keypress or a timeout occured
-          """
-          
-          pass
+    def get_key(self, **kwargs):
+        """
+        Wait for keyboard input
+
+        arguments
+
+        None
+
+        keyword arguments
+
+        keylist     --     list of keys that are allowed (e.g.
+                       ["1","a","enter"]), None to allow all keys or
+                       "default" to use klist property (default = "default")
+        timeout     --     time in milliseconds after which None is returned
+                       when no keypress is registered (default = None);
+                       None for no timeout or "default" to use the timeout
+                       property (default = "default")
+        flush          --     Boolean indicating if all input from before
+                       calling get_key should be ignored, if set to
+                       False keypresses from before calling this
+                       function will be registered, otherwise every
+                       keyboard input from before calling this function
+                       will be flushed (default = False)
+
+        returns
+
+        key, presstime     --     key is a string, indicating which button has
+                            been pressed or None when no key has been
+                            pressed
+                            presstime is the time (measured from
+                            expbegintime) a keypress or a timeout occured
+        """
+
+        pass

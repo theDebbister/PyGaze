@@ -15,15 +15,13 @@
 
 
 # PyGaze imports
-import pygaze
-from pygaze.py3compat import *
 from pygaze import settings
+from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
+from pygaze.keyboard import Keyboard
 from pygaze.libtime import clock
 from pygaze.screen import Screen
-from pygaze.keyboard import Keyboard
 from pygaze.sound import Sound
 
-from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -34,9 +32,7 @@ except:
 
 # native imports
 import copy
-import ctypes
 import math
-import random
 
 # Try to import the local alea library first.
 try:
@@ -51,7 +47,6 @@ except:
 
 
 def deg2pix(cmdist, angle, pixpercm):
-
     """Returns the value in pixels for given values (internal use)
     
     arguments
@@ -66,8 +61,8 @@ def deg2pix(cmdist, angle, pixpercm):
     cmsize = math.tan(math.radians(angle)) * float(cmdist)
     return cmsize * pixpercm
 
-def pix2deg(cmdist, pixelsize, pixpercm):
 
+def pix2deg(cmdist, pixelsize, pixpercm):
     """Converts a distance on the screen in pixels into degrees of visual
     angle (internal use)
     
@@ -79,24 +74,23 @@ def pix2deg(cmdist, pixelsize, pixpercm):
     returns
     angle        -- size of stimulus in visual angle
     """
-    
+
     cmsize = float(pixelsize) / pixpercm
     return 2 * cmdist * math.tan(math.radians(cmsize) / 2.0)
 
 
 class AleaTracker(BaseEyeTracker):
-
     """A class for AleaTracker objects"""
 
     def __init__(self, display, logfile=settings.LOGFILE, \
-        alea_key=settings.ALEAKEY, \
-        animated_calibration=settings.ALEAANIMATEDCALIBRATION, \
-        alea_logging=settings.ALEALOGGING, \
-        eventdetection=settings.EVENTDETECTION, \
-        saccade_velocity_threshold=35, \
-        saccade_acceleration_threshold=9500, \
-        blink_threshold=settings.BLINKTHRESH, \
-        **args):
+                 alea_key=settings.ALEAKEY, \
+                 animated_calibration=settings.ALEAANIMATEDCALIBRATION, \
+                 alea_logging=settings.ALEALOGGING, \
+                 eventdetection=settings.EVENTDETECTION, \
+                 saccade_velocity_threshold=35, \
+                 saccade_acceleration_threshold=9500, \
+                 blink_threshold=settings.BLINKTHRESH, \
+                 **args):
 
         """Initializes the AleaTracker object
         
@@ -121,48 +115,51 @@ class AleaTracker(BaseEyeTracker):
         # object properties
         self.disp = display
         self.screen = Screen()
-        self.dispsize = self.disp.dispsize # display size in pixels
-        self.screensize = settings.SCREENSIZE # display size in cm
+        self.dispsize = self.disp.dispsize  # display size in pixels
+        self.screensize = settings.SCREENSIZE  # display size in cm
         self.kb = Keyboard(keylist=['space', 'escape', 'q'], timeout=1)
         self.errorbeep = Sound(osc='saw', freq=100, length=100)
-        
+
         # show a message
         self.screen.clear()
         self.screen.draw_text(
             text="Initialising the eye tracker, please wait...",
-            fontsize=20)
+            fontsize=20
+        )
         self.disp.fill(self.screen)
         self.disp.show()
-        
+
         # output file properties
         self.alea_logging = alea_logging
         self.outputfile = logfile + '.tsv'
-        
+
         # calibration properties
         self.animated_calibration = animated_calibration == True
-        
+
         # eye tracker properties
         self.connected = False
         self.recording = False
-        self.errdist = 2 # degrees; maximal error for drift correction
-        self.pxerrdist = 30 # initial error in pixels
-        self.maxtries = 100 # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
-        self.prevsample = (-1,-1)
+        self.errdist = 2  # degrees; maximal error for drift correction
+        self.pxerrdist = 30  # initial error in pixels
+        self.maxtries = 100  # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
+        self.prevsample = (-1, -1)
         self.prevps = -1
-        
+
         # event detection properties
-        self.fixtresh = 1.5 # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
-        self.fixtimetresh = 100 # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
-        self.spdtresh = saccade_velocity_threshold # degrees per second; saccade velocity threshold
-        self.accthresh = saccade_acceleration_threshold # degrees per second**2; saccade acceleration threshold
-        self.blinkthresh = blink_threshold # milliseconds; blink detection threshold used in PyGaze method
+        self.fixtresh = 1.5  # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
+        self.fixtimetresh = 100  # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
+        self.spdtresh = saccade_velocity_threshold  # degrees per second; saccade velocity threshold
+        self.accthresh = saccade_acceleration_threshold  # degrees per second**2; saccade acceleration threshold
+        self.blinkthresh = blink_threshold  # milliseconds; blink detection threshold used in PyGaze method
         self.eventdetection = eventdetection
         self.set_detection_type(self.eventdetection)
-        self.weightdist = 10 # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
+        self.weightdist = 10  # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
 
         # connect to the tracker
-        self.alea = OGAleaTracker(alea_key, alea_logging=self.alea_logging, \
-            file_path=self.outputfile)
+        self.alea = OGAleaTracker(
+            alea_key, alea_logging=self.alea_logging, \
+            file_path=self.outputfile
+            )
 
         # get info on the sample rate
         # TODO: Compute after streaming some samples?
@@ -171,18 +168,26 @@ class AleaTracker(BaseEyeTracker):
 
         # initiation report
         self.log("pygaze initiation report start")
-        self.log("display resolution: {}x{}".format( \
-            self.dispsize[0], self.dispsize[1]))
-        self.log("display size in cm: {}x{}".format( \
-            self.screensize[0], self.screensize[1]))
+        self.log(
+            "display resolution: {}x{}".format( \
+                self.dispsize[0], self.dispsize[1]
+            )
+        )
+        self.log(
+            "display size in cm: {}x{}".format( \
+                self.screensize[0], self.screensize[1]
+            )
+        )
         self.log("samplerate: {} Hz".format(self.samplerate))
         self.log("sampletime: {} ms".format(self.sampletime))
         self.log("fixation threshold: {} degrees".format(self.fixtresh))
         self.log("speed threshold: {} degrees/second".format(self.spdtresh))
-        self.log("acceleration threshold: {} degrees/second**2".format( \
-            self.accthresh))
+        self.log(
+            "acceleration threshold: {} degrees/second**2".format( \
+                self.accthresh
+            )
+        )
         self.log("pygaze initiation report end")
-
 
     def calibrate(self, animated=None, skip_bad_points=False):
 
@@ -205,7 +210,7 @@ class AleaTracker(BaseEyeTracker):
                         log file and some properties are updated (i.e. the
                         thresholds for detection algorithms)
         """
-        
+
         # Process animated keyword argument.
         if animated is None:
             animated = self.animated_calibration
@@ -213,23 +218,26 @@ class AleaTracker(BaseEyeTracker):
             img = "ANIMATION:PARROT"
         else:
             img = ""
-        
+
         # Show a message.
         self.screen.clear()
         self.screen.draw_text(
             text="Running calibration in the foreground...",
-            fontsize=20)
+            fontsize=20
+        )
         self.disp.fill(self.screen)
         self.disp.show()
-        
+
         # CALIBRATION
         # Re-run the calibration until it was approved by the user.
         quited = False
         calibration_approved = False
         while not calibration_approved:
             # Wait for the calibration to finish.
-            status, improve = self.alea.calibrate(image=img, \
-                skip_bad_points=skip_bad_points)
+            status, improve = self.alea.calibrate(
+                image=img, \
+                skip_bad_points=skip_bad_points
+                )
             # Construct a message string.
             if status == 0:
                 calib_str = "Calibration completed!"
@@ -246,8 +254,10 @@ class AleaTracker(BaseEyeTracker):
             # Wait for user input.
             key = None
             while key not in ["r", "Space", "space", "q"]:
-                key, keytime = self.kb.get_key(keylist=['q', 'r', 'space'],
-                    timeout=None, flush=True)
+                key, keytime = self.kb.get_key(
+                    keylist=['q', 'r', 'space'],
+                    timeout=None, flush=True
+                    )
             # Process key press.
             if key in ["q", "Space", "space"]:
                 calibration_approved = True
@@ -264,16 +274,19 @@ class AleaTracker(BaseEyeTracker):
         self.screen.draw_text(
             text="Noise calibration. Please look at the dot, and press any key to start.",
             fontsize=20, \
-            pos=(int(self.dispsize[0]/2),int(self.dispsize[1]*0.3)))
+            pos=(int(self.dispsize[0] / 2), int(self.dispsize[1] * 0.3))
+        )
         self.screen.draw_fixation(fixtype="dot")
         self.disp.fill(self.screen)
         self.disp.show()
         # Wait for a keypress.
-        key, keytime = self.kb.get_key(keylist=None, timeout=None, \
-            flush=True)
+        key, keytime = self.kb.get_key(
+            keylist=None, timeout=None, \
+            flush=True
+            )
         # Start with empty lists.
-        err = {'LX':[], 'LY':[], 'RX':[], 'RY':[]}
-        var = {'LX':[], 'LY':[], 'RX':[], 'RY':[]}
+        err = {'LX': [], 'LY': [], 'RX': [], 'RY': []}
+        var = {'LX': [], 'LY': [], 'RX': [], 'RY': []}
         # Start streaming data so that samples can be obtained.
         self.start_recording()
         self.log("noise_calibration_start")
@@ -281,12 +294,12 @@ class AleaTracker(BaseEyeTracker):
         x = int(float(self.dispsize[0]) / 2.0)
         y = int(float(self.dispsize[1]) / 2.0)
         self.screen.clear()
-        self.screen.draw_fixation(fixtype="dot", pos=(x,y))
+        self.screen.draw_fixation(fixtype="dot", pos=(x, y))
         self.disp.fill(self.screen)
         t0 = self.disp.show()
         # Collect at least 10 samples, and wait for at least 1 second.
         i = 0
-        while (i < 10) or (clock.get_time()-t0 < 1000):
+        while (i < 10) or (clock.get_time() - t0 < 1000):
             # Get new sample.
             gx, gy = self.sample()
             if (gx > 0) and (gy > 0):
@@ -296,7 +309,7 @@ class AleaTracker(BaseEyeTracker):
                 err["RX"].append(abs(float(x) - float(gx)))
                 err["RY"].append(abs(float(y) - float(gy)))
                 for k in var.keys():
-                    var[k].append(err[k][-1]**2)
+                    var[k].append(err[k][-1] ** 2)
                 clock.pause(int(self.sampletime))
         # Stop streaming.
         self.log("noise_calibration_stop")
@@ -304,52 +317,66 @@ class AleaTracker(BaseEyeTracker):
 
         # Compute the RMS noise for the calibration points.
         xnoise = (math.sqrt(sum(var['LX']) / float(len(var['LX']))) + \
-            math.sqrt(sum(var['RX']) / float(len(var['RX'])))) / 2.0
+                  math.sqrt(sum(var['RX']) / float(len(var['RX'])))) / 2.0
         ynoise = (math.sqrt(sum(var['LY']) / float(len(var['LY']))) + \
-            math.sqrt(sum(var['RY']) / float(len(var['RY'])))) / 2.0
+                  math.sqrt(sum(var['RY']) / float(len(var['RY'])))) / 2.0
         self.pxdsttresh = (xnoise, ynoise)
-                
+
         # AFTERMATH
         # store some variables
         pixpercm = (self.dispsize[0] / float(self.screensize[0]) + \
-            self.dispsize[1]/float(self.screensize[1])) / 2
+                    self.dispsize[1] / float(self.screensize[1])) / 2
         screendist = settings.SCREENDIST
         # calculate thresholds based on tracker settings
         self.accuracy = ( \
             (pix2deg(screendist, sum(err['LX']) / float(len(err['LX'])), pixpercm), \
-            pix2deg(screendist, sum(err['LY']) / float(len(err['LY'])), pixpercm)), \
+             pix2deg(screendist, sum(err['LY']) / float(len(err['LY'])), pixpercm)), \
             (pix2deg(screendist, sum(err['RX']) / float(len(err['RX'])), pixpercm), \
-            pix2deg(screendist, sum(err['RY']) / float(len(err['RY'])), pixpercm)))
+             pix2deg(screendist, sum(err['RY']) / float(len(err['RY'])), pixpercm)))
         self.pxerrdist = deg2pix(screendist, self.errdist, pixpercm)
         self.pxfixtresh = deg2pix(screendist, self.fixtresh, pixpercm)
         self.pxaccuracy = ( \
             (sum(err['LX']) / float(len(err['LX'])), \
-            sum(err['LY']) / float(len(err['LY']))), \
+             sum(err['LY']) / float(len(err['LY']))), \
             (sum(err['RX']) / float(len(err['RX'])), \
-            sum(err['RY']) / float(len(err['RY']))))
-        self.pxspdtresh = deg2pix(screendist, self.spdtresh/1000.0, pixpercm) # in pixels per millisecond
-        self.pxacctresh = deg2pix(screendist, self.accthresh/1000.0, pixpercm) # in pixels per millisecond**2
+             sum(err['RY']) / float(len(err['RY']))))
+        self.pxspdtresh = deg2pix(screendist, self.spdtresh / 1000.0, pixpercm)  # in pixels per millisecond
+        self.pxacctresh = deg2pix(screendist, self.accthresh / 1000.0, pixpercm)  # in pixels per millisecond**2
 
         # calibration report
         self.log("pygaze calibration report start")
-        self.log("accuracy (degrees): LX={}, LY={}, RX={}, RY={}".format( \
-            self.accuracy[0][0], self.accuracy[0][1], self.accuracy[1][0], \
-            self.accuracy[1][1]))
-        self.log("accuracy (in pixels): LX={}, LY={}, RX={}, RY={}".format( \
-            self.pxaccuracy[0][0], self.pxaccuracy[0][1], \
-            self.pxaccuracy[1][0], self.pxaccuracy[1][1]))
-        self.log("precision (RMS noise in pixels): X={}, Y={}".format( \
-            self.pxdsttresh[0],self.pxdsttresh[1]))
-        self.log("distance between participant and display: {} cm".format( \
-            screendist))
+        self.log(
+            "accuracy (degrees): LX={}, LY={}, RX={}, RY={}".format( \
+                self.accuracy[0][0], self.accuracy[0][1], self.accuracy[1][0], \
+                self.accuracy[1][1]
+            )
+        )
+        self.log(
+            "accuracy (in pixels): LX={}, LY={}, RX={}, RY={}".format( \
+                self.pxaccuracy[0][0], self.pxaccuracy[0][1], \
+                self.pxaccuracy[1][0], self.pxaccuracy[1][1]
+            )
+        )
+        self.log(
+            "precision (RMS noise in pixels): X={}, Y={}".format( \
+                self.pxdsttresh[0], self.pxdsttresh[1]
+            )
+        )
+        self.log(
+            "distance between participant and display: {} cm".format( \
+                screendist
+            )
+        )
         self.log("fixation threshold: {} pixels".format(self.pxfixtresh))
         self.log("speed threshold: {} pixels/ms".format(self.pxspdtresh))
-        self.log("acceleration threshold: {} pixels/ms**2".format( \
-            self.pxacctresh))
+        self.log(
+            "acceleration threshold: {} pixels/ms**2".format( \
+                self.pxacctresh
+            )
+        )
         self.log("pygaze calibration report end")
 
         return True
-
 
     def close(self):
 
@@ -364,8 +391,7 @@ class AleaTracker(BaseEyeTracker):
 
         # close connection
         self.alea.close()
-        self.connected = False        
-
+        self.connected = False
 
     def connected(self):
 
@@ -380,7 +406,6 @@ class AleaTracker(BaseEyeTracker):
         """
 
         return self.connected
-
 
     def drift_correction(self, pos=None, fix_triggered=False):
 
@@ -402,7 +427,7 @@ class AleaTracker(BaseEyeTracker):
                        or not (False); or calls self.calibrate if 'q'
                        or 'escape' is pressed
         """
-        
+
         if pos == None:
             pos = (int(self.dispsize[0] / 2), int(self.dispsize[1] / 2))
         if fix_triggered:
@@ -418,14 +443,14 @@ class AleaTracker(BaseEyeTracker):
                     print("libalea.AleaTracker.drift_correction: 'q' or 'escape' pressed")
                     return self.calibrate()
                 gazepos = self.sample()
-                if ((gazepos[0]-pos[0])**2  + (gazepos[1]-pos[1])**2)**0.5 < self.pxerrdist:
+                if ((gazepos[0] - pos[0]) ** 2 + (gazepos[1] - pos[1]) ** 2) ** 0.5 < self.pxerrdist:
                     return True
                 else:
                     self.errorbeep.play()
         return False
-        
+
     def draw_drift_correction_target(self, x, y):
-        
+
         """
         Draws the drift-correction target.
         
@@ -434,15 +459,17 @@ class AleaTracker(BaseEyeTracker):
         x        --    The X coordinate
         y        --    The Y coordinate
         """
-        
+
         self.screen.clear()
-        self.screen.draw_fixation(fixtype='dot', colour=settings.FGC, pos=(x,y),
-            pw=0, diameter=12)
+        self.screen.draw_fixation(
+            fixtype='dot', colour=settings.FGC, pos=(x, y),
+            pw=0, diameter=12
+            )
         self.disp.fill(self.screen)
-        self.disp.show()            
-        
+        self.disp.show()
+
     def draw_calibration_target(self, x, y):
-        
+
         self.draw_drift_correction_target(x, y)
 
     def fix_triggered_drift_correction(self, pos=None, min_samples=4, max_dev=120, timeout=10000):
@@ -475,7 +502,7 @@ class AleaTracker(BaseEyeTracker):
             pos = (int(self.dispsize[0] / 2), int(self.dispsize[1] / 2))
 
         self.draw_drift_correction_target(pos[0], pos[1])
-        
+
         t0 = clock.get_time()
         consecutive_count = 0
         while consecutive_count < min_samples:
@@ -488,7 +515,7 @@ class AleaTracker(BaseEyeTracker):
                 continue
 
             # Measure the distance to the target position.
-            d = ((x-pos[0])**2 + (y-pos[1])**2)**0.5
+            d = ((x - pos[0]) ** 2 + (y - pos[1]) ** 2) ** 0.5
             # Check whether the distance is below the allowed distance.
             if d <= max_dev:
                 # Increment count.
@@ -496,26 +523,26 @@ class AleaTracker(BaseEyeTracker):
             else:
                 # Reset count.
                 consecutive_count = 0
-            
+
             # Check for a timeout.
             if clock.get_time() - t0 > timeout:
-                print("libalea.AleaTracker.fix_triggered_drift_correction: timeout during fixation-triggered drift check")
+                print(
+                    "libalea.AleaTracker.fix_triggered_drift_correction: timeout during fixation-triggered drift check"
+                    )
                 return self.calibrate()
 
             # Pressing escape enters the calibration screen.
             if self.kb.get_key()[0] in ["Escape", "escape", "q"]:
                 print("libalea.AleaTracker.fix_triggered_drift_correction: 'q' or 'escape' pressed")
                 return self.calibrate()
-        
-        return True
 
+        return True
 
     def get_eyetracker_clock_async(self):
 
         """Not supported for AleaTracker (yet)"""
 
         print("get_eyetracker_clock_async function not supported for AleaTracker")
-
 
     def log(self, msg):
 
@@ -528,7 +555,7 @@ class AleaTracker(BaseEyeTracker):
         Nothing    -- uses native log function of iViewX to include a line
                    in the log file
         """
-        
+
         self.alea.log(msg)
 
     def prepare_drift_correction(self, pos):
@@ -536,7 +563,6 @@ class AleaTracker(BaseEyeTracker):
         """Not supported for AleaTracker"""
 
         print("prepare_drift_correction function not supported for AleaTracker")
-
 
     def pupil_size(self):
 
@@ -550,21 +576,20 @@ class AleaTracker(BaseEyeTracker):
                    being tracked (as specified by self.eye_used) or -1
                    when no data is obtainable
         """
-        
+
         # Get the latest sample.
         t, x, y, ps = self.alea.sample()
-        
+
         # Invalid data.
         if ps == 0:
             return -1
-        
+
         # Check if the new pupil size is the same as the previous.
         if ps != self.prevps:
             # Update the pupil size.
             self.prevps = copy.copy(ps)
-        
-        return self.prevps
 
+        return self.prevps
 
     def sample(self):
 
@@ -579,20 +604,19 @@ class AleaTracker(BaseEyeTracker):
 
         # Get the latest sample.
         t, x, y, ps = self.alea.sample()
-        
+
         # Invalid data.
         if (x == 0) and (y == 0):
-            return (-1,-1)
-        
+            return (-1, -1)
+
         # Combine the x and y coordinates.
         s = (int(x), int(y))
         # Check if the new sample is the same as the previous.
         if s != self.prevsample:
             # Update the current sample.
             self.prevsample = copy.copy(s)
-        
-        return self.prevsample
 
+        return self.prevsample
 
     def send_command(self, cmd):
 
@@ -600,7 +624,6 @@ class AleaTracker(BaseEyeTracker):
         """
 
         print("send_command function not supported for AleaTracker")
-
 
     def start_recording(self):
 
@@ -617,13 +640,11 @@ class AleaTracker(BaseEyeTracker):
         self.alea.start_recording()
         self.recording = True
 
-
     def status_msg(self, msg):
 
         """Not supported for AleaTracker"""
 
         print("status_msg function not supported for AleaTracker")
-
 
     def stop_recording(self):
 
@@ -639,10 +660,9 @@ class AleaTracker(BaseEyeTracker):
 
         self.alea.stop_recording()
         self.recording = False
-    
-    
+
     def set_detection_type(self, eventdetection):
-        
+
         """Set the event detection type to either PyGaze algorithms, or
         native algorithms as provided by the manufacturer (only if
         available: detection type will default to PyGaze if no native
@@ -661,12 +681,11 @@ class AleaTracker(BaseEyeTracker):
                         was passed, but native detection was not
                         available for saccade detection
         """
-        
-        if eventdetection in ['pygaze','native']:
-            self.eventdetection = eventdetection
-        
-        return ('pygaze','pygaze','pygaze')
 
+        if eventdetection in ['pygaze', 'native']:
+            self.eventdetection = eventdetection
+
+        return ('pygaze', 'pygaze', 'pygaze')
 
     def wait_for_event(self, event):
 
@@ -704,7 +723,6 @@ class AleaTracker(BaseEyeTracker):
 
         return outcome
 
-
     def wait_for_blink_end(self):
 
         """Waits for a blink end and returns the blink ending time
@@ -717,19 +735,17 @@ class AleaTracker(BaseEyeTracker):
                         measured from experiment begin time
         """
 
-        
         # # # # #
         # Native method
 
         if self.eventdetection == 'native':
-            
             print("WARNING! 'native' event detection not implemented")
 
         # # # # #
         # PyGaze method
-        
+
         blinking = True
-        
+
         # loop while there is a blink
         while blinking:
             # get newest sample
@@ -738,10 +754,9 @@ class AleaTracker(BaseEyeTracker):
             if self.is_valid_sample(gazepos):
                 # if it is a valid sample, blinking has stopped
                 blinking = False
-        
+
         # return timestamp of blink end
-        return clock.get_time()        
-        
+        return clock.get_time()
 
     def wait_for_blink_start(self):
 
@@ -754,19 +769,18 @@ class AleaTracker(BaseEyeTracker):
         timestamp        --    blink starting time in milliseconds, as
                         measured from experiment begin time
         """
-        
+
         # # # # #
         # Native method
 
         if self.eventdetection == 'native':
-            
             print("WARNING! 'native' event detection not implemented")
 
         # # # # #
         # PyGaze method
-        
+
         blinking = False
-        
+
         # loop until there is a blink
         while not blinking:
             # get newest sample
@@ -778,10 +792,9 @@ class AleaTracker(BaseEyeTracker):
                 # loop until a blink is determined, or a valid sample occurs
                 while not self.is_valid_sample(self.sample()):
                     # check if time has surpassed BLINKTHRESH
-                    if clock.get_time()-t0 >= self.blinkthresh:
+                    if clock.get_time() - t0 >= self.blinkthresh:
                         # return timestamp of blink start
                         return t0
-        
 
     def wait_for_fixation_end(self):
 
@@ -805,31 +818,29 @@ class AleaTracker(BaseEyeTracker):
         # Native method
 
         if self.eventdetection == 'native':
-            
             print("WARNING! 'native' event detection not implemented")
 
         # # # # #
         # PyGaze method
-            
+
         # function assumes that a 'fixation' has ended when a deviation of more than fixtresh
         # from the initial 'fixation' position has been detected
-        
+
         # get starting time and position
         stime, spos = self.wait_for_fixation_start()
-        
+
         # loop until fixation has ended
         while True:
             # get new sample
-            npos = self.sample() # get newest sample
+            npos = self.sample()  # get newest sample
             # check if sample is valid
             if self.is_valid_sample(npos):
                 # check if sample deviates to much from starting position
-                if (npos[0]-spos[0])**2 + (npos[1]-spos[1])**2 > self.pxfixtresh**2: # Pythagoras
+                if (npos[0] - spos[0]) ** 2 + (npos[1] - spos[1]) ** 2 > self.pxfixtresh ** 2:  # Pythagoras
                     # break loop if deviation is too high
                     break
 
         return clock.get_time(), spos
-
 
     def wait_for_fixation_start(self):
 
@@ -849,25 +860,24 @@ class AleaTracker(BaseEyeTracker):
                        tuple of the position from which the fixation
                        was initiated
         """
-        
+
         # # # # #
         # Native method
 
         if self.eventdetection == 'native':
-            
             print("WARNING! 'native' event detection not implemented")
 
         # # # # #
         # PyGaze method
-        
+
         # function assumes a 'fixation' has started when gaze position
         # remains reasonably stable for self.fixtimetresh
-        
+
         # get starting position
         spos = self.sample()
         while not self.is_valid_sample(spos):
             spos = self.sample()
-        
+
         # get starting time
         t0 = clock.get_time()
 
@@ -879,7 +889,7 @@ class AleaTracker(BaseEyeTracker):
             # check if sample is valid
             if self.is_valid_sample(npos):
                 # check if new sample is too far from starting position
-                if (npos[0]-spos[0])**2 + (npos[1]-spos[1])**2 > self.pxfixtresh**2: # Pythagoras
+                if (npos[0] - spos[0]) ** 2 + (npos[1] - spos[1]) ** 2 > self.pxfixtresh ** 2:  # Pythagoras
                     # if not, reset starting position and time
                     spos = copy.copy(npos)
                     t0 = clock.get_time()
@@ -891,7 +901,6 @@ class AleaTracker(BaseEyeTracker):
                     if t1 - t0 >= self.fixtimetresh:
                         # return time and starting position
                         return t1, spos
-
 
     def wait_for_saccade_end(self):
 
@@ -912,12 +921,11 @@ class AleaTracker(BaseEyeTracker):
         # Native method
 
         if self.eventdetection == 'native':
-            
             print("WARNING! 'native' event detection not implemented")
 
         # # # # #
         # PyGaze method
-        
+
         # get starting position (no blinks)
         t0, spos = self.wait_for_saccade_start()
         # get valid sample
@@ -926,8 +934,9 @@ class AleaTracker(BaseEyeTracker):
             prevpos = self.sample()
         # get starting time, intersample distance, and velocity
         t1 = clock.get_time()
-        s = ((prevpos[0]-spos[0])**2 + (prevpos[1]-spos[1])**2)**0.5 # = intersample distance = speed in px/sample
-        v0 = s / (t1-t0)
+        s = ((prevpos[0] - spos[0]) ** 2 + (
+                    prevpos[1] - spos[1]) ** 2) ** 0.5  # = intersample distance = speed in px/sample
+        v0 = s / (t1 - t0)
 
         # run until velocity and acceleration go below threshold
         saccadic = True
@@ -937,13 +946,14 @@ class AleaTracker(BaseEyeTracker):
             t1 = clock.get_time()
             if self.is_valid_sample(newpos) and newpos != prevpos:
                 # calculate distance
-                s = ((newpos[0]-prevpos[0])**2 + (newpos[1]-prevpos[1])**2)**0.5 # = speed in pixels/sample
+                s = ((newpos[0] - prevpos[0]) ** 2 + (newpos[1] - prevpos[1]) ** 2) ** 0.5  # = speed in pixels/sample
                 # calculate velocity
-                v1 = s / (t1-t0)
+                v1 = s / (t1 - t0)
                 # calculate acceleration
-                a = (v1-v0) / (t1-t0) # acceleration in pixels/sample**2 (actually is v1-v0 / t1-t0; but t1-t0 = 1 sample)
+                a = (v1 - v0) / (
+                            t1 - t0)  # acceleration in pixels/sample**2 (actually is v1-v0 / t1-t0; but t1-t0 = 1 sample)
                 # check if velocity and acceleration are below threshold
-                if v1 < self.pxspdtresh and (a > -1*self.pxacctresh and a < 0):
+                if v1 < self.pxspdtresh and (a > -1 * self.pxacctresh and a < 0):
                     saccadic = False
                     epos = newpos[:]
                     etime = clock.get_time()
@@ -954,7 +964,6 @@ class AleaTracker(BaseEyeTracker):
             prevpos = newpos[:]
 
         return etime, spos, epos
-
 
     def wait_for_saccade_start(self):
 
@@ -974,12 +983,11 @@ class AleaTracker(BaseEyeTracker):
         # Native method
 
         if self.eventdetection == 'native':
-            
             print("WARNING! 'native' event detection not implemented")
 
         # # # # #
         # PyGaze method
-        
+
         # get starting position (no blinks)
         newpos = self.sample()
         while not self.is_valid_sample(newpos):
@@ -998,14 +1006,16 @@ class AleaTracker(BaseEyeTracker):
             t1 = clock.get_time()
             if self.is_valid_sample(newpos) and newpos != prevpos:
                 # check if distance is larger than precision error
-                sx = newpos[0]-prevpos[0]; sy = newpos[1]-prevpos[1]
-                if (sx/self.pxdsttresh[0])**2 + (sy/self.pxdsttresh[1])**2 > self.weightdist: # weigthed distance: (sx/tx)**2 + (sy/ty)**2 > 1 means movement larger than RMS noise
+                sx = newpos[0] - prevpos[0];
+                sy = newpos[1] - prevpos[1]
+                if (sx / self.pxdsttresh[0]) ** 2 + (sy / self.pxdsttresh[
+                    1]) ** 2 > self.weightdist:  # weigthed distance: (sx/tx)**2 + (sy/ty)**2 > 1 means movement larger than RMS noise
                     # calculate distance
-                    s = ((sx)**2 + (sy)**2)**0.5 # intersampledistance = speed in pixels/ms
+                    s = ((sx) ** 2 + (sy) ** 2) ** 0.5  # intersampledistance = speed in pixels/ms
                     # calculate velocity
-                    v1 = s / (t1-t0)
+                    v1 = s / (t1 - t0)
                     # calculate acceleration
-                    a = (v1-v0) / (t1-t0) # acceleration in pixels/ms**2
+                    a = (v1 - v0) / (t1 - t0)  # acceleration in pixels/ms**2
                     # check if either velocity or acceleration are above threshold values
                     if v1 > self.pxspdtresh or a > self.pxacctresh:
                         saccadic = True
@@ -1019,10 +1029,9 @@ class AleaTracker(BaseEyeTracker):
                 prevpos = newpos[:]
 
         return stime, spos
-    
-    
+
     def is_valid_sample(self, gazepos):
-        
+
         """Checks if the sample provided is valid (for internal use)
         
         arguments
@@ -1033,11 +1042,10 @@ class AleaTracker(BaseEyeTracker):
         valid        --    a Boolean: True on a valid sample, False on
                         an invalid sample
         """
-        
+
         # return False if a sample is invalid
-        if gazepos == (None,None) or gazepos == (-1,-1) or gazepos == (0,0):
+        if gazepos == (None, None) or gazepos == (-1, -1) or gazepos == (0, 0):
             return False
-        
+
         # in any other case, the sample is valid
         return True
-

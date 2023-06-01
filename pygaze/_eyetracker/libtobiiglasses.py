@@ -21,19 +21,14 @@
 
 
 # TobiiGlassesTracker
-import copy
-import math
 import numpy
 
-
 from pygaze import settings
-from pygaze.libtime import clock
-import pygaze
-from pygaze.screen import Screen
+from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
 from pygaze.keyboard import Keyboard
+from pygaze.screen import Screen
 from pygaze.sound import Sound
 
-from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -42,25 +37,13 @@ try:
 except:
     pass
 
-
-import os
-import datetime
-
-import signal
-import sys
-
-
-import urllib2
-import json
 import time
 import threading
-import socket
-import uuid
 import logging as log
 
 import warnings
-warnings.filterwarnings("ignore", category=numpy.VisibleDeprecationWarning)
 
+warnings.filterwarnings("ignore", category=numpy.VisibleDeprecationWarning)
 
 # # # # #
 # TobiiGlassesController
@@ -68,17 +51,15 @@ warnings.filterwarnings("ignore", category=numpy.VisibleDeprecationWarning)
 from tobiiglasses.tobiiglassescontroller import TobiiGlassesController
 
 
-
 # # # # #
 # classes
 
 class TobiiGlassesTracker(BaseEyeTracker):
-
     """A class for Tobii Pro Glasses 2 EyeTracker objects"""
 
     def __init__(self, display, address='192.168.71.50', udpport=49152, logfile=settings.LOGFILE,
-        eventdetection=settings.EVENTDETECTION, saccade_velocity_threshold=35,
-        saccade_acceleration_threshold=9500, blink_threshold=settings.BLINKTHRESH, **args):
+                 eventdetection=settings.EVENTDETECTION, saccade_velocity_threshold=35,
+                 saccade_acceleration_threshold=9500, blink_threshold=settings.BLINKTHRESH, **args):
 
         """Initializes a TobiiProGlassesTracker instance
 
@@ -101,45 +82,44 @@ class TobiiGlassesTracker(BaseEyeTracker):
             # in a non-verbose manner, so warning messages would be lost
             pass
 
-
         # object properties
         self.disp = display
         self.screen = Screen()
-        self.dispsize = settings.DISPSIZE # display size in pixels
-        self.screensize = settings.SCREENSIZE # display size in cm
-        self.screendist = settings.SCREENDIST # distance between participant and screen in cm
-        self.pixpercm = (self.dispsize[0]/float(self.screensize[0]) + self.dispsize[1]/float(self.screensize[1])) / 2.0
+        self.dispsize = settings.DISPSIZE  # display size in pixels
+        self.screensize = settings.SCREENSIZE  # display size in cm
+        self.screendist = settings.SCREENDIST  # distance between participant and screen in cm
+        self.pixpercm = (self.dispsize[0] / float(self.screensize[0]) + self.dispsize[1] / float(
+            self.screensize[1]
+            )) / 2.0
         self.kb = Keyboard(keylist=['space', 'escape', 'q'], timeout=1)
-        self.errorbeep = Sound(osc='saw',freq=100, length=100)
+        self.errorbeep = Sound(osc='saw', freq=100, length=100)
 
         # output file properties
         self.outputfile = logfile
-        self.description = "experiment" # TODO: EXPERIMENT NAME
-        self.participant = "participant" # TODO: PP NAME
+        self.description = "experiment"  # TODO: EXPERIMENT NAME
+        self.participant = "participant"  # TODO: PP NAME
 
         # eye tracker properties
-        self.eye_used = 0 # 0=left, 1=right, 2=binocular
+        self.eye_used = 0  # 0=left, 1=right, 2=binocular
         self.left_eye = 0
         self.right_eye = 1
         self.binocular = 2
 
-
-        self.maxtries = 100 # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
-        self.prevsample = (-1,-1)
+        self.maxtries = 100  # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
+        self.prevsample = (-1, -1)
 
         # validation properties
-        self.nvalsamples = 1000 # samples for one validation point
+        self.nvalsamples = 1000  # samples for one validation point
 
         # event detection properties
-        self.fixtresh = 1.5 # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
-        self.fixtimetresh = 100 # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
-        self.spdtresh = saccade_velocity_threshold # degrees per second; saccade velocity threshold
-        self.accthresh = saccade_acceleration_threshold # degrees per second**2; saccade acceleration threshold
-        self.blinkthresh = blink_threshold # milliseconds; blink detection threshold used in PyGaze method
+        self.fixtresh = 1.5  # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
+        self.fixtimetresh = 100  # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
+        self.spdtresh = saccade_velocity_threshold  # degrees per second; saccade velocity threshold
+        self.accthresh = saccade_acceleration_threshold  # degrees per second**2; saccade acceleration threshold
+        self.blinkthresh = blink_threshold  # milliseconds; blink detection threshold used in PyGaze method
         self.eventdetection = eventdetection
         self.set_detection_type(self.eventdetection)
-        self.weightdist = 10 # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
-
+        self.weightdist = 10  # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
 
         self.tobiiglasses = TobiiGlassesController(udpport, address)
 
@@ -149,7 +129,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         self.current_recording_id = None
         self.current_participant_id = None
         self.current_project_id = None
-
 
     def __del__(self):
 
@@ -163,43 +142,40 @@ class TobiiGlassesTracker(BaseEyeTracker):
         if "mems" in keys:
 
             try:
-                for i in range(0,3):
+                for i in range(0, 3):
                     ac[i] = self.tobiiglasses.data['mems']['ac']['ac'][i]
             except:
                 pass
 
             try:
-                for i in range(0,3):
+                for i in range(0, 3):
                     gy[i] = self.tobiiglasses.data['mems']['gy']['gy'][i]
             except:
                 pass
 
             row += ("{}; {}; {}; {}; {}; {}; ".format(ac[0], ac[1], ac[2], gy[0], gy[1], gy[2]))
 
-
         gp = [None, None]
         if "gp" in keys:
 
             try:
-                for i in range(0,2):
+                for i in range(0, 2):
                     gp[i] = self.tobiiglasses.data['gp']['gp'][i]
             except:
                 pass
 
             row += ("{}; {}; ".format(gp[0], gp[1]))
 
-
         gp3 = [None, None, None]
         if "gp3" in keys:
 
             try:
-                for i in range(0,3):
+                for i in range(0, 3):
                     gp3[i] = self.tobiiglasses.data['gp3']['gp3'][i]
             except:
                 pass
 
             row += ("{}; {}; {}; ".format(gp3[0], gp3[1], gp3[2]))
-
 
         pc = [None, None, None]
         pd = None
@@ -207,7 +183,7 @@ class TobiiGlassesTracker(BaseEyeTracker):
         if "left_eye" in keys:
 
             try:
-                for i in range(0,3):
+                for i in range(0, 3):
                     pc[i] = self.tobiiglasses.data['left_eye']['pc']['pc'][i]
             except:
                 pass
@@ -218,11 +194,10 @@ class TobiiGlassesTracker(BaseEyeTracker):
                 pass
 
             try:
-                for i in range(0,3):
+                for i in range(0, 3):
                     gd[i] = self.tobiiglasses.data['left_eye']['gd']['gd'][i]
             except:
                 pass
-
 
             row += ("{}; {}; {}; {}; {}; {}; {}; ".format(pc[0], pc[1], pc[2], pd, gd[0], gd[1], gd[2]))
 
@@ -232,7 +207,7 @@ class TobiiGlassesTracker(BaseEyeTracker):
         if "right_eye" in keys:
 
             try:
-                for i in range(0,3):
+                for i in range(0, 3):
                     pc[i] = self.tobiiglasses.data['right_eye']['pc']['pc'][i]
             except:
                 pass
@@ -243,7 +218,7 @@ class TobiiGlassesTracker(BaseEyeTracker):
                 pass
 
             try:
-                for i in range(0,3):
+                for i in range(0, 3):
                     gd[i] = self.tobiiglasses.data['right_eye']['gd']['gd'][i]
             except:
                 pass
@@ -262,41 +237,36 @@ class TobiiGlassesTracker(BaseEyeTracker):
         header = "ts; "
 
         if "mems" in keys:
-            header+="ac_x [m/s^2]; ac_y [m/s^2]; ac_z [m/s^2]; gy_x [°/s]; gy_y [°/s]; gy_z [°/s]; "
+            header += "ac_x [m/s^2]; ac_y [m/s^2]; ac_z [m/s^2]; gy_x [°/s]; gy_y [°/s]; gy_z [°/s]; "
         if "gp" in keys:
-            header+="gp_x; gp_y; "
+            header += "gp_x; gp_y; "
         if "gp3" in keys:
-            header+="gp3_x [mm]; gp3_y [mm]; gp3_z [mm]; "
+            header += "gp3_x [mm]; gp3_y [mm]; gp3_z [mm]; "
         if "left_eye" in keys:
-            header+="left_pc_x [mm]; left_pc_y [mm]; left_pc_z [mm]; left_pd [mm]; left_gd_x; left_gd_y; left_gd_z; "
+            header += "left_pc_x [mm]; left_pc_y [mm]; left_pc_z [mm]; left_pd [mm]; left_gd_x; left_gd_y; left_gd_z; "
         if "left_eye" in keys:
-            header+="right_pc_x [mm]; right_pc_y [mm]; right_pc_z [mm]; right_pd [mm]; right_gd_x; right_gd_y; right_gd_z; "
+            header += "right_pc_x [mm]; right_pc_y [mm]; right_pc_z [mm]; right_pd [mm]; right_gd_x; right_gd_y; right_gd_z; "
 
         if len(triggers) > 0:
             for trigger in triggers:
-                header+=trigger + "; "
+                header += trigger + "; "
                 self.triggers_values[trigger] = None
 
         header = header[:-2]
         return header
 
-
-
     def __data_logger__(self, logfile, frequency, keys, triggers, time_offset):
 
         with open(logfile, 'a') as f:
-
             header = self.__get_log_header__(keys, triggers)
             f.write(header + "\n")
 
             while self.logging:
-
                 row = self.__get_log_row__(keys, triggers)
                 f.write("{}; {} \n".format(time_offset, row))
-                time_period = float(1.0/float(frequency))
-                time_offset += int(time_period*1000)
+                time_period = float(1.0 / float(frequency))
+                time_offset += int(time_period * 1000)
                 time.sleep(time_period)
-
 
     def start_capturing(self):
 
@@ -350,14 +320,14 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         return res
 
-    def set_current_project(self, project_name = None):
+    def set_current_project(self, project_name=None):
 
         if project_name is None:
             self.current_project_id = self.tobiiglasses.create_project()
         else:
             self.current_project_id = self.tobiiglasses.create_project(project_name)
 
-    def set_current_participant(self, participant_name = None):
+    def set_current_participant(self, participant_name=None):
 
         if self.current_project_id is None:
             log.error("There is no project to assign a participant.")
@@ -365,15 +335,17 @@ class TobiiGlassesTracker(BaseEyeTracker):
             if participant_name is None:
                 self.current_participant_id = self.tobiiglasses.create_participant(self.current_project_id)
             else:
-                self.current_participant_id = self.tobiiglasses.create_participant(self.current_project_id, participant_name)
+                self.current_participant_id = self.tobiiglasses.create_participant(
+                    self.current_project_id, participant_name
+                    )
 
     def __create_calibration__(self, project_id, participant_id):
 
         calibration_id = self.tobiiglasses.create_calibration(project_id, participant_id)
         return calibration_id
 
-
-    def start_logging(self, logfile, frequency, keys = ["mems", "gp", "gp3", "left_eye", "right_eye"], triggers = [], time_offset=0):
+    def start_logging(self, logfile, frequency, keys=["mems", "gp", "gp3", "left_eye", "right_eye"], triggers=[],
+                      time_offset=0):
 
         if not self.logging:
             self.logger = threading.Timer(0, self.__data_logger__, [logfile, frequency, keys, triggers, time_offset])
@@ -392,7 +364,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
             log.debug("Trigger received! Key: " + trigger_key + " Value: " + trigger_value)
         except:
             pass
-
 
     def stop_logging(self):
 
@@ -423,8 +394,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         if self.tobiiglasses.is_streaming():
             self.stop_capturing()
 
-
-
     def connected(self):
 
         """Checks if the tracker is connected
@@ -440,7 +409,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         res = self.tobiiglasses.wait_until_status_is_ok()
 
         return res
-
 
     def drift_correction(self, pos=None, fix_triggered=False):
 
@@ -468,8 +436,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
-
 
     def fix_triggered_drift_correction(self, pos=None, min_samples=10, max_dev=60, reset_threshold=30):
 
@@ -503,7 +469,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         print("function not supported yet")
 
-
     def get_eyetracker_clock_async(self):
 
         """Retrieve difference between tracker time and experiment time
@@ -525,7 +490,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         print("function not supported yet")
 
-
     def log(self, msg):
 
         """Writes a message to the log file
@@ -542,10 +506,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
-
-
-
 
     def log_var(self, var, val):
 
@@ -565,20 +525,17 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         print("function not supported yet")
 
-
     def prepare_backdrop(self):
 
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
 
-
     def prepare_drift_correction(self, pos):
 
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
 
     def pupil_size(self):
 
@@ -597,7 +554,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         print("function not supported yet")
 
-
     def sample(self):
 
         """Returns newest available gaze position
@@ -614,20 +570,17 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         print("function not supported yet")
 
-
     def send_command(self, cmd):
 
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
 
-
     def set_backdrop(self):
 
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
 
     def set_eye_used(self):
 
@@ -646,7 +599,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
 
     def start_recording(self):
 
@@ -667,17 +619,17 @@ class TobiiGlassesTracker(BaseEyeTracker):
                 self.tobiiglasses.start_recording(self.current_recording_id)
                 log.debug("Recording " + self.current_recording_id + " started!")
             except:
-                raise Exception("Error in libtobiiproglasses.TobiiProGlassesController.start_recording: failed to start recording")
+                raise Exception(
+                    "Error in libtobiiproglasses.TobiiProGlassesController.start_recording: failed to start recording"
+                    )
         else:
             log.error("The Tobii Pro Glasses is already recording!")
-
 
     def status_msg(self, msg):
 
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
 
     def stop_recording(self):
 
@@ -697,9 +649,8 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         else:
             self.tobiiglasses.stop_recording(self.current_recording_id)
-            res = self.tobiiglasses.wait_until_recording_is_done(self.current_recording_id)                    
+            res = self.tobiiglasses.wait_until_recording_is_done(self.current_recording_id)
             self.current_recording_id = None
-
 
     def set_detection_type(self, eventdetection):
 
@@ -728,7 +679,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         print("function not supported yet")
 
-
     def wait_for_event(self, event):
 
         """Waits for event
@@ -751,7 +701,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
 
     def wait_for_blink_end(self):
 
@@ -785,7 +734,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
 
     def wait_for_fixation_end(self):
 
@@ -835,7 +783,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
 
         print("function not supported yet")
 
-
     def wait_for_saccade_end(self):
 
         """Returns ending time, starting and end position when a saccade is
@@ -874,7 +821,6 @@ class TobiiGlassesTracker(BaseEyeTracker):
         """Not supported for TobiiProGlassesTracker (yet)"""
 
         print("function not supported yet")
-
 
     def is_valid_sample(self, gazepos):
 

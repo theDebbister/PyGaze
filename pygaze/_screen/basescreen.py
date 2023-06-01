@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #    
 #    """An example child of BaseDisplay"""
 #    

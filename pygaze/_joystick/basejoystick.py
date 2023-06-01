@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #    
 #    """An example child of BaseDisplay"""
 #    
@@ -49,11 +49,9 @@
 
 
 class BaseJoystick:
-
     """A joystick for collecting responses"""
 
     def __init__(self):
-
         """
         Initializes a Joystick instance
         
@@ -70,12 +68,10 @@ class BaseJoystick:
                         on a call to a get_* method when no input is
                         registered (default = JOYTIMEOUT)
         """
-        
+
         pass
 
-
     def set_joybuttonlist(self):
-
         """
         Set a list of accepted joystick buttons
         
@@ -95,9 +91,7 @@ class BaseJoystick:
 
         pass
 
-
     def set_timeout(self):
-
         """
         Set a timeout (in milliseconds)
         
@@ -118,9 +112,7 @@ class BaseJoystick:
 
         pass
 
-
     def get_joybutton(self):
-
         """
         Waits for joystick buttonpress
         
@@ -151,9 +143,7 @@ class BaseJoystick:
 
         pass
 
-
     def get_joyaxes(self):
-
         """
         Waits for joystick axis movement
         
@@ -179,9 +169,7 @@ class BaseJoystick:
 
         pass
 
-
     def get_joyballs(self):
-
         """
         Waits for joystick trackball movement
         
@@ -207,9 +195,7 @@ class BaseJoystick:
 
         pass
 
-
     def get_joyhats(self):
-
         """
         Waits for joystick hat movement
         
@@ -232,12 +218,10 @@ class BaseJoystick:
                         time is the time (measured from expbegintime) a
                         hatmovement or a timeout occured
         """
-        
+
         pass
 
-
     def get_joyinput(self):
-
         """
         Waits for any kind of joystick input
         

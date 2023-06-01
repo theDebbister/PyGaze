@@ -15,21 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import urllib2
-import json
-import time
 import datetime
-import threading
-import socket
-import uuid
+import json
 import logging as log
+import socket
+import threading
+import time
+import uuid
+
+import urllib2
 
 log.basicConfig(format='[%(levelname)s]: %(message)s', level=log.DEBUG)
 
 
 class TobiiGlassesController():
 
-    def __init__(self, udpport = 49152, address =  None):
+    def __init__(self, udpport=49152, address=None):
 
         self.timeout = 1
         self.streaming = False
@@ -38,9 +39,9 @@ class TobiiGlassesController():
 
         self.data = {}
         nd = {'ts': -1}
-        self.data['mems'] = { 'ac': nd, 'gy': nd }
-        self.data['right_eye'] = { 'pc': nd, 'pd': nd, 'gd': nd}
-        self.data['left_eye'] = { 'pc': nd, 'pd': nd, 'gd': nd}
+        self.data['mems'] = {'ac': nd, 'gy': nd}
+        self.data['right_eye'] = {'pc': nd, 'pd': nd, 'gd': nd}
+        self.data['left_eye'] = {'pc': nd, 'pd': nd, 'gd': nd}
         self.data['gp'] = nd
         self.data['gp3'] = nd
 
@@ -56,13 +57,14 @@ class TobiiGlassesController():
 
         self.__connect__()
 
-        self.KA_DATA_MSG = "{\"type\": \"live.data.unicast\", \"key\": \""+ str(uuid.uuid4()) +"\", \"op\": \"start\"}"
+        self.KA_DATA_MSG = "{\"type\": \"live.data.unicast\", \"key\": \"" + str(
+            uuid.uuid4()
+            ) + "\", \"op\": \"start\"}"
 
     def __set_address__(self, udpport, address):
 
         self.base_url = 'http://' + address
         self.peer = (address, udpport)
-
 
     def __del__(self):
 
@@ -71,7 +73,6 @@ class TobiiGlassesController():
 
         self.__disconnect__()
 
-
     def __mksock__(self):
 
         iptype = socket.AF_INET
@@ -79,13 +80,11 @@ class TobiiGlassesController():
             iptype = socket.AF_INET6
         return socket.socket(iptype, socket.SOCK_DGRAM)
 
-
     def __send_keepalive_msg__(self, socket, msg):
 
         while self.streaming:
             socket.sendto(msg.encode("utf-8"), self.peer)
             time.sleep(self.timeout)
-
 
     def __grab_data__(self, socket):
 
@@ -96,14 +95,12 @@ class TobiiGlassesController():
             jdata = json.loads(data)
             self.__refresh_data__(jdata)
 
-
-
     def __refresh_data__(self, jsondata):
 
         try:
             gy = jsondata['gy']
             ts = jsondata['ts']
-            if( (self.data['mems']['gy']['ts'] < ts) and (jsondata['s'] == 0) ):
+            if ((self.data['mems']['gy']['ts'] < ts) and (jsondata['s'] == 0)):
                 self.data['mems']['gy'] = jsondata
         except:
             pass
@@ -111,7 +108,7 @@ class TobiiGlassesController():
         try:
             ac = jsondata['ac']
             ts = jsondata['ts']
-            if( (self.data['mems']['ac']['ts'] < ts) and (jsondata['s'] == 0) ):
+            if ((self.data['mems']['ac']['ts'] < ts) and (jsondata['s'] == 0)):
                 self.data['mems']['ac'] = jsondata
         except:
             pass
@@ -120,7 +117,7 @@ class TobiiGlassesController():
             pc = jsondata['pc']
             ts = jsondata['ts']
             eye = jsondata['eye']
-            if( (self.data[eye + '_eye']['pc']['ts'] < ts) and (jsondata['s'] == 0) ):
+            if ((self.data[eye + '_eye']['pc']['ts'] < ts) and (jsondata['s'] == 0)):
                 self.data[eye + '_eye']['pc'] = jsondata
         except:
             pass
@@ -129,7 +126,7 @@ class TobiiGlassesController():
             pd = jsondata['pd']
             ts = jsondata['ts']
             eye = jsondata['eye']
-            if( (self.data[eye + '_eye']['pd']['ts'] < ts) and (jsondata['s'] == 0) ):
+            if ((self.data[eye + '_eye']['pd']['ts'] < ts) and (jsondata['s'] == 0)):
                 self.data[eye + '_eye']['pd'] = jsondata
         except:
             pass
@@ -138,7 +135,7 @@ class TobiiGlassesController():
             gd = jsondata['gd']
             ts = jsondata['ts']
             eye = jsondata['eye']
-            if( (self.data[eye + '_eye']['gd']['ts'] < ts) and (jsondata['s'] == 0) ):
+            if ((self.data[eye + '_eye']['gd']['ts'] < ts) and (jsondata['s'] == 0)):
                 self.data[eye + '_eye']['gd'] = jsondata
         except:
             pass
@@ -146,7 +143,7 @@ class TobiiGlassesController():
         try:
             gp = jsondata['gp']
             ts = jsondata['ts']
-            if( (self.data['gp']['ts'] < ts) and (jsondata['s'] == 0) ):
+            if ((self.data['gp']['ts'] < ts) and (jsondata['s'] == 0)):
                 self.data['gp'] = jsondata
 
         except:
@@ -155,11 +152,10 @@ class TobiiGlassesController():
         try:
             gp3 = jsondata['gp3']
             ts = jsondata['ts']
-            if( (self.data['gp3']['ts'] < ts) and (jsondata['s'] == 0) ):
+            if ((self.data['gp3']['ts'] < ts) and (jsondata['s'] == 0)):
                 self.data['gp3'] = jsondata
         except:
             pass
-
 
     def __start_streaming__(self):
 
@@ -191,8 +187,6 @@ class TobiiGlassesController():
         data = json.load(res)
         return data
 
-
-
     def __discover_device__(self):
 
         log.debug("Discovering a Tobii Pro Glasses 2 device ...")
@@ -207,9 +201,6 @@ class TobiiGlassesController():
         log.debug("Tobii Pro Glasses found with address: [{}]".format(address[0]))
 
         return "[{}]".format(address[0].split("%")[0])
-
-
-
 
     def __connect__(self):
 
@@ -232,8 +223,6 @@ class TobiiGlassesController():
 
         return True
 
-
-
     def start_streaming(self):
         log.debug("Start data streaming ...")
         try:
@@ -253,7 +242,6 @@ class TobiiGlassesController():
         except:
             log.error("An error occurs trying to stop data streaming")
 
-
     def wait_until_status_is_ok(self):
 
         status = self.wait_for_status('/api/system/status', 'sys_status', ['ok'])
@@ -262,7 +250,6 @@ class TobiiGlassesController():
             return True
         else:
             return False
-
 
     def is_streaming(self):
 
@@ -286,7 +273,9 @@ class TobiiGlassesController():
 
     def wait_until_is_calibrated(self, calibration_id):
 
-        status = self.wait_for_status('/api/calibrations/' + calibration_id + '/status', 'ca_state', ['calibrated', 'failed'])
+        status = self.wait_for_status(
+            '/api/calibrations/' + calibration_id + '/status', 'ca_state', ['calibrated', 'failed']
+            )
 
         if status == 'calibrated':
             log.debug("Calibration {} successful ".format(calibration_id))
@@ -326,13 +315,14 @@ class TobiiGlassesController():
 
         return participant_id
 
-
-    def create_project(self, projectname = "DefaultProjectName"):
+    def create_project(self, projectname="DefaultProjectName"):
 
         project_id = self.get_project_id(projectname)
 
         if project_id is None:
-            data = {'pr_info' : {'CreationDate': self.project_creation_date, 'EagleId':  str(uuid.uuid5(uuid.NAMESPACE_DNS, projectname.encode('utf-8'))), 'Name': projectname}}
+            data = {'pr_info': {'CreationDate': self.project_creation_date,
+                                'EagleId': str(uuid.uuid5(uuid.NAMESPACE_DNS, projectname.encode('utf-8'))),
+                                'Name': projectname}}
             json_data = self.__post_request__('/api/projects', data)
             log.debug("Project {} created!".format(json_data['pr_id']))
             return json_data['pr_id']
@@ -340,14 +330,15 @@ class TobiiGlassesController():
             log.debug("Project {} already exists ...".format(project_id))
             return project_id
 
-
-    def create_participant(self, project_id, participant_name = "DefaultUser", participant_notes = ""):
+    def create_participant(self, project_id, participant_name="DefaultUser", participant_notes=""):
 
         participant_id = self.get_participant_id(participant_name)
         self.participant_name = participant_name
 
         if participant_id is None:
-            data = {'pa_project': project_id, 'pa_info': {'EagleId': str(uuid.uuid5(uuid.NAMESPACE_DNS, self.participant_name.encode('utf-8'))), 'Name': self.participant_name, 'Notes': participant_notes}}
+            data = {'pa_project': project_id,
+                    'pa_info': {'EagleId': str(uuid.uuid5(uuid.NAMESPACE_DNS, self.participant_name.encode('utf-8'))),
+                                'Name': self.participant_name, 'Notes': participant_notes}}
             json_data = self.__post_request__('/api/participants', data)
             log.debug("Participant " + json_data['pa_id'] + " created! Project " + project_id)
             return json_data['pa_id']
@@ -359,7 +350,9 @@ class TobiiGlassesController():
 
         data = {'ca_project': project_id, 'ca_type': 'default', 'ca_participant': participant_id}
         json_data = self.__post_request__('/api/calibrations', data)
-        log.debug("Calibration " + json_data['ca_id'] + "created! Project: " + project_id + ", Participant: " + participant_id)
+        log.debug(
+            "Calibration " + json_data['ca_id'] + "created! Project: " + project_id + ", Participant: " + participant_id
+            )
         return json_data['ca_id']
 
     def start_calibration(self, calibration_id):
@@ -367,11 +360,13 @@ class TobiiGlassesController():
         self.__post_request__('/api/calibrations/' + calibration_id + '/start')
         log.debug("Calibration " + calibration_id + " started...")
 
-    def create_recording(self, participant_id, recording_notes = ""):
+    def create_recording(self, participant_id, recording_notes=""):
 
         self.recn = self.recn + 1
         recording_name = "Recording" + str(self.recn)
-        data = {'rec_participant': participant_id, 'rec_info': {'EagleId': str(uuid.uuid5(uuid.NAMESPACE_DNS, self.participant_name.encode('utf-8'))), 'Name': recording_name, 'Notes': recording_notes}}
+        data = {'rec_participant': participant_id,
+                'rec_info': {'EagleId': str(uuid.uuid5(uuid.NAMESPACE_DNS, self.participant_name.encode('utf-8'))),
+                             'Name': recording_name, 'Notes': recording_notes}}
         json_data = self.__post_request__('/api/recordings', data)
         return json_data['rec_id']
 

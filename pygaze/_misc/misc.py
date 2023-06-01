@@ -20,6 +20,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from inspect import ismethod
+
 from pygaze import settings
 
 
@@ -27,7 +28,6 @@ from pygaze import settings
 # helper functions
 
 def copy_docstr(src, target):
-
     """
     Copies docstrings from the methods of a source class to the methods of a
     target class.
@@ -36,7 +36,7 @@ def copy_docstr(src, target):
     src        --    source class (e.g. BaseDisplay)
     target    --    target class (e.g. PyGameDisplay)
     """
-    
+
     for attr_name in dir(target):
         if not hasattr(src, attr_name) or not ismethod(getattr(src, attr_name)):
             continue
@@ -44,7 +44,6 @@ def copy_docstr(src, target):
 
 
 def pos2psychopos(pos, dispsize=None):
-
     """Returns a converted position tuple (x,y) (internal use)
     
     arguments
@@ -64,14 +63,13 @@ def pos2psychopos(pos, dispsize=None):
     if dispsize is None:
         dispsize = settings.DISPSIZE[:]
 
-    x = pos[0] - dispsize[0]/2
-    y = (pos[1] - dispsize[1]/2) * -1
+    x = pos[0] - dispsize[0] / 2
+    y = (pos[1] - dispsize[1] / 2) * -1
 
-    return (x,y)
+    return (x, y)
 
 
 def psychopos2pos(pos, dispsize=None):
-
     """Returns a converted position tuple (x,y) (internal use)
     
     arguments
@@ -91,14 +89,13 @@ def psychopos2pos(pos, dispsize=None):
     if dispsize is None:
         dispsize = settings.DISPSIZE[:]
 
-    x = pos[0] + dispsize[0]/2
-    y = (pos[1] * -1) + dispsize[1]/2
+    x = pos[0] + dispsize[0] / 2
+    y = (pos[1] * -1) + dispsize[1] / 2
 
-    return (x,y)
+    return (x, y)
 
 
 def rgb2psychorgb(rgbgun):
-
     """Returns a converted RGB gun
     
     arguments
@@ -109,15 +106,15 @@ def rgb2psychorgb(rgbgun):
     psyrgb    -- a (R,G,B) tuple containing values between -1 and 1; or
                rgbgun when passed rgbgun was not a tuple or a list
     """
-    
-    if type(rgbgun) not in [tuple,list]:
+
+    if type(rgbgun) not in [tuple, list]:
         return rgbgun
 
     psyrgb = []
 
     for val in rgbgun:
-        psyrgb.append((val/127.5)-1)
-    
+        psyrgb.append((val / 127.5) - 1)
+
     # return (R,G,B), since PsychoPy does not like alpha channels anymore
-    
+
     return tuple(psyrgb[0:3])

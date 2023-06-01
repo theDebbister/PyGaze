@@ -19,11 +19,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-import pygame
-import time
 import sys
+import time
+
+import pygame
 
 from pygaze._time.basetime import BaseTime
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -34,11 +36,11 @@ except:
 
 
 class PyGameTime(BaseTime):
-    
+
     # see pygaze._time.basetime.BaseTime
-    
+
     def __init__(self):
-        
+
         # see pygaze._time.basetime.BaseTime
 
         # try to copy docstring (but ignore it if it fails, as we do
@@ -50,7 +52,7 @@ class PyGameTime(BaseTime):
             # docstring is useful for code editors; these load the docs
             # in a non-verbose manner, so warning messages would be lost
             pass
-        
+
         # On Windows, time.clock() provides higher accuracy than time.time().
         if sys.platform == "win32":
             # DEPRECATED IN PYTHON 3
@@ -63,22 +65,19 @@ class PyGameTime(BaseTime):
 
         pygame.init()
 
-
     def expstart(self):
 
         # see pygaze._time.basetime.BaseTime
 
         self.expbegintime = self._cpu_time() * 1000
 
-
     def get_time(self):
 
         # see pygaze._time.basetime.BaseTime
 
-        ctime = self._cpu_time()*1000 - self.expbegintime
+        ctime = self._cpu_time() * 1000 - self.expbegintime
 
         return ctime
-
 
     def pause(self, pausetime):
 
@@ -87,7 +86,6 @@ class PyGameTime(BaseTime):
         realpause = pygame.time.delay(int(pausetime))
 
         return realpause
-
 
     def expend(self):
 

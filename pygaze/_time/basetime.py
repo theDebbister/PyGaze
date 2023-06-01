@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #    
 #    """An example child of BaseDisplay"""
 #    
@@ -49,11 +49,9 @@
 
 
 class BaseTime:
-    
     """Class for keeping track of time"""
-    
+
     def __init__(self):
-        
         """
         Initializes a Time instance
         
@@ -65,12 +63,10 @@ class BaseTime:
 
         None
         """
-        
+
         pass
 
-
     def expstart(self):
-
         """
         Time is set to 0 when calling this
         
@@ -89,9 +85,7 @@ class BaseTime:
 
         pass
 
-
     def get_time(self):
-
         """
         Returns current time in milliseconds
         
@@ -111,9 +105,7 @@ class BaseTime:
 
         pass
 
-
     def pause(self):
-
         """
         Pauses the experiment for given number of milliseconds
         
@@ -132,9 +124,7 @@ class BaseTime:
 
         pass
 
-
     def expend(self):
-
         """
         Completely ends the experiment (only call this at the end!)
         

@@ -22,6 +22,7 @@
 import psychopy.core
 
 from pygaze._time.basetime import BaseTime
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -32,11 +33,11 @@ except:
 
 
 class PsychoPyTime(BaseTime):
-    
+
     # see pygaze._time.basetime.BaseTime
-    
+
     def __init__(self):
-        
+
         # see pygaze._time.basetime.BaseTime
 
         # try to copy docstring (but ignore it if it fails, as we do
@@ -48,9 +49,8 @@ class PsychoPyTime(BaseTime):
             # docstring is useful for code editors; these load the docs
             # in a non-verbose manner, so warning messages would be lost
             pass
-        
-        pass
 
+        pass
 
     def expstart(self):
 
@@ -58,24 +58,21 @@ class PsychoPyTime(BaseTime):
 
         self.expbegintime = psychopy.core.getTime() * 1000
 
-
     def get_time(self):
 
         # see pygaze._time.basetime.BaseTime
 
         return psychopy.core.getTime() * 1000 - self.expbegintime
 
-
     def pause(self, pausetime):
 
         # see pygaze._time.basetime.BaseTime
 
         t0 = psychopy.core.getTime()
-        psychopy.core.wait(pausetime/1000.0)
+        psychopy.core.wait(pausetime / 1000.0)
         t1 = psychopy.core.getTime()
 
-        return t1-t0
-
+        return t1 - t0
 
     def expend(self):
 

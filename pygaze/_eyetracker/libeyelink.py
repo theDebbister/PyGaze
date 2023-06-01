@@ -20,14 +20,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from pygaze import settings
-from pygaze.libtime import clock
-import pygaze
-from pygaze.screen import Screen
-from pygaze.mouse import Mouse
-from pygaze.keyboard import Keyboard
-from pygaze.sound import Sound
-from pygaze._eyetracker.eyelinkgraphics import EyelinkGraphics
 from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
+from pygaze._eyetracker.eyelinkgraphics import EyelinkGraphics
+from pygaze.keyboard import Keyboard
+from pygaze.libtime import clock
+from pygaze.screen import Screen
 
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
@@ -76,12 +73,12 @@ class libeyelink(BaseEyeTracker):
     MAX_TRY = 100
 
     def __init__(self, display, resolution=settings.DISPSIZE,
-        data_file=settings.LOGFILENAME+".edf", fg_color=settings.FGC,
-        bg_color=settings.BGC, eventdetection=settings.EVENTDETECTION,
-        saccade_velocity_threshold=35, saccade_acceleration_threshold=9500,
-        blink_threshold=settings.BLINKTHRESH,
-        force_drift_correct=True, pupil_size_mode=settings.EYELINKPUPILSIZEMODE,
-        **args):
+                 data_file=settings.LOGFILENAME + ".edf", fg_color=settings.FGC,
+                 bg_color=settings.BGC, eventdetection=settings.EVENTDETECTION,
+                 saccade_velocity_threshold=35, saccade_acceleration_threshold=9500,
+                 blink_threshold=settings.BLINKTHRESH,
+                 force_drift_correct=True, pupil_size_mode=settings.EYELINKPUPILSIZEMODE,
+                 screen: Screen = None, **args):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
@@ -107,12 +104,16 @@ class libeyelink(BaseEyeTracker):
         if len(stem) > 8 or ext.lower() != '.edf':
             raise Exception(
                 "The EyeLink cannot handle filenames longer than eight "
-                "characters (excluding '.edf' extension).")
+                "characters (excluding '.edf' extension)."
+            )
 
         # properties
         self.display = display
         self.fontsize = 18
-        self.scr = Screen(disptype=settings.DISPTYPE, mousevisible=False)
+        if screen is None:
+            self.scr = Screen(disptype=settings.DISPTYPE, mousevisible=False)
+        else:
+            self.scr = screen
         self.kb = Keyboard(keylist=["escape", "q"], timeout=1)
         self.resolution = resolution
         self.recording = False
@@ -147,24 +148,29 @@ class libeyelink(BaseEyeTracker):
         self.screendist = settings.SCREENDIST
         # distance between participant and screen in cm
         self.screensize = settings.SCREENSIZE
-        self.pixpercm = (self.resolution[0] / float(self.screensize[0]) + \
+        self.pixpercm = (self.resolution[0] / float(self.screensize[0]) +
                          self.resolution[1] / float(self.screensize[1])) / 2.0
         # only initialize eyelink once
-        if _eyelink == None:
+        if _eyelink is None:
             try:
                 _eyelink = pylink.EyeLink()
             except:
                 raise Exception(
                     "Error in libeyelink.libeyelink.__init__(): Failed to "
-                    "connect to the tracker!")
+                    "connect to the tracker!"
+                )
         # determine software version of tracker
         self.tracker_software_ver = 0
         self.eyelink_ver = pylink.getEYELINK().getTrackerVersion()
         if self.eyelink_ver == 3:
             tvstr = pylink.getEYELINK().getTrackerVersionString()
             vindex = tvstr.find("EYELINK CL")
-            self.tracker_software_ver = int(float(tvstr[(vindex + \
-                                                         len("EYELINK CL")):].strip()))
+            self.tracker_software_ver = int(
+                float(
+                    tvstr[(vindex +
+                           len("EYELINK CL")):].strip()
+                )
+            )
         if self.eyelink_ver == 1:
             self.eyelink_model = 'EyeLink I'
         elif self.eyelink_ver == 2:
@@ -191,13 +197,18 @@ class libeyelink(BaseEyeTracker):
         else:
             raise Exception(
                 "pupil_size_mode should be 'area' or 'diameter', not {}".format( \
-                    self.pupil_size_mode))
+                    self.pupil_size_mode
+                )
+            )
         pylink.getEYELINK().openDataFile(self.eyelink_data_file)
         pylink.flushGetkeyQueue()
         pylink.getEYELINK().setOfflineMode()
         # notify eyelink of display resolution
-        self.send_command("screen_pixel_coords = 0 0 {} {}".format( \
-            self.resolution[0], self.resolution[1]))
+        self.send_command(
+            "screen_pixel_coords = 0 0 {} {}".format( \
+                self.resolution[0], self.resolution[1]
+            )
+        )
         # get some configuration stuff
         if self.eyelink_ver >= 2:
             self.send_command("select_parser_configuration 0")
@@ -206,24 +217,30 @@ class libeyelink(BaseEyeTracker):
         # set EDF file contents (this specifies which data is written to the EDF
         # file)
         self.send_command(
-            "file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON")
+            "file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON"
+        )
         if self.tracker_software_ver >= 4:
             self.send_command(
-                "file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS,HTARGET")
+                "file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS,HTARGET"
+            )
         else:
             self.send_command(
-                "file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS")
+                "file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS"
+            )
         # set link data (this specifies which data is sent through the link and
         # thus can be used in gaze contingent displays)
         self.send_command(
-            "link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,BUTTON")
+            "link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,BUTTON"
+        )
         if self.tracker_software_ver >= 4:
             self.send_command(
-                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,HTARGET")
+                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,HTARGET"
+            )
         else:
             self.send_command(
 
-                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS")
+                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS"
+            )
         # not quite sure what this means (according to Sebastiaan Mathot, it
         # might be the button that is used to end drift correction?)
         self.send_command("button_function 5 'accept_target_fixation'")
@@ -231,7 +248,8 @@ class libeyelink(BaseEyeTracker):
         if not self.connected():
             raise Exception(
                 "Error in libeyelink.libeyelink.__init__(): Failed to connect "
-                "to the eyetracker!")
+                "to the eyetracker!"
+            )
 
     def send_command(self, cmd):
 
@@ -266,7 +284,8 @@ class libeyelink(BaseEyeTracker):
             if self.recording:
                 raise Exception(
                     "Error in libeyelink.libeyelink.calibrate(): Trying to "
-                    "calibrate after recording has started!")
+                    "calibrate after recording has started!"
+                )
 
             # # # # #
             # EyeLink calibration and validation
@@ -289,10 +308,12 @@ class libeyelink(BaseEyeTracker):
             while True:
                 # present instructions
                 self.display.fill()  # clear display
-                self.scr.draw_text(text= \
-                                       "Noise calibration: please look at the dot\n\n(press space to start)",
-                                   pos=(self.resolution[0] / 2, int(self.resolution[1] * 0.2)),
-                                   center=True, fontsize=self.fontsize)
+                self.scr.draw_text(
+                    text= \
+                        "Noise calibration: please look at the dot\n\n(press space to start)",
+                    pos=(self.resolution[0] / 2, int(self.resolution[1] * 0.2)),
+                    center=True, fontsize=self.fontsize
+                )
                 self.scr.draw_fixation(fixtype='circle')
                 self.display.fill(self.scr)
                 self.display.show()
@@ -342,17 +363,23 @@ class libeyelink(BaseEyeTracker):
 
                     # recalculate thresholds (degrees to pixels)
                     self.pxfixtresh = deg2pix(self.screendist, self.fixtresh, self.pixpercm)
-                    self.pxspdtresh = deg2pix(self.screendist, self.spdtresh,
-                                              self.pixpercm) / 1000.0  # in pixels per millisecons
-                    self.pxacctresh = deg2pix(self.screendist, self.accthresh,
-                                              self.pixpercm) / 1000.0  # in pixels per millisecond**2
+                    self.pxspdtresh = deg2pix(
+                        self.screendist, self.spdtresh,
+                        self.pixpercm
+                    ) / 1000.0  # in pixels per millisecons
+                    self.pxacctresh = deg2pix(
+                        self.screendist, self.accthresh,
+                        self.pixpercm
+                    ) / 1000.0  # in pixels per millisecond**2
                     return
                 else:  # if nothing recorded, display message saying so
                     self.display.fill()
-                    self.scr.draw_text(text= \
-                                           "Noise calibration failed.\n\nPress r to retry,\nor press space to return to calibration screen.", \
-                                       pos=(self.resolution[0] / 2, int(self.resolution[1] * 0.2)), \
-                                       center=True, fontsize=self.fontsize)
+                    self.scr.draw_text(
+                        text= \
+                            "Noise calibration failed.\n\nPress r to retry,\nor press space to return to calibration screen.", \
+                        pos=(self.resolution[0] / 2, int(self.resolution[1] * 0.2)), \
+                        center=True, fontsize=self.fontsize
+                    )
                     self.display.fill(self.scr)
                     self.display.show()
                     self.scr.clear()
@@ -368,11 +395,13 @@ class libeyelink(BaseEyeTracker):
         if self.recording:
             raise Exception(
                 "Error in libeyelink.libeyelink.drift_correction(): Trying to "
-                "perform drift correction after recording has started!")
+                "perform drift correction after recording has started!"
+            )
         if not self.connected():
             raise Exception(
                 "Error in libeyelink.libeyelink.drift_correction(): The "
-                "eyelink is not connected!")
+                "eyelink is not connected!"
+            )
         if pos == None:
             pos = self.resolution[0] / 2, self.resolution[1] / 2
         if fix_triggered:
@@ -434,7 +463,8 @@ class libeyelink(BaseEyeTracker):
         if self.recording:
             raise Exception(
                 "Error in libeyelink.libeyelink.fix_triggered_drift_correction(): "
-                "Trying to perform drift correction after recording has started!")
+                "Trying to perform drift correction after recording has started!"
+            )
 
         self.recording = True
         if pos == None:
@@ -454,7 +484,8 @@ class libeyelink(BaseEyeTracker):
                 self.calibrate()
                 print(
                     "libeyelink.libeyelink.fix_triggered_drift_correction(): "
-                    "'q' pressed")
+                    "'q' pressed"
+                )
                 return False
 
             # pressing escape enters the calibration screen
@@ -464,14 +495,16 @@ class libeyelink(BaseEyeTracker):
                 self.confirm_abort_experiment()
                 print(
                     "libeyelink.libeyelink.fix_triggered_drift_correction(): "
-                    "'escape' pressed")
+                    "'escape' pressed"
+                )
                 return False
             elif resp == 'q':
                 self.recording = False
                 self.calibrate()
                 print(
                     "libeyelink.libeyelink.fix_triggered_drift_correction(): "
-                    "'q' pressed")
+                    "'q' pressed"
+                )
                 return False
             # collect a sample
             x, y = self.sample()
@@ -505,7 +538,8 @@ class libeyelink(BaseEyeTracker):
                     ly = []
                     print(
                         "libeyelink.libeyelink.fix_triggered_drift_correction(): "
-                        "try again")
+                        "try again"
+                    )
                 if result != 0:
                     try:
                         result = pylink.getEYELINK().getCalibrationResult()
@@ -514,7 +548,8 @@ class libeyelink(BaseEyeTracker):
                         ly = []
                         print(
                             "libeyelink.libeyelink.fix_triggered_drift_correction(): "
-                            "try again")
+                            "try again"
+                        )
         # apply drift correction
         pylink.getEYELINK().applyDriftCorrect()
         self.recording = False
@@ -536,13 +571,16 @@ class libeyelink(BaseEyeTracker):
                 break
             if i > self.MAX_TRY:
                 raise Exception(
-                    u"Error in libeyelink.libeyelink.start_recording(): Failed to start recording!")
+                    u"Error in libeyelink.libeyelink.start_recording(): Failed to start recording!"
+                )
                 self.close()
                 clock.expend()
             i += 1
             print(
                 u"WARNING libeyelink.libeyelink.start_recording(): Failed to start recording (attempt {} of {})".format( \
-                    i, self.MAX_TRY))
+                    i, self.MAX_TRY
+                )
+            )
             pylink.msecDelay(100)
         # don't know what this is
         print(u'Start realtime mode ...')
@@ -554,7 +592,8 @@ class libeyelink(BaseEyeTracker):
         if not pylink.getEYELINK().waitForBlockStart(100, 1, 0):
             raise Exception(
                 "Error in libeyelink.libeyelink.start_recording(): Failed to "
-                "start recording (waitForBlockStart error)!")
+                "start recording (waitForBlockStart error)!"
+            )
         print(u'done ...')
 
     def stop_recording(self):
@@ -579,14 +618,19 @@ class libeyelink(BaseEyeTracker):
         print(u"libeyelink.libeyelink.close(): Closing data file")
         pylink.getEYELINK().closeDataFile()
         pylink.msecDelay(500)
-        print(u"libeyelink.libeyelink.close(): Transferring {} to {}".format( \
-            self.eyelink_data_file, self.local_data_file))
+        print(
+            u"libeyelink.libeyelink.close(): Transferring {} to {}".format( \
+                self.eyelink_data_file, self.local_data_file
+            )
+        )
         # During data transfer, suppress output
         _out = sys.stdout
         with open(os.devnull, 'w') as fd:
             sys.stdout = fd
-            pylink.getEYELINK().receiveDataFile(self.eyelink_data_file,
-                                                self.local_data_file)
+            pylink.getEYELINK().receiveDataFile(
+                self.eyelink_data_file,
+                self.local_data_file
+            )
             sys.stdout = _out
         pylink.msecDelay(500)
         print(u"libeyelink.libeyelink.close(): Closing eyelink")
@@ -606,7 +650,8 @@ class libeyelink(BaseEyeTracker):
         else:
             print(
                 "WARNING libeyelink.libeyelink.set_eye_used(): Failed to "
-                "determine which eye is being recorded")
+                "determine which eye is being recorded"
+            )
 
     def pupil_size(self):
 
@@ -615,7 +660,8 @@ class libeyelink(BaseEyeTracker):
         if not self.recording:
             raise Exception(
                 "Error in libeyelink.libeyelink.pupil_size(): Recording was "
-                "not started before collecting eyelink data!")
+                "not started before collecting eyelink data!"
+            )
         if self.eye_used == None:
             self.set_eye_used()
         # get newest sample
@@ -645,7 +691,8 @@ class libeyelink(BaseEyeTracker):
         if not self.recording:
             raise Exception(
                 "Error in libeyelink.libeyelink.sample(): Recording was not "
-                "started before collecting eyelink data!")
+                "started before collecting eyelink data!"
+            )
         if self.eye_used == None:
             self.set_eye_used()
         s = pylink.getEYELINK().getNewestSample()
@@ -691,7 +738,8 @@ class libeyelink(BaseEyeTracker):
         if not self.recording:
             raise Exception(
                 "Error in libeyelink.libeyelink.wait_for_event(): Recording "
-                "was not started before collecting eyelink data!")
+                "was not started before collecting eyelink data!"
+            )
 
         if self.eye_used == None:
             self.set_eye_used()
@@ -722,7 +770,8 @@ class libeyelink(BaseEyeTracker):
             outcome = self.wait_for_blink_end()
         else:
             raise Exception(
-                "Error in libeyelink.libeyelink.wait_for_event: eventcode {} is not supported".format(event))
+                "Error in libeyelink.libeyelink.wait_for_event: eventcode {} is not supported".format(event)
+            )
         return outcome
 
     def wait_for_saccade_start(self):
@@ -832,7 +881,7 @@ class libeyelink(BaseEyeTracker):
                     # v1-v0 / t1-t0; but t1-t0 = 1 sample)
                     a = (v1 - v0) / (t1 - t0)
                     # check if velocity and acceleration are below threshold
-                    if v1 < self.pxspdtresh and (a > -1 * self.pxacctresh and \
+                    if v1 < self.pxspdtresh and (a > -1 * self.pxacctresh and
                                                  a < 0):
                         saccadic = False
                         epos = newpos[:]
@@ -1051,12 +1100,18 @@ class libeyelink(BaseEyeTracker):
         yc = settings.DISPSIZE[1] / 2
         xc = settings.DISPSIZE[0] / 2
         ld = 40  # Line height
-        scr.draw_text(u'Really abort experiment?', pos=(xc, yc - 3 * ld),
-                      fontsize=self.fontsize)
-        scr.draw_text(u'Press \'Y\' to abort', pos=(xc, yc - 0.5 * ld),
-                      fontsize=self.fontsize)
-        scr.draw_text(u'Press any other key or wait 5s to go to setup',
-                      pos=(xc, yc + 0.5 * ld), fontsize=self.fontsize)
+        scr.draw_text(
+            u'Really abort experiment?', pos=(xc, yc - 3 * ld),
+            fontsize=self.fontsize
+        )
+        scr.draw_text(
+            u'Press \'Y\' to abort', pos=(xc, yc - 0.5 * ld),
+            fontsize=self.fontsize
+        )
+        scr.draw_text(
+            u'Press any other key or wait 5s to go to setup',
+            pos=(xc, yc + 0.5 * ld), fontsize=self.fontsize
+        )
         self.display.fill(scr)
         self.display.show()
         # process the response:
@@ -1081,8 +1136,10 @@ class libeyelink(BaseEyeTracker):
         y        --    The Y coordinate
         """
 
-        # self.scr.clear()
-        self.scr.draw_fixation(fixtype="circle", colour=settings.FGC, pos=(x,y),
-            pw=0, diameter=18)
+        self.scr.draw_fixation(
+            fixtype='circle', colour=settings.FGC,
+            pos=(x, y), pw=0, diameter=12
+        )
+
         self.display.fill(self.scr)
         self.display.show()

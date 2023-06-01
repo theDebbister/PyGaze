@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #    
 #    """An example child of BaseDisplay"""
 #    
@@ -48,11 +48,9 @@
 #
 
 class BaseDisplay:
-
     """A class for Display objects, to present Screen objects on a monitor"""
 
     def __init__(self):
-
         """
         Initializes a Display object.
         
@@ -71,11 +69,10 @@ class BaseDisplay:
         screen    --    a screen.Screen instance to be presented on the new
                     Display (default=None)
         """
-        
+
         pass
 
     def show(self):
-
         """
         Updates ('flips') the display.
         
@@ -91,11 +88,10 @@ class BaseDisplay:
         time        --    the exact refresh time when disptype is PsychoPy,
                     or an estimate when disptype is PyGame
         """
-        
+
         pass
 
     def show_part(self, rect, screen=None):
-
         """
         Fills AND shows part(s) of the screen to given specified screen
         (only works when disptype is PyGame; when this is set to PsychoPy
@@ -116,11 +112,10 @@ class BaseDisplay:
         time        --    the exact refresh time when disptype is PsychoPy,
                     or an estimate when disptype is PyGame
         """
-        
+
         pass
 
     def fill(self, screen=None):
-
         """
         Fills the screen with the background colour of the Screen, NOT
         updating it (call Display.show() to actually show the new contents)
@@ -142,7 +137,6 @@ class BaseDisplay:
         pass
 
     def close(self):
-
         """
         Closes the display
         
@@ -162,7 +156,6 @@ class BaseDisplay:
         pass
 
     def make_screenshot(self, filename="screenshot.png"):
-
         """
         Make a screenshot from the current display.
 

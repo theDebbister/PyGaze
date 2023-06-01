@@ -21,13 +21,12 @@
 
 
 from pygaze import settings
-from pygaze.libtime import clock
-import pygaze
-from pygaze.screen import Screen
+from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
 from pygaze.keyboard import Keyboard
+from pygaze.libtime import clock
+from pygaze.screen import Screen
 from pygaze.sound import Sound
 
-from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -39,12 +38,11 @@ except:
 import copy
 import math
 
-from pygaze._eyetracker.iViewXAPI import  *
+from pygaze._eyetracker.iViewXAPI import *
 
 
 # function for identyfing errors
 def errorstring(returncode):
-
     """Returns a string with a description of the error associated with given
     return code (for internal use)
 
@@ -62,38 +60,38 @@ def errorstring(returncode):
             return "returncode not recognized as a valid integer"
 
     codes = {
-        1:"SUCCES: intended functionality has been fulfilled",
-        2:"NO_VALID_DATA: no new data available",
-        3:"CALIBRATION_ABORTED: calibration was aborted",
-        100:"COULD_NOT_CONNECT: failed to establish connection",
-        101:"NOT_CONNECTED: no connection established",
-        102:"NOT_CALIBRATED: system is not calibrated",
-        103:"NOT_VALIDATED: system is not validated",
-        104:"EYETRACKING_APPLICATION_NOT_RUNNING: no SMI eye tracking application running",
-        105:"WRONG_COMMUNICATION_PARAMETER: wrong port settings",
-        111:"WRONG_DEVICE: eye tracking device required for this function is not connected",
-        112:"WRONG_PARAMETER: parameter out of range",
-        113:"WRONG_CALIBRATION_METHOD: eye tracking device required for this calibration method is not connected",
-        121:"CREATE_SOCKET: failed to create sockets",
-        122:"CONNECT_SOCKET: failed to connect sockets",
-        123:"BIND_SOCKET: failed to bind sockets",
-        124:"DELETE_SOCKET: failed to delete sockets",
-        131:"NO_RESPONSE_FROM_IVIEW: no response from iView X; check iView X connection settings (IP addresses, ports) or last command",
-        132:"INVALID_IVIEWX_VERSION: iView X version could not be resolved",
-        133:"WRONG_IVIEWX_VERSION: wrong version of iView X",
-        171:"ACCESS_TO_FILE: failed to access log file",
-        181:"SOCKET_CONNECTION: socket error during data transfer",
-        191:"EMPTY_DATA_BUFFER: recording buffer is empty",
-        192:"RECORDING_DATA_BUFFER: recording is activated",
-        193:"FULL_DATA_BUFFER: data buffer is full",
-        194:"IVIEWX_IS_NOT_READY: iView X is not ready",
-        201:"IVIEWX_NOT_FOUND: no installed SMI eye tracking application detected",
-        220:"COULD_NOT_OPEN_PORT: could not open port for TTL output",
-        221:"COULD_NOT_CLOSE_PORT: could not close port for TTL output",
-        222:"AOI_ACCESS: could not access AOI data",
-        223:"AOI_NOT_DEFINED: no defined AOI found",
+        1: "SUCCES: intended functionality has been fulfilled",
+        2: "NO_VALID_DATA: no new data available",
+        3: "CALIBRATION_ABORTED: calibration was aborted",
+        100: "COULD_NOT_CONNECT: failed to establish connection",
+        101: "NOT_CONNECTED: no connection established",
+        102: "NOT_CALIBRATED: system is not calibrated",
+        103: "NOT_VALIDATED: system is not validated",
+        104: "EYETRACKING_APPLICATION_NOT_RUNNING: no SMI eye tracking application running",
+        105: "WRONG_COMMUNICATION_PARAMETER: wrong port settings",
+        111: "WRONG_DEVICE: eye tracking device required for this function is not connected",
+        112: "WRONG_PARAMETER: parameter out of range",
+        113: "WRONG_CALIBRATION_METHOD: eye tracking device required for this calibration method is not connected",
+        121: "CREATE_SOCKET: failed to create sockets",
+        122: "CONNECT_SOCKET: failed to connect sockets",
+        123: "BIND_SOCKET: failed to bind sockets",
+        124: "DELETE_SOCKET: failed to delete sockets",
+        131: "NO_RESPONSE_FROM_IVIEW: no response from iView X; check iView X connection settings (IP addresses, ports) or last command",
+        132: "INVALID_IVIEWX_VERSION: iView X version could not be resolved",
+        133: "WRONG_IVIEWX_VERSION: wrong version of iView X",
+        171: "ACCESS_TO_FILE: failed to access log file",
+        181: "SOCKET_CONNECTION: socket error during data transfer",
+        191: "EMPTY_DATA_BUFFER: recording buffer is empty",
+        192: "RECORDING_DATA_BUFFER: recording is activated",
+        193: "FULL_DATA_BUFFER: data buffer is full",
+        194: "IVIEWX_IS_NOT_READY: iView X is not ready",
+        201: "IVIEWX_NOT_FOUND: no installed SMI eye tracking application detected",
+        220: "COULD_NOT_OPEN_PORT: could not open port for TTL output",
+        221: "COULD_NOT_CLOSE_PORT: could not close port for TTL output",
+        222: "AOI_ACCESS: could not access AOI data",
+        223: "AOI_NOT_DEFINED: no defined AOI found",
         'unknown': "unknown error with decimal code {}; please refer to the iViewX SDK Manual".format(returncode)
-        }
+    }
 
     if returncode in codes.keys():
         return codes[returncode]
@@ -102,7 +100,6 @@ def errorstring(returncode):
 
 
 def deg2pix(cmdist, angle, pixpercm):
-
     """Returns the value in pixels for given values (internal use)
 
     arguments
@@ -121,14 +118,13 @@ def deg2pix(cmdist, angle, pixpercm):
 
 # class
 class SMItracker(BaseEyeTracker):
-
     """A class for SMI eye tracker objects"""
 
     def __init__(self, display, ip='127.0.0.1', sendport=4444,
-        receiveport=5555, logfile=settings.LOGFILE,
-        eventdetection=settings.EVENTDETECTION, saccade_velocity_threshold=35,
-        saccade_acceleration_threshold=9500, blink_threshold=settings.BLINKTHRESH,
-        **args):
+                 receiveport=5555, logfile=settings.LOGFILE,
+                 eventdetection=settings.EVENTDETECTION, saccade_velocity_threshold=35,
+                 saccade_acceleration_threshold=9500, blink_threshold=settings.BLINKTHRESH,
+                 **args):
 
         """Initializes the SMItracker object
 
@@ -158,41 +154,43 @@ class SMItracker(BaseEyeTracker):
         # object properties
         self.disp = display
         self.screen = Screen()
-        self.dispsize = settings.DISPSIZE # display size in pixels
-        self.screensize = settings.SCREENSIZE # display size in cm
+        self.dispsize = settings.DISPSIZE  # display size in pixels
+        self.screensize = settings.SCREENSIZE  # display size in cm
         self.kb = Keyboard(keylist=['space', 'escape', 'q'], timeout=1)
-        self.errorbeep = Sound(osc='saw',freq=100, length=100)
+        self.errorbeep = Sound(osc='saw', freq=100, length=100)
 
         # output file properties
         self.outputfile = logfile
-        self.description = "experiment" # TODO: EXPERIMENT NAME
-        self.participant = "participant" # TODO: PP NAME
+        self.description = "experiment"  # TODO: EXPERIMENT NAME
+        self.participant = "participant"  # TODO: PP NAME
 
         # eye tracker properties
         self.connected = False
         self.recording = False
-        self.eye_used = 0 # 0=left, 1=right, 2=binocular
+        self.eye_used = 0  # 0=left, 1=right, 2=binocular
         self.left_eye = 0
         self.right_eye = 1
         self.binocular = 2
-        self.errdist = 2 # degrees; maximal error for drift correction
-        self.maxtries = 100 # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
-        self.prevsample = (-1,-1)
+        self.errdist = 2  # degrees; maximal error for drift correction
+        self.maxtries = 100  # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
+        self.prevsample = (-1, -1)
         self.prevps = -1
 
         # event detection properties
-        self.fixtresh = 1.5 # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
-        self.fixtimetresh = 100 # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
-        self.spdtresh = saccade_velocity_threshold # degrees per second; saccade velocity threshold
-        self.accthresh = saccade_acceleration_threshold # degrees per second**2; saccade acceleration threshold
-        self.blinkthresh = blink_threshold # milliseconds; blink detection threshold used in PyGaze method
+        self.fixtresh = 1.5  # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
+        self.fixtimetresh = 100  # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
+        self.spdtresh = saccade_velocity_threshold  # degrees per second; saccade velocity threshold
+        self.accthresh = saccade_acceleration_threshold  # degrees per second**2; saccade acceleration threshold
+        self.blinkthresh = blink_threshold  # milliseconds; blink detection threshold used in PyGaze method
         self.eventdetection = eventdetection
         self.set_detection_type(self.eventdetection)
-        self.weightdist = 10 # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
+        self.weightdist = 10  # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
 
         # set logger
-        res = iViewXAPI.iV_SetLogger(c_int(1), \
-            c_char_p((logfile + '_SMILOG.txt').encode("utf-8")))
+        res = iViewXAPI.iV_SetLogger(
+            c_int(1), \
+            c_char_p((logfile + '_SMILOG.txt').encode("utf-8"))
+            )
         if res != 1:
             err = errorstring(res)
             raise Exception("Error in libsmi.SMItracker.__init__: failed to set logger; {}".format(err))
@@ -206,8 +204,10 @@ class SMItracker(BaseEyeTracker):
         # these can be used together, using a bitwise or, e.g.: 1|2|4 (bitcode 00111)
 
         # connect to iViewX
-        res = iViewXAPI.iV_Connect(c_char_p(ip.encode("utf-8")), \
-            c_int(sendport), c_char_p(ip.encode("utf-8")), c_int(receiveport))
+        res = iViewXAPI.iV_Connect(
+            c_char_p(ip.encode("utf-8")), \
+            c_int(sendport), c_char_p(ip.encode("utf-8")), c_int(receiveport)
+            )
         if res == 1:
             res = iViewXAPI.iV_GetSystemInfo(byref(systemData))
             self.samplerate = systemData.samplerate
@@ -225,18 +225,28 @@ class SMItracker(BaseEyeTracker):
         self.log("pygaze initiation report start")
         self.log("experiment: {}".format(self.description))
         self.log("participant: {}".format(self.participant))
-        self.log("display resolution: {}x{}".format(self.dispsize[0], \
-            self.dispsize[1]))
-        self.log("display size in cm: {}x{}".format(self.screensize[0], \
-            self.screensize[1]))
+        self.log(
+            "display resolution: {}x{}".format(
+                self.dispsize[0], \
+                self.dispsize[1]
+                )
+            )
+        self.log(
+            "display size in cm: {}x{}".format(
+                self.screensize[0], \
+                self.screensize[1]
+                )
+            )
         self.log("samplerate: {} Hz".format(self.samplerate))
         self.log("sampletime: {} ms".format(self.sampletime))
         self.log("fixation threshold: {} degrees".format(self.fixtresh))
         self.log("speed threshold: {} degrees/second".format(self.spdtresh))
-        self.log("acceleration threshold: {} degrees/second**2".format( \
-            self.accthresh))
+        self.log(
+            "acceleration threshold: {} degrees/second**2".format( \
+                self.accthresh
+            )
+        )
         self.log("pygaze initiation report end")
-
 
     def calibrate(self, calibrate=True, validate=True):
 
@@ -268,7 +278,9 @@ class SMItracker(BaseEyeTracker):
         # imageBuffer    -- pointer to image data (I have NO idea what format this is in)
 
         # configure calibration (NOT starting it)
-        calibrationData = CCalibration(9, 1, 0, 1, 1, 0, 127, 1, 15, b"") # (method (i.e.: number of points), visualization, display, speed, auto, fg, bg, shape, size, filename)
+        calibrationData = CCalibration(
+            9, 1, 0, 1, 1, 0, 127, 1, 15, b""
+            )  # (method (i.e.: number of points), visualization, display, speed, auto, fg, bg, shape, size, filename)
 
         # setup calibration
         res = iViewXAPI.iV_SetupCalibration(byref(calibrationData))
@@ -288,14 +300,14 @@ class SMItracker(BaseEyeTracker):
                 verr = errorstring(vres)
             else:
                 verr = None
-##                # TEST #
-##                res = iViewXAPI.iV_GetAccuracyImage(byref(imageData))
-##                self.log("IMAGEBUFFERSTART")
-##                self.log(imageData.imageBuffer)
-##                self.log("IMAGEBUFFERSTOP")
-##                print("Image height: %s, image width: %s, image size: %s" % (imageData.imageHeight,imageData.imageWidth, imageData.imageSize))
-##                print imageData.imageBuffer
-##                ########
+        ##                # TEST #
+        ##                res = iViewXAPI.iV_GetAccuracyImage(byref(imageData))
+        ##                self.log("IMAGEBUFFERSTART")
+        ##                self.log(imageData.imageBuffer)
+        ##                self.log("IMAGEBUFFERSTOP")
+        ##                print("Image height: %s, image width: %s, image size: %s" % (imageData.imageHeight,imageData.imageWidth, imageData.imageSize))
+        ##                print imageData.imageBuffer
+        ##                ########
         # handle calibration errors
         else:
             cerr = errorstring(cres)
@@ -307,12 +319,15 @@ class SMItracker(BaseEyeTracker):
                 print("libsmi.SMItracker.calibrate: validation was succesful")
 
                 # present instructions
-                self.disp.fill() # clear display
-                self.screen.draw_text(text="Noise calibration: please look at the dot\n\n(press space to start)", pos=(self.dispsize[0]/2, int(self.dispsize[1]*0.2)), center=True)
+                self.disp.fill()  # clear display
+                self.screen.draw_text(
+                    text="Noise calibration: please look at the dot\n\n(press space to start)",
+                    pos=(self.dispsize[0] / 2, int(self.dispsize[1] * 0.2)), center=True
+                    )
                 self.screen.draw_fixation(fixtype='dot')
                 self.disp.fill(self.screen)
                 self.disp.show()
-                self.screen.clear() # clear screen again
+                self.screen.clear()  # clear screen again
 
                 # wait for spacepress
                 self.kb.get_key(keylist=['space'], timeout=None)
@@ -328,67 +343,89 @@ class SMItracker(BaseEyeTracker):
                 clock.pause(500)
 
                 # get samples
-                sl = [self.sample()] # samplelist, prefilled with 1 sample to prevent sl[-1] from producing an error; first sample will be ignored for RMS calculation
-                t0 = clock.get_time() # starting time
+                sl = [
+                    self.sample()]  # samplelist, prefilled with 1 sample to prevent sl[-1] from producing an error; first sample will be ignored for RMS calculation
+                t0 = clock.get_time()  # starting time
                 while clock.get_time() - t0 < 1000:
-                    s = self.sample() # sample
-                    if s != sl[-1] and s != (-1,-1) and s != (0,0):
+                    s = self.sample()  # sample
+                    if s != sl[-1] and s != (-1, -1) and s != (0, 0):
                         sl.append(s)
                 # calculate RMS noise
                 Xvar = []
                 Yvar = []
-                for i in range(2,len(sl)):
-                    Xvar.append((sl[i][0]-sl[i-1][0])**2)
-                    Yvar.append((sl[i][1]-sl[i-1][1])**2)
-                XRMS = (sum(Xvar) / len(Xvar))**0.5
-                YRMS = (sum(Yvar) / len(Yvar))**0.5
+                for i in range(2, len(sl)):
+                    Xvar.append((sl[i][0] - sl[i - 1][0]) ** 2)
+                    Yvar.append((sl[i][1] - sl[i - 1][1]) ** 2)
+                XRMS = (sum(Xvar) / len(Xvar)) ** 0.5
+                YRMS = (sum(Yvar) / len(Yvar)) ** 0.5
                 self.pxdsttresh = (XRMS, YRMS)
 
                 # calculate pixels per cm
-                pixpercm = (self.dispsize[0]/float(self.screensize[0]) + self.dispsize[1]/float(self.screensize[1])) / 2
+                pixpercm = (self.dispsize[0] / float(self.screensize[0]) + self.dispsize[1] / float(
+                    self.screensize[1]
+                    )) / 2
                 # get accuracy
-                res = 0; i = 0
-                while res != 1 and i < self.maxtries: # multiple tries, in case no (valid) sample is available
-                    res = iViewXAPI.iV_GetAccuracy(byref(accuracyData),0) # 0 is for 'no visualization'
+                res = 0;
+                i = 0
+                while res != 1 and i < self.maxtries:  # multiple tries, in case no (valid) sample is available
+                    res = iViewXAPI.iV_GetAccuracy(byref(accuracyData), 0)  # 0 is for 'no visualization'
                     i += 1
-                    clock.pause(int(self.sampletime)) # wait for sampletime
+                    clock.pause(int(self.sampletime))  # wait for sampletime
                 if res == 1:
-                    self.accuracy = ((accuracyData.deviationLX,accuracyData.deviationLY), (accuracyData.deviationLX,accuracyData.deviationLY)) # dsttresh = (left tuple, right tuple); tuple = (horizontal deviation, vertical deviation) in degrees of visual angle
+                    self.accuracy = ((accuracyData.deviationLX, accuracyData.deviationLY), (accuracyData.deviationLX,
+                                                                                            accuracyData.deviationLY))  # dsttresh = (left tuple, right tuple); tuple = (horizontal deviation, vertical deviation) in degrees of visual angle
                 else:
                     err = errorstring(res)
                     print("WARNING libsmi.SMItracker.calibrate: failed to obtain accuracy data; {}".format(err))
-                    self.accuracy = ((2,2),(2,2))
-                    print("libsmi.SMItracker.calibrate: As an estimate, the intersample distance threshhold was set to it's default value of 2 degrees")
+                    self.accuracy = ((2, 2), (2, 2))
+                    print(
+                        "libsmi.SMItracker.calibrate: As an estimate, the intersample distance threshhold was set to it's default value of 2 degrees"
+                        )
                 # get distance from screen to eyes (information from tracker)
-                res = 0; i = 0
-                while res != 1 and i < self.maxtries: # multiple tries, in case no (valid) sample is available
+                res = 0;
+                i = 0
+                while res != 1 and i < self.maxtries:  # multiple tries, in case no (valid) sample is available
                     res = iViewXAPI.iV_GetSample(byref(sampleData))
                     i += 1
-                    clock.pause(int(self.sampletime)) # wait for sampletime
+                    clock.pause(int(self.sampletime))  # wait for sampletime
                 if res == 1:
-                    screendist = sampleData.leftEye.eyePositionZ / 10.0 # eyePositionZ is in mm; screendist is in cm
+                    screendist = sampleData.leftEye.eyePositionZ / 10.0  # eyePositionZ is in mm; screendist is in cm
                 else:
                     err = errorstring(res)
                     print("WARNING libsmi.SMItracker.calibrate: failed to obtain screen distance; {}".format(err))
                     screendist = settings.SCREENDIST
-                    print("libsmi.SMItracker.calibrate: As an estimate, the screendistance was set to it's default value of 57 cm")
+                    print(
+                        "libsmi.SMItracker.calibrate: As an estimate, the screendistance was set to it's default value of 57 cm"
+                        )
                 # calculate thresholds based on tracker settings
                 self.pxerrdist = deg2pix(screendist, self.errdist, pixpercm)
                 self.pxfixtresh = deg2pix(screendist, self.fixtresh, pixpercm)
-                self.pxaccuracy = ((deg2pix(screendist, self.accuracy[0][0], pixpercm),deg2pix(screendist, self.accuracy[0][1], pixpercm)), (deg2pix(screendist, self.accuracy[1][0], pixpercm),deg2pix(screendist, self.accuracy[1][1], pixpercm)))
-                self.pxspdtresh = deg2pix(screendist, self.spdtresh/1000.0, pixpercm) # in pixels per millisecond
-                self.pxacctresh = deg2pix(screendist, self.accthresh/1000.0, pixpercm) # in pixels per millisecond**2
+                self.pxaccuracy = ((deg2pix(screendist, self.accuracy[0][0], pixpercm),
+                                    deg2pix(screendist, self.accuracy[0][1], pixpercm)), (
+                                   deg2pix(screendist, self.accuracy[1][0], pixpercm),
+                                   deg2pix(screendist, self.accuracy[1][1], pixpercm)))
+                self.pxspdtresh = deg2pix(screendist, self.spdtresh / 1000.0, pixpercm)  # in pixels per millisecond
+                self.pxacctresh = deg2pix(screendist, self.accthresh / 1000.0, pixpercm)  # in pixels per millisecond**2
 
                 # calibration report
                 self.log("pygaze calibration report start")
-                self.log("accuracy (degrees): LX={}, LY={}, RX={}, RY={}".format( \
-                    self.accuracy[0][0], self.accuracy[0][1], \
-                    self.accuracy[1][0], self.accuracy[1][1]))
-                self.log("accuracy (in pixels): LX={}, LY={}, RX={}, RY={}".format( \
-                    self.pxaccuracy[0][0], self.pxaccuracy[0][1], \
-                    self.pxaccuracy[1][0], self.pxaccuracy[1][1]))
-                self.log("precision (RMS noise in pixels): X={}, Y={}".format( \
-                    self.pxdsttresh[0], self.pxdsttresh[1]))
+                self.log(
+                    "accuracy (degrees): LX={}, LY={}, RX={}, RY={}".format( \
+                        self.accuracy[0][0], self.accuracy[0][1], \
+                        self.accuracy[1][0], self.accuracy[1][1]
+                    )
+                )
+                self.log(
+                    "accuracy (in pixels): LX={}, LY={}, RX={}, RY={}".format( \
+                        self.pxaccuracy[0][0], self.pxaccuracy[0][1], \
+                        self.pxaccuracy[1][0], self.pxaccuracy[1][1]
+                    )
+                )
+                self.log(
+                    "precision (RMS noise in pixels): X={}, Y={}".format( \
+                        self.pxdsttresh[0], self.pxdsttresh[1]
+                    )
+                )
                 self.log("distance between participant and display: {} cm".format(screendist))
                 self.log("fixation threshold: {} pixels".format(self.pxfixtresh))
                 self.log("speed threshold: {} pixels/ms".format(self.pxspdtresh))
@@ -406,7 +443,6 @@ class SMItracker(BaseEyeTracker):
         else:
             print("WARNING libsmi.SMItracker.calibrate: calibration was unsuccesful; {}".format(cerr))
             return False
-
 
     def close(self):
 
@@ -428,7 +464,6 @@ class SMItracker(BaseEyeTracker):
         # close connection
         iViewXAPI.iV_Disconnect()
         self.connected = False
-
 
     def connected(self):
 
@@ -486,12 +521,11 @@ class SMItracker(BaseEyeTracker):
                     print("libsmi.SMItracker.drift_correction: 'q' or 'escape' pressed")
                     return self.calibrate(calibrate=True, validate=True)
                 gazepos = self.sample()
-                if ((gazepos[0]-pos[0])**2  + (gazepos[1]-pos[1])**2)**0.5 < self.pxerrdist:
+                if ((gazepos[0] - pos[0]) ** 2 + (gazepos[1] - pos[1]) ** 2) ** 0.5 < self.pxerrdist:
                     return True
                 else:
                     self.errorbeep.play()
         return False
-
 
     def fix_triggered_drift_correction(self, pos=None, min_samples=10, max_dev=60, reset_threshold=30):
 
@@ -529,7 +563,7 @@ class SMItracker(BaseEyeTracker):
         while len(lx) < min_samples:
 
             # pressing escape enters the calibration screen
-            if self.kb.get_key()[0] in ['escape','q']:
+            if self.kb.get_key()[0] in ['escape', 'q']:
                 print("libsmi.SMItracker.fix_triggered_drift_correction: 'q' or 'escape' pressed")
                 return self.calibrate(calibrate=True, validate=True)
 
@@ -552,7 +586,7 @@ class SMItracker(BaseEyeTracker):
 
                 avg_x = sum(lx) / len(lx)
                 avg_y = sum(ly) / len(ly)
-                d = ((avg_x - pos[0]) ** 2 + (avg_y - pos[1]) ** 2)**0.5
+                d = ((avg_x - pos[0]) ** 2 + (avg_y - pos[1]) ** 2) ** 0.5
 
                 if d < max_dev:
                     return True
@@ -581,7 +615,7 @@ class SMItracker(BaseEyeTracker):
         res = iViewXAPI.iV_Log(c_char_p(msg.encode("utf-8")))
         if res != 1:
             err = errorstring(res)
-            print("WARNING libsmi.SMItracker.log: failed to log message '{}'; {}".format(msg,err))
+            print("WARNING libsmi.SMItracker.log: failed to log message '{}'; {}".format(msg, err))
 
     def log_var(self, var, val):
 
@@ -601,7 +635,11 @@ class SMItracker(BaseEyeTracker):
         res = iViewXAPI.iV_Log(c_char_p(msg.encode("utf-8")))
         if res != 1:
             err = errorstring(res)
-            print("WARNING libsmi.SMItracker.log_var: failed to log variable '{}' with value '{}'; {}".format(var,val,err))
+            print(
+                "WARNING libsmi.SMItracker.log_var: failed to log variable '{}' with value '{}'; {}".format(
+                    var, val, err
+                    )
+                )
 
     def prepare_backdrop(self):
 
@@ -656,7 +694,6 @@ class SMItracker(BaseEyeTracker):
 
             return -1
 
-
     def sample(self):
 
         """Returns newest available gaze position
@@ -683,8 +720,7 @@ class SMItracker(BaseEyeTracker):
         else:
             err = errorstring(res)
             print("WARNING libsmi.SMItracker.sample: failed to obtain sample; {}".format(err))
-            return (-1,-1)
-
+            return (-1, -1)
 
     def send_command(self, cmd):
 
@@ -700,7 +736,9 @@ class SMItracker(BaseEyeTracker):
         try:
             iViewXAPI.iV_SendCommand(c_char_p(cmd.encode("utf-8")))
         except:
-            raise Exception("Error in libsmi.SMItracker.send_command: failed to send remote command to iViewX (iV_SendCommand might be deprecated)")
+            raise Exception(
+                "Error in libsmi.SMItracker.send_command: failed to send remote command to iViewX (iV_SendCommand might be deprecated)"
+                )
 
     def send_message(self, msg):
         # Use to send event marker strings to the iViewX recording.
@@ -731,7 +769,6 @@ class SMItracker(BaseEyeTracker):
         else:
             self.log_var("eye_used", "left")
 
-
     def start_recording(self):
 
         """Starts recording eye position
@@ -744,7 +781,8 @@ class SMItracker(BaseEyeTracker):
                    successfully started
         """
 
-        res = 0; i = 0
+        res = 0;
+        i = 0
         while res != 1 and i < self.maxtries:
             res = iViewXAPI.iV_StartRecording()
             i += 1
@@ -756,13 +794,11 @@ class SMItracker(BaseEyeTracker):
             err = errorstring(res)
             raise Exception("Error in libsmi.SMItracker.start_recording: {}".format(err))
 
-
     def status_msg(self, msg):
 
         """Not supported for SMItracker (yet)"""
 
         print("function not supported yet")
-
 
     def stop_recording(self):
 
@@ -776,7 +812,8 @@ class SMItracker(BaseEyeTracker):
                    successfully started
         """
 
-        res = 0; i = 0
+        res = 0;
+        i = 0
         while res != 1 and i < self.maxtries:
             res = iViewXAPI.iV_StopRecording()
             i += 1
@@ -787,7 +824,6 @@ class SMItracker(BaseEyeTracker):
             self.recording = False
             err = errorstring(res)
             raise Exception("Error in libsmi.SMItracker.stop_recording: {}".format(err))
-
 
     def set_detection_type(self, eventdetection):
 
@@ -810,11 +846,10 @@ class SMItracker(BaseEyeTracker):
                         available for saccade detection
         """
 
-        if eventdetection in ['pygaze','native']:
+        if eventdetection in ['pygaze', 'native']:
             self.eventdetection = eventdetection
 
-        return ('pygaze','native','pygaze')
-
+        return ('pygaze', 'native', 'pygaze')
 
     def wait_for_event(self, event):
 
@@ -852,7 +887,6 @@ class SMItracker(BaseEyeTracker):
 
         return outcome
 
-
     def wait_for_blink_end(self):
 
         """Waits for a blink end and returns the blink ending time
@@ -865,18 +899,18 @@ class SMItracker(BaseEyeTracker):
                         measured from experiment begin time
         """
 
-
         # # # # #
         # SMI method
 
         if self.eventdetection == 'native':
-
             # print warning, since SMI does not have a blink detection
             # built into their API
 
-            print("WARNING! 'native' event detection has been selected, \
-                but SMI does not offer blink detection; PyGaze algorithm \
-                will be used")
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but SMI does not offer blink detection; PyGaze algorithm \
+                                will be used"
+                )
 
         # # # # #
         # PyGaze method
@@ -895,7 +929,6 @@ class SMItracker(BaseEyeTracker):
         # return timestamp of blink end
         return clock.get_time()
 
-
     def wait_for_blink_start(self):
 
         """Waits for a blink start and returns the blink starting time
@@ -912,13 +945,14 @@ class SMItracker(BaseEyeTracker):
         # SMI method
 
         if self.eventdetection == 'native':
-
             # print warning, since SMI does not have a blink detection
             # built into their API
 
-            print("WARNING! 'native' event detection has been selected, \
-                but SMI does not offer blink detection; PyGaze algorithm \
-                will be used")
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but SMI does not offer blink detection; PyGaze algorithm \
+                                will be used"
+                )
 
         # # # # #
         # PyGaze method
@@ -936,10 +970,9 @@ class SMItracker(BaseEyeTracker):
                 # loop until a blink is determined, or a valid sample occurs
                 while not self.is_valid_sample(self.sample()):
                     # check if time has surpassed BLINKTHRESH
-                    if clock.get_time()-t0 >= self.blinkthresh:
+                    if clock.get_time() - t0 >= self.blinkthresh:
                         # return timestamp of blink start
                         return t0
-
 
     def wait_for_fixation_end(self):
 
@@ -976,7 +1009,7 @@ class SMItracker(BaseEyeTracker):
                 if eventData.eventType == 'F':
                     # get timestamp and starting position
                     timediff = stime - (int(eventData.startTime) / 1000.0)
-                    etime = timediff + (int(eventData.endTime) / 1000.0) # time is in microseconds
+                    etime = timediff + (int(eventData.endTime) / 1000.0)  # time is in microseconds
                     fixpos = (evenData.positionX, evenData.positionY)
                     # return starting time and position
                     return etime, fixpos
@@ -995,16 +1028,15 @@ class SMItracker(BaseEyeTracker):
             # loop until fixation has ended
             while True:
                 # get new sample
-                npos = self.sample() # get newest sample
+                npos = self.sample()  # get newest sample
                 # check if sample is valid
                 if self.is_valid_sample(npos):
                     # check if sample deviates to much from starting position
-                    if (npos[0]-spos[0])**2 + (npos[1]-spos[1])**2 > self.pxfixtresh**2: # Pythagoras
+                    if (npos[0] - spos[0]) ** 2 + (npos[1] - spos[1]) ** 2 > self.pxfixtresh ** 2:  # Pythagoras
                         # break loop if deviation is too high
                         break
 
             return clock.get_time(), spos
-
 
     def wait_for_fixation_start(self):
 
@@ -1029,14 +1061,14 @@ class SMItracker(BaseEyeTracker):
         # SMI method
 
         if self.eventdetection == 'native':
-
             # print warning, since SMI does not have a fixation start
             # detection built into their API (only ending)
 
-            print("WARNING! 'native' event detection has been selected, \
-                but SMI does not offer fixation START detection (only \
-                fixation ENDING; PyGaze algorithm will be used")
-
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but SMI does not offer fixation START detection (only \
+                                fixation ENDING; PyGaze algorithm will be used"
+                )
 
         # # # # #
         # PyGaze method
@@ -1060,7 +1092,7 @@ class SMItracker(BaseEyeTracker):
             # check if sample is valid
             if self.is_valid_sample(npos):
                 # check if new sample is too far from starting position
-                if (npos[0]-spos[0])**2 + (npos[1]-spos[1])**2 > self.pxfixtresh**2: # Pythagoras
+                if (npos[0] - spos[0]) ** 2 + (npos[1] - spos[1]) ** 2 > self.pxfixtresh ** 2:  # Pythagoras
                     # if not, reset starting position and time
                     spos = copy.copy(npos)
                     t0 = clock.get_time()
@@ -1072,7 +1104,6 @@ class SMItracker(BaseEyeTracker):
                     if t1 - t0 >= self.fixtimetresh:
                         # return time and starting position
                         return t1, spos
-
 
     def wait_for_saccade_end(self):
 
@@ -1093,13 +1124,14 @@ class SMItracker(BaseEyeTracker):
         # SMI method
 
         if self.eventdetection == 'native':
-
             # print warning, since SMI does not have a blink detection
             # built into their API
 
-            print("WARNING! 'native' event detection has been selected, \
-                but SMI does not offer saccade detection; PyGaze \
-                algorithm will be used")
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but SMI does not offer saccade detection; PyGaze \
+                                algorithm will be used"
+                )
 
         # # # # #
         # PyGaze method
@@ -1112,8 +1144,9 @@ class SMItracker(BaseEyeTracker):
             prevpos = self.sample()
         # get starting time, intersample distance, and velocity
         t1 = clock.get_time()
-        s = ((prevpos[0]-spos[0])**2 + (prevpos[1]-spos[1])**2)**0.5 # = intersample distance = speed in px/sample
-        v0 = s / (t1-t0)
+        s = ((prevpos[0] - spos[0]) ** 2 + (
+                    prevpos[1] - spos[1]) ** 2) ** 0.5  # = intersample distance = speed in px/sample
+        v0 = s / (t1 - t0)
 
         # run until velocity and acceleration go below threshold
         saccadic = True
@@ -1123,13 +1156,14 @@ class SMItracker(BaseEyeTracker):
             t1 = clock.get_time()
             if self.is_valid_sample(newpos) and newpos != prevpos:
                 # calculate distance
-                s = ((newpos[0]-prevpos[0])**2 + (newpos[1]-prevpos[1])**2)**0.5 # = speed in pixels/sample
+                s = ((newpos[0] - prevpos[0]) ** 2 + (newpos[1] - prevpos[1]) ** 2) ** 0.5  # = speed in pixels/sample
                 # calculate velocity
-                v1 = s / (t1-t0)
+                v1 = s / (t1 - t0)
                 # calculate acceleration
-                a = (v1-v0) / (t1-t0) # acceleration in pixels/sample**2 (actually is v1-v0 / t1-t0; but t1-t0 = 1 sample)
+                a = (v1 - v0) / (
+                            t1 - t0)  # acceleration in pixels/sample**2 (actually is v1-v0 / t1-t0; but t1-t0 = 1 sample)
                 # check if velocity and acceleration are below threshold
-                if v1 < self.pxspdtresh and (a > -1*self.pxacctresh and a < 0):
+                if v1 < self.pxspdtresh and (a > -1 * self.pxacctresh and a < 0):
                     saccadic = False
                     epos = newpos[:]
                     etime = clock.get_time()
@@ -1140,7 +1174,6 @@ class SMItracker(BaseEyeTracker):
             prevpos = newpos[:]
 
         return etime, spos, epos
-
 
     def wait_for_saccade_start(self):
 
@@ -1160,13 +1193,14 @@ class SMItracker(BaseEyeTracker):
         # SMI method
 
         if self.eventdetection == 'native':
-
             # print warning, since SMI does not have a blink detection
             # built into their API
 
-            print("WARNING! 'native' event detection has been selected, \
-                but SMI does not offer saccade detection; PyGaze \
-                algorithm will be used")
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but SMI does not offer saccade detection; PyGaze \
+                                algorithm will be used"
+                )
 
         # # # # #
         # PyGaze method
@@ -1189,14 +1223,16 @@ class SMItracker(BaseEyeTracker):
             t1 = clock.get_time()
             if self.is_valid_sample(newpos) and newpos != prevpos:
                 # check if distance is larger than precision error
-                sx = newpos[0]-prevpos[0]; sy = newpos[1]-prevpos[1]
-                if (sx/self.pxdsttresh[0])**2 + (sy/self.pxdsttresh[1])**2 > self.weightdist: # weigthed distance: (sx/tx)**2 + (sy/ty)**2 > 1 means movement larger than RMS noise
+                sx = newpos[0] - prevpos[0];
+                sy = newpos[1] - prevpos[1]
+                if (sx / self.pxdsttresh[0]) ** 2 + (sy / self.pxdsttresh[
+                    1]) ** 2 > self.weightdist:  # weigthed distance: (sx/tx)**2 + (sy/ty)**2 > 1 means movement larger than RMS noise
                     # calculate distance
-                    s = ((sx)**2 + (sy)**2)**0.5 # intersampledistance = speed in pixels/ms
+                    s = ((sx) ** 2 + (sy) ** 2) ** 0.5  # intersampledistance = speed in pixels/ms
                     # calculate velocity
-                    v1 = s / (t1-t0)
+                    v1 = s / (t1 - t0)
                     # calculate acceleration
-                    a = (v1-v0) / (t1-t0) # acceleration in pixels/ms**2
+                    a = (v1 - v0) / (t1 - t0)  # acceleration in pixels/ms**2
                     # check if either velocity or acceleration are above threshold values
                     if v1 > self.pxspdtresh or a > self.pxacctresh:
                         saccadic = True
@@ -1210,7 +1246,6 @@ class SMItracker(BaseEyeTracker):
                 prevpos = newpos[:]
 
         return stime, spos
-
 
     def is_valid_sample(self, gazepos):
 
@@ -1227,7 +1262,7 @@ class SMItracker(BaseEyeTracker):
         """
 
         # return False if a sample is invalid
-        if gazepos == (-1,-1):
+        if gazepos == (-1, -1):
             return False
         # sometimes, on SMI devices, invalid samples can actually contain
         # numbers; these do

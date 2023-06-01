@@ -20,6 +20,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from pygaze import settings
+
 if settings.DISPTYPE == "psychopy":
     try:
         from psychopy.visual import Aperture
@@ -33,15 +34,14 @@ else:
         raise Exception("Error in plugins.frl: PyGame could not be loaded!")
 
 import pygaze
-from pygaze._misc.misc import pos2psychopos, psychopos2pos
+from pygaze._misc.misc import pos2psychopos
 
 
 class FRL:
-    
     """Gaze contingent FRL"""
-    
+
     def __init__(self, disptype=settings.DISPTYPE, pos="centre", dist=125, \
-        size=200):
+                 size=200):
 
         """Initializes FRL object
         
@@ -68,11 +68,11 @@ class FRL:
 
         # FRL distance
         # horizontal distance between gaze position and FRL-centre
-        self.frlxdis = ((self.dist**2)/2)**0.5
+        self.frlxdis = ((self.dist ** 2) / 2) ** 0.5
         # vertical distance between gaze position and FRL-centre
-        self.frlydis = ((self.dist**2)/2)**0.5
+        self.frlydis = ((self.dist ** 2) / 2) ** 0.5
         # FRL position
-        if pos in ["center","centre"]:
+        if pos in ["center", "centre"]:
             self.frlcor = (0, 0)
         elif pos == "top":
             self.frlcor = (0, -self.dist)
@@ -91,10 +91,14 @@ class FRL:
         elif pos == "topleft":
             self.frlcor = (self.frlxdis, self.frlydis)
         else:
-            print("WARNING! plugins.frl.__init__: FRL position argument '{}' not recognized; FRL position set to 'centre'.".format(pos))
+            print(
+                "WARNING! plugins.frl.__init__: FRL position argument '{}' not recognized; FRL position set to 'centre'.".format(
+                    pos
+                    )
+                )
             self.frlcor = (0, 0)
 
-        if disptype in ["pygame","psychopy"]:
+        if disptype in ["pygame", "psychopy"]:
             self.disptype = disptype
         else:
             raise Exception("Error in plugins.frl.__init__: disptype '{}' not recognized".format(disptype))
@@ -103,16 +107,17 @@ class FRL:
             self.__class__ = PyGameFRL
         elif self.disptype == "psychopy":
             self.__class__ = PsychoPyFRL
-            self.frl = Aperture(pygaze.expdisplay, self.size, \
-                pos=pos2psychopos(self.frlcor), shape="circle", units="pix")
+            self.frl = Aperture(
+                pygaze.expdisplay, self.size, \
+                pos=pos2psychopos(self.frlcor), shape="circle", units="pix"
+                )
 
 
 class PyGameFRL:
-
     """Gaze contingent FRL based on PyGame"""
-    
+
     def get_pos(self, gazepos):
-        
+
         """Returns FRL position tuple, based on gaze position; for internal
         use
         
@@ -124,8 +129,7 @@ class PyGameFRL:
                    coordinate
         """
 
-        return (gazepos[0]-self.frlcor[0], gazepos[1]-self.frlcor[1])
-
+        return (gazepos[0] - self.frlcor[0], gazepos[1] - self.frlcor[1])
 
     def update(self, display, stimscreen, gazepos):
 
@@ -148,45 +152,43 @@ class PyGameFRL:
 
         # reset display surface
         display.fill()
-        
+
         # draw new FRL
-        r = self.size/2
+        r = self.size / 2
         # In pixels. updaterectheight (FRL actually consists of a stack of
         # rectangles, h is the height of an individual rectangle)
         h = 1
         # top side
-        for y in range(0,r):
+        for y in range(0, r):
             # right end of rectangle
-            y = r - y # reverse y
-            x = (r**2-y**2)**0.5
+            y = r - y  # reverse y
+            x = (r ** 2 - y ** 2) ** 0.5
             # rectangle coordinates
-            updaterect = [frlpos[0]-x,frlpos[1]-h*y,2*x,h]
+            updaterect = [frlpos[0] - x, frlpos[1] - h * y, 2 * x, h]
             # update screen part
             pygaze.expdisplay.set_clip(updaterect)
-            pygaze.expdisplay.blit(stimscreen.screen,(0,0))
+            pygaze.expdisplay.blit(stimscreen.screen, (0, 0))
         # bottom side
-        for y in range(0,r+1):
+        for y in range(0, r + 1):
             # right end of rectangle
-            x = (r**2-y**2)**0.5
+            x = (r ** 2 - y ** 2) ** 0.5
             # rectangle coordinates
-            updaterect = [frlpos[0]-x,frlpos[1]+h*y,2*x,h]
+            updaterect = [frlpos[0] - x, frlpos[1] + h * y, 2 * x, h]
             # update screen part
             pygaze.expdisplay.set_clip(updaterect)
-            pygaze.expdisplay.blit(stimscreen.screen,(0,0))
+            pygaze.expdisplay.blit(stimscreen.screen, (0, 0))
 
         # unset clip and update display
         pygaze.expdisplay.set_clip(None)
         disptime = display.show()
-        
+
         return disptime
 
 
 class PsychoPyFRL:
-
     """Gaze contingent FRL based on PsychoPy"""
-    
+
     def get_pos(self, gazepos):
-        
         """Returns FRL position tuple, based on gaze position; for internal
         use
         
@@ -198,11 +200,9 @@ class PsychoPyFRL:
                    coordinate
         """
 
-        return gazepos[0]-self.frlcor[0], gazepos[1]-self.frlcor[1]
-
+        return gazepos[0] - self.frlcor[0], gazepos[1] - self.frlcor[1]
 
     def update(self, display, stimscreen, gazepos):
-
         """Updates display with FRL, showing part of the stimulus screen
         inside of a FRL and backgroundcolour everywhere else
         
@@ -232,5 +232,5 @@ class PsychoPyFRL:
 
         # unset FRL
         self.frl.disable()
-        
+
         return disptime

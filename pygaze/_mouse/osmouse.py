@@ -19,11 +19,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze.py3compat import *
-from pygaze import settings
-from libopensesame.exceptions import osexception
 from openexp.mouse import mouse
+
+from pygaze import settings
 from pygaze._mouse.basemouse import BaseMouse
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -38,7 +38,7 @@ class OSMouse(BaseMouse):
     # See _mouse.basemouse.BaseMouse
 
     def __init__(self, mousebuttonlist=settings.MOUSEBUTTONLIST,
-        timeout=settings.MOUSETIMEOUT, visible=False):
+                 timeout=settings.MOUSETIMEOUT, visible=False):
 
         # See _mouse.basemouse.BaseMouse
 
@@ -55,8 +55,10 @@ class OSMouse(BaseMouse):
         self.experiment = settings.osexperiment
         self.uniform_coordinates = \
             self.experiment.var.uniform_coordinates == "yes"
-        self.mouse = mouse(self.experiment, buttonlist=mousebuttonlist,
-            timeout=timeout)
+        self.mouse = mouse(
+            self.experiment, buttonlist=mousebuttonlist,
+            timeout=timeout
+            )
 
     def _from_pos(self, pos):
 
@@ -64,7 +66,7 @@ class OSMouse(BaseMouse):
 
         if pos is None or not self.uniform_coordinates:
             return pos
-        return pos[0]+self.mouse._xcenter, pos[1]+self.mouse._ycenter
+        return pos[0] + self.mouse._xcenter, pos[1] + self.mouse._ycenter
 
     def _to_pos(self, pos):
 
@@ -72,7 +74,7 @@ class OSMouse(BaseMouse):
 
         if pos is None or not self.uniform_coordinates:
             return pos
-        return pos[0]-self.mouse._xcenter, pos[1]-self.mouse._ycenter
+        return pos[0] - self.mouse._xcenter, pos[1] - self.mouse._ycenter
 
     def set_mousebuttonlist(self, mousebuttonlist=None):
 
@@ -92,7 +94,7 @@ class OSMouse(BaseMouse):
 
         self.mouse.show_cursor(visible)
 
-    def set_pos(self, pos=(0,0)):
+    def set_pos(self, pos=(0, 0)):
 
         # See _mouse.basemouse.BaseMouse
 

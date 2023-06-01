@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #    
 #    """An example child of BaseDisplay"""
 #    
@@ -49,11 +49,9 @@
 
 
 class BaseMouse:
-
     """A mouse for collecting responses"""
 
     def __init__(self):
-
         """
         Initializes mouse object
         
@@ -76,9 +74,7 @@ class BaseMouse:
 
         pass
 
-
     def set_mousebuttonlist(self):
-
         """
         Set a list of accepted mouse buttons
         
@@ -96,12 +92,10 @@ class BaseMouse:
         
         None        --     sets mbuttonlist property
         """
-        
+
         pass
 
-
     def set_timeout(self):
-
         """
         Set a timeout (in milliseconds)
         
@@ -121,9 +115,7 @@ class BaseMouse:
 
         pass
 
-
     def set_visible(self):
-
         """
         Sets the visibility of the cursor
         
@@ -143,9 +135,7 @@ class BaseMouse:
 
         pass
 
-
     def set_pos(self):
-
         """
         Set the mouse position
         
@@ -165,9 +155,7 @@ class BaseMouse:
 
         pass
 
-
     def get_pos(self):
-
         """
         Returns mouse position
         
@@ -186,9 +174,7 @@ class BaseMouse:
 
         pass
 
-
     def get_clicked(self):
-
         """
         Waits for mouse clicks
         
@@ -224,9 +210,7 @@ class BaseMouse:
 
         pass
 
-
     def get_pressed(self):
-
         """
         Returns the current state of the mouse buttons
         

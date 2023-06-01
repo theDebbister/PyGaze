@@ -19,14 +19,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze.py3compat import *
 from pygaze import settings
 from pygaze._misc.misc import copy_docstr
 from pygaze._mouse.basemouse import BaseMouse
 
 
 class Mouse(BaseMouse):
-
     """A mouse for collecting responses"""
 
     def __init__(self, disptype=settings.DISPTYPE, **args):

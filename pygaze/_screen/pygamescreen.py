@@ -19,10 +19,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze import settings
 import pygaze
-
+from pygaze import settings
 from pygaze._screen.basescreen import BaseScreen
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -42,13 +42,12 @@ import pygame.image
 
 
 class PyGameScreen(BaseScreen):
-
     """A class for PyGame Screen objects, for visual stimuli (to be displayed via a Display object)"""
-    
+
     def __init__(self, dispsize=settings.DISPSIZE, fgc=settings.FGC,
-        bgc=settings.BGC, mousevisible=settings.MOUSEVISIBLE, screen=None,
-        **args):
-        
+                 bgc=settings.BGC, mousevisible=settings.MOUSEVISIBLE, screen=None,
+                 **args):
+
         """
         Constructor.
     
@@ -64,7 +63,7 @@ class PyGameScreen(BaseScreen):
             # docstring is useful for code editors; these load the docs
             # in a non-verbose manner, so warning messages would be lost
             pass
-        
+
         self.dispsize = dispsize
         self.fgc = fgc
         self.bgc = bgc
@@ -92,8 +91,7 @@ class PyGameScreen(BaseScreen):
         self.screen.fill(self.bgc)
 
         if screen is not None:
-            self.screen.blit(screen.screen,(0,0))
-
+            self.screen.blit(screen.screen, (0, 0))
 
     def clear(self, colour=None, color=None):
 
@@ -119,13 +117,16 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
 
         if colour is None:
             colour = self.bgc
-        
-        self.screen.fill(colour)
 
+        self.screen.fill(colour)
 
     def copy(self, screen):
 
@@ -140,10 +141,9 @@ class PyGameScreen(BaseScreen):
         """
 
         self.screen = copy.copy(screen.screen)
-            
 
     def draw_circle(self, colour=None, color=None, pos=None, r=50, pw=1, \
-        fill=False):
+                    fill=False):
 
         """Draws a circle on the screen
         
@@ -174,20 +174,23 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
 
         if colour is None:
             colour = self.fgc
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
         if fill:
             pw = 0
 
-        pygame.draw.circle(self.screen, colour, (int(pos[0]),int(pos[1])), int(r), int(pw))
-        
+        pygame.draw.circle(self.screen, colour, (int(pos[0]), int(pos[1])), int(r), int(pw))
 
     def draw_ellipse(self, colour=None, color=None, x=None, y=None, w=50, \
-        h=50, pw=1, fill=False):
+                     h=50, pw=1, fill=False):
 
         """Draws an ellipse on the screen
         
@@ -225,23 +228,28 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
 
         if colour is None:
             colour = self.fgc
         if x is None:
-            x = self.dispsize[0]/2 - w/2
+            x = self.dispsize[0] / 2 - w / 2
         if y is None:
-            y = self.dispsize[1]/2 - h/2
+            y = self.dispsize[1] / 2 - h / 2
         if fill:
             pw = 0
 
-        pygame.draw.ellipse(self.screen, colour, \
-            [int(x),int(y),int(w),int(h)], int(pw))
+        pygame.draw.ellipse(
+            self.screen, colour, \
+            [int(x), int(y), int(w), int(h)], int(pw)
+            )
 
-        
     def draw_rect(self, colour=None, color=None, x=None, y=None, w=50, \
-        h=50, pw=1, fill=False):
+                  h=50, pw=1, fill=False):
 
         """Draws a rectangle on the screen
         
@@ -275,20 +283,25 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
 
         if colour is None:
             colour = self.fgc
         if x is None:
-            x = self.dispsize[0]/2 - w/2
+            x = self.dispsize[0] / 2 - w / 2
         if y is None:
-            y = self.dispsize[1]/2 - h/2
+            y = self.dispsize[1] / 2 - h / 2
         if fill:
             pw = 0
 
-        pygame.draw.rect(self.screen, colour, [int(x),int(y),int(w),int(h)], \
-            int(pw))
-
+        pygame.draw.rect(
+            self.screen, colour, [int(x), int(y), int(w), int(h)], \
+            int(pw)
+            )
 
     def draw_line(self, colour=None, color=None, spos=None, epos=None, pw=1):
 
@@ -321,20 +334,23 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
 
         if colour is None:
             colour = self.fgc
         if spos is None:
-            spos = (int(self.dispsize[0]*0.25), self.dispsize[1]/2)
+            spos = (int(self.dispsize[0] * 0.25), self.dispsize[1] / 2)
         if epos is None:
-            epos = (int(self.dispsize[0]*0.75), self.dispsize[1]/2)
+            epos = (int(self.dispsize[0] * 0.75), self.dispsize[1] / 2)
 
-        pygame.draw.line(self.screen, colour, (int(spos[0]),int(spos[1])), (int(epos[0]),int(epos[1])), int(pw))
-
+        pygame.draw.line(self.screen, colour, (int(spos[0]), int(spos[1])), (int(epos[0]), int(epos[1])), int(pw))
 
     def draw_polygon(self, pointlist, colour=None, color=None, pw=1, \
-        fill=True):
+                     fill=True):
 
         """Draws a polygon on the screen
         
@@ -363,21 +379,24 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
 
         if colour is None:
             colour = self.fgc
         if fill:
             pw = 0
-        
+
         for i in range(len(pointlist)):
-            pointlist[i] = [int(pointlist[i][0]),int(pointlist[i][1])]
+            pointlist[i] = [int(pointlist[i][0]), int(pointlist[i][1])]
 
         pygame.draw.polygon(self.screen, colour, pointlist, int(pw))
 
-
     def draw_fixation(self, fixtype="cross", colour=None, color=None, \
-            pos=None, pw=1, diameter=12):
+                      pos=None, pw=1, diameter=12):
 
         """Draws a fixation (cross, x or dot) on the screen
         
@@ -413,38 +432,53 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
 
-        if fixtype not in ["cross","x","dot"]:
+        if fixtype not in ["cross", "x", "dot"]:
             fixtype == "cross"
-            raise Exception("Error in libscreen.Screen.draw_fixation: fixtype {} not recognized; fixtype should be one of 'cross','x','dot'".format(fixtype))
+            raise Exception(
+                "Error in libscreen.Screen.draw_fixation: fixtype {} not recognized; fixtype should be one of 'cross','x','dot'".format(
+                    fixtype
+                    )
+                )
         if colour is None:
             colour = self.fgc
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
-        
-        pos = (int(pos[0]),int(pos[1]))
-        r = int(diameter/2.0)
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
+
+        pos = (int(pos[0]), int(pos[1]))
+        r = int(diameter / 2.0)
         pw = int(pw)
 
         if fixtype == "cross":
-            pygame.draw.line(self.screen, colour, (pos[0]-r, pos[1]), \
-                (pos[0]+r, pos[1]), pw)
-            pygame.draw.line(self.screen, colour, (pos[0], pos[1]-r), \
-                (pos[0], pos[1]+r), pw)
+            pygame.draw.line(
+                self.screen, colour, (pos[0] - r, pos[1]), \
+                (pos[0] + r, pos[1]), pw
+                )
+            pygame.draw.line(
+                self.screen, colour, (pos[0], pos[1] - r), \
+                (pos[0], pos[1] + r), pw
+                )
         elif fixtype == "x":
             x = int(math.cos(math.radians(45)) * r)
             y = int(math.sin(math.radians(45)) * r)
-            pygame.draw.line(self.screen, colour, (pos[0]-x, pos[1]-y), \
-                (pos[0]+x, pos[1]+y), pw)
-            pygame.draw.line(self.screen, colour, (pos[0]-x, pos[1]+y), \
-                (pos[0]+x, pos[1]-y), pw)
+            pygame.draw.line(
+                self.screen, colour, (pos[0] - x, pos[1] - y), \
+                (pos[0] + x, pos[1] + y), pw
+                )
+            pygame.draw.line(
+                self.screen, colour, (pos[0] - x, pos[1] + y), \
+                (pos[0] + x, pos[1] - y), pw
+                )
         elif fixtype == "dot":
             pygame.draw.circle(self.screen, colour, pos, r, 0)
 
-
     def draw_text(self, text="text", colour=None, color=None, pos=None, \
-            centre=None, center=None, font="mono", fontsize=12, antialias=True):
+                  centre=None, center=None, font="mono", fontsize=12, antialias=True):
 
         """Draws a text on the screen
         
@@ -483,8 +517,12 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         if center is None and centre is None:
             centre = True
         elif center is None and centre is not None:
@@ -492,41 +530,45 @@ class PyGameScreen(BaseScreen):
         elif center is not None and centre is None:
             centre = center
         elif centre != center:
-            raise Exception("The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(center,centre))
+            raise Exception(
+                "The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(
+                    center, centre
+                    )
+                )
 
         if colour is None:
             colour = self.fgc
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
 
         if not pygame.font.get_init():
             pygame.font.init()
-        
+
         fontname = os.path.join(pygaze.FONTDIR, font) + ".ttf"
         if not os.path.isfile(fontname):
             print("WARNING: screen.Screen: could not find font {}; using default instead".format(fontname))
             font = pygame.font.get_default_font()
-        if os.path.isfile(fontname):            
+        if os.path.isfile(fontname):
             font = pygame.font.Font(fontname, fontsize)
         else:
             font = pygame.font.SysFont(font, fontsize)
-        
+
         lines = text.split("\n")
         lineh = font.get_linesize()
-        
-        for lnr in range(0,len(lines)):
+
+        for lnr in range(0, len(lines)):
             txtsurf = font.render(lines[lnr], antialias, colour)
             if centre and len(lines) == 1:
-                linepos = (pos[0] - font.size(lines[lnr])[0]/2, pos[1] - font.size(lines[lnr])[1]/2)
+                linepos = (pos[0] - font.size(lines[lnr])[0] / 2, pos[1] - font.size(lines[lnr])[1] / 2)
             elif centre:
-                linepos = (pos[0] - font.size(lines[lnr])[0]/2, pos[1] + lineh * (2 * (lnr - (len(lines)/2.0) + 0.5)))
+                linepos = (
+                pos[0] - font.size(lines[lnr])[0] / 2, pos[1] + lineh * (2 * (lnr - (len(lines) / 2.0) + 0.5)))
             else:
                 linepos = (pos[0], pos[1] + 2 * lnr)
-            self.screen.blit(txtsurf, (int(linepos[0]),int(linepos[1])))
-    
-    
+            self.screen.blit(txtsurf, (int(linepos[0]), int(linepos[1])))
+
     def draw_image(self, image, pos=None, scale=None):
-        
+
         """Draws an image on the screen
         
         arguments
@@ -545,10 +587,10 @@ class PyGameScreen(BaseScreen):
                     adds SimpleImageStim to (PsychoPy) the self.screen
                     property
         """
-        
+
         if pos is None:
-            pos = (self.dispsize[0]/2, self.dispsize[1]/2)
-        
+            pos = (self.dispsize[0] / 2, self.dispsize[1] / 2)
+
         # check if image is a path name
         if type(image) == str:
             # check if the image file exists
@@ -557,10 +599,12 @@ class PyGameScreen(BaseScreen):
                 try:
                     img = pygame.image.load(image)
                 except:
-                    raise Exception("Error in libscreen.PyGameScreen.draw_image: could not load image file '{}'".format(image))
+                    raise Exception(
+                        "Error in libscreen.PyGameScreen.draw_image: could not load image file '{}'".format(image)
+                        )
             else:
                 raise Exception("Error in libscreen.PyGameScreen.draw_image: path '{}' is not a file!".format(image))
-        
+
         # check if image is a PyGame Surface
         elif type(image) == pygame.Surface:
             # since image is already a PyGame Surface, we needn't do anything with it
@@ -569,20 +613,23 @@ class PyGameScreen(BaseScreen):
         else:
             try:
                 # PIL Image to PyGame Surface
-                img = pygame.image.fromstring(image.tostring(), \
-                    (image.size[0],image.size[1]), "RGB", False)
+                img = pygame.image.fromstring(
+                    image.tostring(), \
+                    (image.size[0], image.size[1]), "RGB", False
+                    )
             except:
                 raise Exception("Error in libscreen.PyGameScreen.draw_image: image format not recognized!")
-        
-        if scale is not None:
-            img = pygame.transform.scale(img, (int(img.get_width()*scale), \
-                int(img.get_height()*scale)))
-        
-        imgpos = (int(pos[0] - img.get_width()/2), \
-            int(pos[1] - img.get_height()/2))
-        
-        self.screen.blit(img, imgpos)
 
+        if scale is not None:
+            img = pygame.transform.scale(
+                img, (int(img.get_width() * scale), \
+                      int(img.get_height() * scale))
+                )
+
+        imgpos = (int(pos[0] - img.get_width() / 2), \
+                  int(pos[1] - img.get_height() / 2))
+
+        self.screen.blit(img, imgpos)
 
     def set_background_colour(self, colour=None, color=None):
 
@@ -608,7 +655,11 @@ class PyGameScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         if colour is not None:
             self.bgc = colour

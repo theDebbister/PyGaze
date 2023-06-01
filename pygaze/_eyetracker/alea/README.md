@@ -1,12 +1,18 @@
 # PyAlea
 
-Python wrapper for the IntelliGaze API by [Alea Technologies](https://www.intelligaze.com/en/), developed by [Dr Edwin Dalmaijer](https://github.com/esdalmaijer).
+Python wrapper for the IntelliGaze API by [Alea Technologies](https://www.intelligaze.com/en/), developed
+by [Dr Edwin Dalmaijer](https://github.com/esdalmaijer).
 
-PyAlea is covered by the Apache v2.0 license. The original repository can be found on [GitHub](https://github.com/esdalmaijer/PyAlea). This module was copied into PyGaze on 2018-08-11 without modifications.
+PyAlea is covered by the Apache v2.0 license. The original repository can be found
+on [GitHub](https://github.com/esdalmaijer/PyAlea). This module was copied into PyGaze on 2018-08-11 without
+modifications.
 
 ## C API
 
-Alea offers an API to interact with their eye trackers. This API operates through COM, and is less straightforward to wrap in Python. (While technically possible, it requires external packages, and jumping through several hoops.) An easier solution was to introduce a C++ wrapper for the API, which is then compiled as a DLL. The resulting DLL is more easily accessed through Python's `ctypes`.
+Alea offers an API to interact with their eye trackers. This API operates through COM, and is less straightforward to
+wrap in Python. (While technically possible, it requires external packages, and jumping through several hoops.) An
+easier solution was to introduce a C++ wrapper for the API, which is then compiled as a DLL. The resulting DLL is more
+easily accessed through Python's `ctypes`.
 
 The source code for this "C API" wrapper for the original API is included here.
 
@@ -28,7 +34,9 @@ import alea
 
 ### Recording data to file
 
-You can then use the AleaTracker class for quick and easy interfacing with your eye tracker. For example, the following script initialises a connection with the IntelliGaze Server, calibrates the eye tracker, and records 10 seconds of data into a text file.
+You can then use the AleaTracker class for quick and easy interfacing with your eye tracker. For example, the following
+script initialises a connection with the IntelliGaze Server, calibrates the eye tracker, and records 10 seconds of data
+into a text file.
 
 ```python
 import time
@@ -58,9 +66,11 @@ tracker.close()
 
 ### Streaming samples for gaze-contingent functionality
 
-You can use AleaTracker's `sample` method to obtain the corrent gaze coordinates, as well as the current pupil size. While a connection is open, this will always return the latest available sample.
+You can use AleaTracker's `sample` method to obtain the corrent gaze coordinates, as well as the current pupil size.
+While a connection is open, this will always return the latest available sample.
 
-**NOTE: You do not have to be recording to use the `sample` method, and using the `sample` method does not affect recording. You can do both at the same time, but you don't have to.**
+**NOTE: You do not have to be recording to use the `sample` method, and using the `sample` method does not affect
+recording. You can do both at the same time, but you don't have to.**
 
 ```python
 import time
@@ -90,6 +100,8 @@ tracker.close()
 ## Troubleshooting
 
 * Make sure the IntelliGaze Server is running! Without it, the Python wrapper will have nothing to talk to.
-* Make sure you install the IntelliGaze Server! You can download it from the IntelliGaze by [Alea Technologies website](https://www.intelligaze.com/en/support/download).
-* Make sure that you are running a Microsoft Windows operating system (tested on Windows 7 and 10). Linux and OS X support is not currently available.
+* Make sure you install the IntelliGaze Server! You can download it from the IntelliGaze
+  by [Alea Technologies website](https://www.intelligaze.com/en/support/download).
+* Make sure that you are running a Microsoft Windows operating system (tested on Windows 7 and 10). Linux and OS X
+  support is not currently available.
 

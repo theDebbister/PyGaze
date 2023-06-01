@@ -22,35 +22,35 @@
 # This module contains the python prototype declaration for all functions which
 # are neccessary to control the EyeLogic software from an API client.
 
+import os
+import sys
 from ctypes import *
 from ctypes import wintypes
 from enum import Enum
-import os
-import sys
 
 
 ## contains all information about the state of the eyes at a specific time
 class ELGazeSample(Structure):
     _fields_ = [ \
-        ("timestampMicroSec",c_int64), \
-        ("index",c_int32), \
-        ("porRawX",c_double), \
-        ("porRawY",c_double), \
-        ("porFilteredX",c_double), \
-        ("porFilteredY",c_double), \
-        ("porLeftX",c_double), \
-        ("porLeftY",c_double), \
-        ("eyePositionLeftX",c_double), \
-        ("eyePositionLeftY",c_double), \
-        ("eyePositionLeftZ",c_double), \
-        ("pupilRadiusLeft",c_double), \
-        ("porRightX",c_double), \
-        ("porRightY",c_double), \
-        ("eyePositionRightX",c_double), \
-        ("eyePositionRightY",c_double), \
-        ("eyePositionRightZ",c_double), \
-        ("pupilRadiusRight",c_double) \
-     ]
+        ("timestampMicroSec", c_int64), \
+        ("index", c_int32), \
+        ("porRawX", c_double), \
+        ("porRawY", c_double), \
+        ("porFilteredX", c_double), \
+        ("porFilteredY", c_double), \
+        ("porLeftX", c_double), \
+        ("porLeftY", c_double), \
+        ("eyePositionLeftX", c_double), \
+        ("eyePositionLeftY", c_double), \
+        ("eyePositionLeftZ", c_double), \
+        ("pupilRadiusLeft", c_double), \
+        ("porRightX", c_double), \
+        ("porRightY", c_double), \
+        ("eyePositionRightX", c_double), \
+        ("eyePositionRightY", c_double), \
+        ("eyePositionRightZ", c_double), \
+        ("pupilRadiusRight", c_double) \
+        ]
 
 
 ## Events coming from the eye tracker
@@ -72,7 +72,7 @@ GazeSampleCallback = CFUNCTYPE(None, POINTER(ELGazeSample))
 ## callback function type, event occurred
 EventCallback = CFUNCTYPE(None, c_int32)
 
-if sys.maxsize > 2**32:
+if sys.maxsize > 2 ** 32:
     libname = "ELCApi"
 else:
     libname = "ELCApi32"
@@ -81,14 +81,17 @@ libnameGlobal = os.path.join(baseDir, libname + ".dll")
 if not os.path.isfile(libnameGlobal):
     raise Exception(
         "WARNING: Could not find EyeLogic dll in its expected location: '{}'".
-        format(libnameGlobal))
+        format(libnameGlobal)
+    )
 try:
     kernel32 = WinDLL('kernel32', use_last_error=True)
+
 
     def check_bool(result, func, args):
         if not result:
             raise WinError(get_last_error())
         return args
+
 
     kernel32.LoadLibraryExW.errcheck = check_bool
     kernel32.LoadLibraryExW.restype = wintypes.HMODULE
@@ -119,13 +122,13 @@ class ELApi:
         c_lib.elInitApi.restype = c_int
         c_lib.elInitApi(c_char_p(clientNameUtf8))
 
-## destructor
+    ## destructor
 
     def __del__(self):
         c_lib.elDestroyApi()
 
-## registers sample callback listener
-# @param   sampleCallback   this callback function is called on new gaze samples, may be null
+    ## registers sample callback listener
+    # @param   sampleCallback   this callback function is called on new gaze samples, may be null
 
     def registerGazeSampleCallback(self, sampleCallback: GazeSampleCallback):
         c_lib.elRegisterGazeSampleCallback.argtypes = [GazeSampleCallback]
@@ -135,8 +138,8 @@ class ELApi:
         else:
             c_lib.elRegisterGazeSampleCallback(sampleCallback)
 
-## registers event callback listener
-# @param   eventCallback   this callback function is called on eye tracking events, may be null
+    ## registers event callback listener
+    # @param   eventCallback   this callback function is called on eye tracking events, may be null
 
     def registerEventCallback(self, eventCallback: EventCallback):
         c_lib.elRegisterEventCallback.argtypes = [EventCallback]
@@ -146,7 +149,7 @@ class ELApi:
         else:
             c_lib.elRegisterEventCallback(eventCallback)
 
-## return values of connect( )
+    ## return values of connect( )
 
     class ReturnConnect(Enum):
         ## connection successully established
@@ -159,10 +162,10 @@ class ELApi:
         ## connection failed: the server can not be found or is not responding
         TIMEOUT = 3
 
-## initialize connection to the server (method is blocking until connection
-# established)
-#
-# @return success state
+    ## initialize connection to the server (method is blocking until connection
+    # established)
+    #
+    # @return success state
 
     def connect(self) -> ReturnConnect:
         global c_lib
@@ -170,7 +173,7 @@ class ELApi:
         c_lib.elConnect.restype = c_int32
         return ELApi.ReturnConnect(c_lib.elConnect())
 
-## closes connection to the server
+    ## closes connection to the server
 
     def disconnect(self):
         global c_lib
@@ -178,7 +181,7 @@ class ELApi:
         c_lib.elDisconnect.restype = None
         c_lib.elDisconnect()
 
-## whether a connection to the server is established
+    ## whether a connection to the server is established
 
     def isConnected(self) -> bool:
         global c_lib
@@ -189,14 +192,14 @@ class ELApi:
     ## configuration of the stimulus screen
     class ScreenConfig(Structure):
         _fields_ = [ \
-            ("id",c_int32), \
-            ("resolutionX",c_int32), \
-            ("resolutionY",c_int32), \
-            ("physicalSizeX_mm",c_double), \
-            ("physicalSizeY_mm",c_double), \
-            ("dpiX",c_double), \
-            ("dpiY",c_double), \
-        ]
+            ("id", c_int32), \
+            ("resolutionX", c_int32), \
+            ("resolutionY", c_int32), \
+            ("physicalSizeX_mm", c_double), \
+            ("physicalSizeY_mm", c_double), \
+            ("dpiX", c_double), \
+            ("dpiY", c_double), \
+            ]
 
     ## get stimulus screen configuration
     # @return    screen configuration
@@ -222,12 +225,12 @@ class ELApi:
 
         class DeviceConfigInternal(Structure):
             _fields_ = [ \
-                ("deviceSerial",c_int64), \
-                ("numFrameRates",c_int32), \
-                ("frameRates",c_uint8 * 16), \
-                ("numCalibrationMethods",c_int32), \
-                ("calibrationMethods",c_uint8 * 16), \
-            ]
+                ("deviceSerial", c_int64), \
+                ("numFrameRates", c_int32), \
+                ("frameRates", c_uint8 * 16), \
+                ("numCalibrationMethods", c_int32), \
+                ("calibrationMethods", c_uint8 * 16), \
+                ]
 
         c_lib.elGetDeviceConfig.argtypes = [POINTER(DeviceConfigInternal)]
         c_lib.elGetDeviceConfig.restype = None
@@ -238,10 +241,11 @@ class ELApi:
             deviceConfig.frameRates.append(deviceConfigInternal.frameRates[i])
         for i in range(deviceConfigInternal.numCalibrationMethods):
             deviceConfig.calibrationMethods.append(
-                deviceConfigInternal.calibrationMethods[i])
+                deviceConfigInternal.calibrationMethods[i]
+            )
         return deviceConfig
 
-## return values of requestTracking( )
+    ## return values of requestTracking( )
 
     class ReturnStart(Enum):
         ## start tracking successful
@@ -257,14 +261,14 @@ class ELApi:
         ## some general failure occurred
         FAILURE = 5
 
-## request tracking
-#
-# If tracking is not yet ongoing, tracking is started in the device. If tracking is already
-# running (e.g. started from another client) with the same frame-rate as requested, all gaze
-# samples are reported to this client as well.
-#
-# @param   frameRateModeInd    index of the requested frame rate mode (0 .. \#frameRateModes-1)
-# @returns success state
+    ## request tracking
+    #
+    # If tracking is not yet ongoing, tracking is started in the device. If tracking is already
+    # running (e.g. started from another client) with the same frame-rate as requested, all gaze
+    # samples are reported to this client as well.
+    #
+    # @param   frameRateModeInd    index of the requested frame rate mode (0 .. \#frameRateModes-1)
+    # @returns success state
 
     def requestTracking(self, frameRateModeInd: c_int) -> ReturnStart:
         global c_lib
@@ -272,10 +276,10 @@ class ELApi:
         c_lib.elRequestTracking.restype = c_int
         return ELApi.ReturnStart(c_lib.elRequestTracking(frameRateModeInd))
 
-## unrequest tracking
-#
-# Note that the tracking device may continue if other processes still request tracking. Check
-# the EyeLogic server window to observe the actual state.
+    ## unrequest tracking
+    #
+    # Note that the tracking device may continue if other processes still request tracking. Check
+    # the EyeLogic server window to observe the actual state.
 
     def unrequestTracking(self):
         global c_lib
@@ -283,7 +287,7 @@ class ELApi:
         c_lib.elUnrequestTracking.restype = None
         c_lib.elUnrequestTracking()
 
-## return values of calibrate( )
+    ## return values of calibrate( )
 
     class ReturnCalibrate(Enum):
         ## calibration successful
@@ -299,10 +303,9 @@ class ELApi:
         ## calibration was not successful or aborted
         FAILURE = 5
 
-
-## perform calibration (method is blocking until calibration finished)
-#
-# @returns success state
+    ## perform calibration (method is blocking until calibration finished)
+    #
+    # @returns success state
 
     def calibrate(self, calibrationModeInd: c_int):
         global c_lib

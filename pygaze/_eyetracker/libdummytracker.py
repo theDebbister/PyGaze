@@ -20,14 +20,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from pygaze import settings
-from pygaze.libtime import clock
-import pygaze
-from pygaze.screen import Screen
-from pygaze.mouse import Mouse
-from pygaze.keyboard import Keyboard
-from pygaze.sound import Sound
-
 from pygaze._eyetracker.libdumbdummy import DumbDummy
+from pygaze.keyboard import Keyboard
+from pygaze.libtime import clock
+from pygaze.mouse import Mouse
+from pygaze.screen import Screen
+from pygaze.sound import Sound
 
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
@@ -41,7 +39,7 @@ except:
 class Dummy(DumbDummy):
     """A dummy class to run experiments in dummy mode, where eye movements are simulated by the mouse"""
 
-    def __init__(self, display):
+    def __init__(self, display, screen=None):
 
         """Initiates an eyetracker dummy object, that simulates gaze position using the mouse
         
@@ -66,14 +64,24 @@ class Dummy(DumbDummy):
         self.blinking = False
         self.bbpos = (settings.DISPSIZE[0] / 2, settings.DISPSIZE[1] / 2)
         self.resolution = settings.DISPSIZE[:]
-        self.simulator = Mouse(disptype=settings.DISPTYPE, mousebuttonlist=None,
-                               timeout=2, visible=False)
-        self.kb = Keyboard(disptype=settings.DISPTYPE, keylist=None,
-                           timeout=None)
-        self.angrybeep = Sound(osc='saw', freq=100, length=100, attack=0,
-                               decay=0, soundfile=None)
+        self.simulator = Mouse(
+            disptype=settings.DISPTYPE, mousebuttonlist=None,
+            timeout=2, visible=False
+            )
+        self.kb = Keyboard(
+            disptype=settings.DISPTYPE, keylist=None,
+            timeout=None
+            )
+        self.angrybeep = Sound(
+            osc='saw', freq=100, length=100, attack=0,
+            decay=0, soundfile=None
+            )
         self.display = display
-        self.screen = Screen(disptype=settings.DISPTYPE, mousevisible=False)
+
+        if screen is None:
+            self.screen = Screen(disptype=settings.DISPTYPE, mousevisible=False)
+        else:
+            self.screen = screen
 
     def calibrate(self):
 
@@ -387,9 +395,10 @@ class Dummy(DumbDummy):
         y        --    The Y coordinate
         """
 
-        # self.screen.clear()
-        self.screen.draw_fixation(fixtype='circle', colour=settings.FGC,
-                                  pos=(x, y), pw=0, diameter=12)
+        self.screen.draw_fixation(
+            fixtype='circle', colour=settings.FGC,
+            pos=(x, y), pw=0, diameter=14
+            )
 
         self.display.fill(self.screen)
         self.display.show()

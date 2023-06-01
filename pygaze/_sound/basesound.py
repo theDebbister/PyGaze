@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #    
 #    """An example child of BaseDisplay"""
 #    
@@ -49,11 +49,9 @@
 
 
 class BaseSound:
-
     """A Sound class for creating and playing sounds"""
 
     def __init__(self):
-        
         """
         Initializes a Sound Instance
         
@@ -81,9 +79,7 @@ class BaseSound:
 
         pass
 
-
     def pan(self):
-
         """
         Sets the panning of a sound (the volume of the 'unpanned'
         channel decreases, while the other channel remaines the same)
@@ -108,9 +104,7 @@ class BaseSound:
 
         pass
 
-
     def play(self):
-
         """
         Plays specified sound (keyword argument loops specifies how many
         repeats after being played once, -1 is infinite); function does not
@@ -132,9 +126,7 @@ class BaseSound:
 
         pass
 
-
     def stop(self):
-
         """
         Stops sound playback
         
@@ -153,9 +145,7 @@ class BaseSound:
 
         pass
 
-
     def set_volume(self):
-
         """
         Set the playback volume (loudness) to specified value
         

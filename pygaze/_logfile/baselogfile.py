@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #    
 #    """An example child of BaseDisplay"""
 #    
@@ -49,11 +49,9 @@
 
 
 class BaseLogfile:
-
     """Logfile object for saving data"""
 
     def __init__(self):
-
         """Initiates logfile object
         
         arguments
@@ -72,9 +70,7 @@ class BaseLogfile:
 
         pass
 
-
     def write(self, vallist: list[str], **kwargs) -> None:
-
         """
         Writes given values to logfile (each value separated with a tab)
         
@@ -94,9 +90,7 @@ class BaseLogfile:
 
         pass
 
-
     def close(self):
-
         """
         Closes logfile (do this after writing everything to the file!)
         

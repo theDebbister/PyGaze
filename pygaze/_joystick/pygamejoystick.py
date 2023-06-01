@@ -21,9 +21,10 @@
 
 import copy
 
-from pygaze.libtime import clock
 from pygaze import settings
 from pygaze._joystick.basejoystick import BaseJoystick
+from pygaze.libtime import clock
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -32,17 +33,15 @@ try:
 except:
     pass
 
-import pygaze
 import pygame
 from pygame.joystick import Joystick
 
 
 class PyGameJoystick(BaseJoystick):
-
     """A joystick for collecting responses"""
 
     def __init__(self, joybuttonlist=settings.JOYBUTTONLIST,
-        timeout=settings.JOYTIMEOUT):
+                 timeout=settings.JOYTIMEOUT):
 
         """Initializes joystick object (joybuttonlist: list of buttons; timeout: timeout in ms)
         
@@ -78,7 +77,6 @@ class PyGameJoystick(BaseJoystick):
         self.set_joybuttonlist(joybuttonlist)
         self.set_timeout(timeout)
 
-
     def set_joybuttonlist(self, joybuttonlist=None):
 
         """Set a list of accepted joystick buttons
@@ -101,7 +99,6 @@ class PyGameJoystick(BaseJoystick):
             for joybutton in joybuttonlist:
                 self.jbuttonlist.append(joybutton)
 
-
     def set_timeout(self, timeout=None):
 
         """Set a timeout (in milliseconds)
@@ -119,7 +116,6 @@ class PyGameJoystick(BaseJoystick):
         """
 
         self.timeout = timeout
-
 
     def get_joybutton(self, joybuttonlist="default", timeout="default"):
 
@@ -167,7 +163,6 @@ class PyGameJoystick(BaseJoystick):
         # in case of timeout
         return None, time
 
-
     def get_joyaxes(self, timeout="default"):
 
         """Waits for joystick axis movement
@@ -207,7 +202,6 @@ class PyGameJoystick(BaseJoystick):
                     return pos, time
         # in case of timeout
         return None, time
-
 
     def get_joyballs(self, timeout="default"):
 
@@ -249,7 +243,6 @@ class PyGameJoystick(BaseJoystick):
         # in case of timeout
         return None, time
 
-
     def get_joyhats(self, timeout="default"):
 
         """Waits for joystick hat movement
@@ -270,7 +263,7 @@ class PyGameJoystick(BaseJoystick):
                        time is the time (measured from expbegintime) a
                        hatmovement or a timeout occured
         """
-        
+
         # set timeout
         if timeout == "default":
             timeout = self.timeout
@@ -289,7 +282,6 @@ class PyGameJoystick(BaseJoystick):
                     return hatpos, time
         # in case of timeout
         return None, time
-
 
     def get_joyinput(self, joybuttonlist="default", timeout="default"):
 
@@ -372,4 +364,3 @@ class PyGameJoystick(BaseJoystick):
                     return eventtype, hatpos, time
         # in case of timeout
         return eventtype, None, time
-    

@@ -19,4 +19,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-raise Exception("pygaze.libgazecon is no longer supported from PyGaze 0.7.0. You can still import AOI, FRL, and GazeCursor from the plug-ins.")
+raise Exception(
+    "pygaze.libgazecon is no longer supported from PyGaze 0.7.0. You can still import AOI, FRL, and GazeCursor from the plug-ins."
+    )

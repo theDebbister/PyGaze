@@ -20,11 +20,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from pygaze import settings
-from pygaze.py3compat import *
-from pygaze.libtime import clock
-import pygaze
-from pygaze.screen import Screen
 from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
+from pygaze.libtime import clock
+from pygaze.py3compat import *
+from pygaze.screen import Screen
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -35,15 +35,13 @@ except:
 
 
 def message(msg):
-    
     """Prints a timestamp and message to the console"""
-    
+
     print(u"{}\t{}".format(int(clock.get_time()), msg))
 
-class DumbDummy(BaseEyeTracker):
 
+class DumbDummy(BaseEyeTracker):
     """A dummy class to run experiments in 'dumb dummy' mode, where nothing happens (NO simulation!)"""
-    
 
     def __init__(self, display):
 
@@ -68,11 +66,10 @@ class DumbDummy(BaseEyeTracker):
 
         self.recording = False
         self.blinking = False
-        self.bbpos = (settings.DISPSIZE[0]/2, settings.DISPSIZE[1]/2)
+        self.bbpos = (settings.DISPSIZE[0] / 2, settings.DISPSIZE[1] / 2)
 
         self.display = display
         self.screen = Screen(disptype=settings.DISPTYPE, mousevisible=False)
-
 
     def send_command(self, cmd):
 
@@ -80,27 +77,29 @@ class DumbDummy(BaseEyeTracker):
 
         message(u"The following command would have been given to the eyetracker: " + safe_decode(cmd))
 
-
     def log(self, msg):
 
         """Dummy log message, messages message instead of sending it to the eyetracker"""
 
         message(u"The following message would have been logged to the EDF: " + safe_decode(msg))
 
-
     def log_var(self, var, val):
 
         """Dummy varlog, messages variable and value instead of sending it to the eyetracker"""
 
-        message(u"The following variable would have been logged to the EDF: " + safe_decode(var) + u", value: " + safe_decode(val))
-
+        message(
+            u"The following variable would have been logged to the EDF: " + safe_decode(
+                var
+                ) + u", value: " + safe_decode(
+                val
+                )
+            )
 
     def status_msg(self, msg):
-        
+
         """Dummy status message, messages message instead of sending it to the eyetracker"""
 
         message(u"The following status message would have been visible on the experimentor PC: " + safe_decode(msg))
-
 
     def connected(self):
 
@@ -110,22 +109,19 @@ class DumbDummy(BaseEyeTracker):
 
         return True
 
-
     def calibrate(self):
 
         """Dummy calibration"""
 
         message("Calibration would now take place")
 
-
     def drift_correction(self, pos=None, fix_triggered=False):
 
         """Dummy drift correction"""
 
         message("Drift correction would now take place")
-        
-        return True
 
+        return True
 
     def prepare_drift_correction(self, pos):
 
@@ -133,24 +129,21 @@ class DumbDummy(BaseEyeTracker):
 
         message("Drift correction preparation would now take place")
 
-
     def fix_triggered_drift_correction(self, pos=None, min_samples=30, max_dev=60, reset_threshold=10):
 
         """Dummy drift correction (fixation triggered)"""
 
         message("Drift correction (fixation triggered) would now take place")
-        
-        return True
 
+        return True
 
     def start_recording(self):
 
         """Dummy for starting recording, messages what would have been the recording start"""
 
         self.recording = True
-        
-        message("Recording would have started now")
 
+        message("Recording would have started now")
 
     def stop_recording(self):
 
@@ -159,7 +152,6 @@ class DumbDummy(BaseEyeTracker):
         self.recording = False
 
         message("Recording would have stopped now")
-
 
     def close(self):
 
@@ -170,27 +162,23 @@ class DumbDummy(BaseEyeTracker):
 
         message("eyetracker connection would have closed now")
 
-
     def set_eye_used(self):
 
         """Dummy for setting which eye to track (does nothing)"""
-        
+
         message("Which eye to track would now be set")
 
-
     def pupil_size(self):
-        
-        """Returns dummy pupil size"""
-        
-        return 19
 
+        """Returns dummy pupil size"""
+
+        return 19
 
     def sample(self):
 
         """Returns dummy gaze position"""
 
-        return (19,19)
-
+        return (19, 19)
 
     def wait_for_event(self, event):
 
@@ -211,13 +199,11 @@ class DumbDummy(BaseEyeTracker):
 
         return outcome
 
-
     def wait_for_saccade_start(self):
 
         """Returns starting time and starting position when a simulated saccade is started"""
 
-        return clock.get_time(), (19,19)
-
+        return clock.get_time(), (19, 19)
 
     def wait_for_saccade_end(self):
 
@@ -229,15 +215,13 @@ class DumbDummy(BaseEyeTracker):
 
         stime, spos = self.wait_for_saccade_start()
 
-        return clock.get_time(), spos, (190,190)
-
+        return clock.get_time(), spos, (190, 190)
 
     def wait_for_fixation_start(self):
 
         """Returns starting time and position when a simulated fixation is started"""
 
-        return clock.get_time(), (19,19)
-
+        return clock.get_time(), (19, 19)
 
     def wait_for_fixation_end(self):
 
@@ -247,16 +231,14 @@ class DumbDummy(BaseEyeTracker):
 
         return clock.get_time(), spos
 
-
     def wait_for_blink_start(self):
 
         """Returns starting time and position of a simulated blink"""
 
-        return clock.get_time(), (19,19)
-
+        return clock.get_time(), (19, 19)
 
     def wait_for_blink_end(self):
 
         """Returns ending time and position of a simulated blink (mousebuttonup)"""
-        
-        return clock.get_time(), (19,19)
+
+        return clock.get_time(), (19, 19)

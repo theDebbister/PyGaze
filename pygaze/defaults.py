@@ -25,7 +25,7 @@
 # under TRACKERTYPE.
 DUMMYMODE = False
 # Name of the log file, without path or extension.
-LOGFILENAME = "default" 
+LOGFILENAME = "default"
 # Path to the log file.
 LOGFILE = LOGFILENAME[:]
 
@@ -35,9 +35,9 @@ SCREENNR = 0
 # Back-end for the display. Choose either "psychopy" or "pygame".
 DISPTYPE = "psychopy"
 # Display resolution in pixels as (width,height). Needs to be integers!
-DISPSIZE = (1280,1024)
+DISPSIZE = (1280, 1024)
 # Physical display size in centimeters as (width,height). Can be floats.
-SCREENSIZE = (33.8,27.1)
+SCREENSIZE = (33.8, 27.1)
 # Distance between the eye and the display in centimeters. Float.
 SCREENDIST = 57.0
 # Boolean indicating whether the experiment is executed in fullscreen.
@@ -45,9 +45,9 @@ FULLSCREEN = True
 # Boolean indicating mouse visibility.
 MOUSEVISIBLE = False
 # Background colour in (red,green,blue); use integer values in range [0,255].
-BGC = (125,125,125) # backgroundcolour
+BGC = (125, 125, 125)  # backgroundcolour
 # Foreground colour in (red,green,blue); use integer values in range [0,255].
-FGC = (0,0,0)
+FGC = (0, 0, 0)
 
 # SOUND
 # Default oscillator for Sound instances, choose between:
@@ -132,7 +132,7 @@ SMIIP = "127.0.0.1"
 SMISENDIP = "127.0.0.1"
 # IP address for iViewX receiving. (This can be the same IP if iViewX is
 # running locally.)
-SMIRECEIVEIP = "127.0.0.1" 
+SMIRECEIVEIP = "127.0.0.1"
 # Port number for iViewX sending.
 SMISENDPORT = 4444
 # Port number for iViewX receiving.
@@ -150,4 +150,3 @@ ALEAALEAANIMATEDCALIBRATION = False
 # to that. The PyGaze way of logging produces files that are more similar to
 # those of other trackers.
 ALEALOGGING = True
-

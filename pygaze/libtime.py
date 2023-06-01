@@ -19,8 +19,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze.py3compat import *
 from pygaze import settings
+
 if settings.DISPTYPE == "psychopy":
     from pygaze._time.psychopytime import PsychoPyTime as Time
 elif settings.DISPTYPE == "pygame":
@@ -35,17 +35,14 @@ else:
 
 # the following function definitions are for backwards compatibility
 
-import pygaze
 
 def expstart():
-    
     """Time is set to 0 upon calling this"""
-    
+
     clock.expstart()
 
-    
+
 def get_time():
-    
     """Returns the current time in milliseconds
     
     arguments
@@ -58,12 +55,11 @@ def get_time():
     time        --    current time in milliseconds, as measured from
                 expbegintime
     """
-    
+
     return clock.get_time()
 
 
 def pause(pausetime):
-    
     """Pauses the experiment for the given number of milliseconds
     
     arguments
@@ -75,12 +71,11 @@ def pause(pausetime):
     returns
     pausetime    --    the actual duration of the pause in milliseconds
     """
-    
+
     return clock.pause(pausetime)
 
 
 def expend():
-    
     """Completely ends the experiment (only call this at the very end!)
     
     arguments
@@ -93,9 +88,10 @@ def expend():
     endtime        --    experiment ending time in milliseconds, as measured
                 from expbegintime
     """
-    
+
     return clock.expend()
 
-# Create a singleton clock 
+
+# Create a singleton clock
 clock = Time()
 clock.expstart()

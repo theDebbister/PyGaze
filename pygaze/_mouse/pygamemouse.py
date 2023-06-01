@@ -21,9 +21,10 @@
 
 import copy
 
-from pygaze.libtime import clock
 from pygaze import settings
 from pygaze._mouse.basemouse import BaseMouse
+from pygaze.libtime import clock
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -31,18 +32,15 @@ try:
     from pygaze._misc.misc import copy_docstr
 except:
     pass
-    
-import pygaze
+
 import pygame
 
-class PyGameMouse(BaseMouse):
 
+class PyGameMouse(BaseMouse):
     # See _mouse.basemouse.BaseMouse
 
-    import pygame.mouse
-
     def __init__(self, mousebuttonlist=settings.MOUSEBUTTONLIST,
-        timeout=settings.MOUSETIMEOUT, visible=False):
+                 timeout=settings.MOUSETIMEOUT, visible=False):
 
         # See _mouse.basemouse.BaseMouse
 
@@ -61,11 +59,10 @@ class PyGameMouse(BaseMouse):
         self.set_timeout(timeout)
         self.set_visible(visible=visible)
 
-
     def set_mousebuttonlist(self, mousebuttonlist=None):
 
         # See _mouse.basemouse.BaseMouse
-        
+
         if mousebuttonlist == None or mousebuttonlist == []:
             self.mbuttonlist = None
         else:
@@ -73,13 +70,11 @@ class PyGameMouse(BaseMouse):
             for mbutton in mousebuttonlist:
                 self.mbuttonlist.append(mbutton)
 
-
     def set_timeout(self, timeout=None):
 
         # See _mouse.basemouse.BaseMouse
 
         self.timeout = timeout
-
 
     def set_visible(self, visible=True):
 
@@ -88,13 +83,11 @@ class PyGameMouse(BaseMouse):
         self.visible = visible
         pygame.mouse.set_visible(visible)
 
-
-    def set_pos(self, pos=(0,0)):
+    def set_pos(self, pos=(0, 0)):
 
         # See _mouse.basemouse.BaseMouse
 
         pygame.mouse.set_pos(pos)
-
 
     def get_pos(self):
 
@@ -103,7 +96,6 @@ class PyGameMouse(BaseMouse):
         mpos = pygame.mouse.get_pos()
 
         return mpos
-
 
     def get_clicked(self, mousebuttonlist="default", timeout="default"):
 
@@ -129,7 +121,6 @@ class PyGameMouse(BaseMouse):
                         return pressed, clickpos, time
         # in case of timeout
         return None, None, time
-
 
     def get_pressed(self):
 

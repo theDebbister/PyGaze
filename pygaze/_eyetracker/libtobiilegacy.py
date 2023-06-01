@@ -23,16 +23,16 @@
 # TobiiTracker
 import copy
 import math
+
 import numpy
 
 from pygaze import settings
-from pygaze.libtime import clock
-import pygaze
-from pygaze.screen import Screen
+from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
 from pygaze.keyboard import Keyboard
+from pygaze.libtime import clock
+from pygaze.screen import Screen
 from pygaze.sound import Sound
 
-from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -41,13 +41,11 @@ try:
 except:
     pass
 
-
-## letobii 
-#from letobii import TobiiController
+## letobii
+# from letobii import TobiiController
 #
 
 # TobiiController
-from tobii.eye_tracking_io.basic import EyetrackerException
 
 import os
 import datetime
@@ -58,10 +56,7 @@ import tobii.eye_tracking_io.eyetracker
 import tobii.eye_tracking_io.time.clock
 import tobii.eye_tracking_io.time.sync
 
-from tobii.eye_tracking_io.types import Point2D, Blob
-
-import psychopy.visual
-import psychopy.event
+from tobii.eye_tracking_io.types import Point2D
 
 # try importing PIL
 try:
@@ -79,7 +74,6 @@ except:
 # functions
 
 def deg2pix(cmdist, angle, pixpercm):
-
     """Returns the value in pixels for given values (internal use)
     
     arguments
@@ -100,13 +94,12 @@ def deg2pix(cmdist, angle, pixpercm):
 # classes
 
 class TobiiTracker(BaseEyeTracker):
-    
     """A class for Tobii EyeTracker objects"""
-    
+
     def __init__(self, display, logfile=settings.LOGFILE,
-        eventdetection=settings.EVENTDETECTION, saccade_velocity_threshold=35,
-        saccade_acceleration_threshold=9500, blink_threshold=settings.BLINKTHRESH, **args):
-        
+                 eventdetection=settings.EVENTDETECTION, saccade_velocity_threshold=35,
+                 saccade_acceleration_threshold=9500, blink_threshold=settings.BLINKTHRESH, **args):
+
         """Initializes a TobiiTracker instance
         
         arguments
@@ -129,43 +122,45 @@ class TobiiTracker(BaseEyeTracker):
         # object properties
         self.disp = display
         self.screen = Screen()
-        self.dispsize = settings.DISPSIZE # display size in pixels
-        self.screensize = settings.SCREENSIZE # display size in cm
-        self.screendist = settings.SCREENDIST # distance between participant and screen in cm
-        self.pixpercm = (self.dispsize[0]/float(self.screensize[0]) + self.dispsize[1]/float(self.screensize[1])) / 2.0
+        self.dispsize = settings.DISPSIZE  # display size in pixels
+        self.screensize = settings.SCREENSIZE  # display size in cm
+        self.screendist = settings.SCREENDIST  # distance between participant and screen in cm
+        self.pixpercm = (self.dispsize[0] / float(self.screensize[0]) + self.dispsize[1] / float(
+            self.screensize[1]
+            )) / 2.0
         self.kb = Keyboard(keylist=['space', 'escape', 'q'], timeout=1)
-        self.errorbeep = Sound(osc='saw',freq=100, length=100)
-        
+        self.errorbeep = Sound(osc='saw', freq=100, length=100)
+
         # output file properties
         self.outputfile = logfile
-        self.description = "experiment" # TODO: EXPERIMENT NAME
-        self.participant = "participant" # TODO: PP NAME
-        
+        self.description = "experiment"  # TODO: EXPERIMENT NAME
+        self.participant = "participant"  # TODO: PP NAME
+
         # eye tracker properties
         self.connected = False
         self.recording = False
-        self.eye_used = 0 # 0=left, 1=right, 2=binocular
+        self.eye_used = 0  # 0=left, 1=right, 2=binocular
         self.left_eye = 0
         self.right_eye = 1
         self.binocular = 2
-        self.errdist = 2 # degrees; maximal error for drift correction
+        self.errdist = 2  # degrees; maximal error for drift correction
         self.pxerrdist = deg2pix(self.screendist, self.errdist, self.pixpercm)
-        self.maxtries = 100 # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
-        self.prevsample = (-1,-1)
+        self.maxtries = 100  # number of samples obtained before giving up (for obtaining accuracy and tracker distance information, as well as starting or stopping recording)
+        self.prevsample = (-1, -1)
 
         # validation properties
-        self.nvalsamples = 1000 # samples for one validation point
-        
+        self.nvalsamples = 1000  # samples for one validation point
+
         # event detection properties
-        self.fixtresh = 1.5 # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
-        self.fixtimetresh = 100 # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
-        self.spdtresh = saccade_velocity_threshold # degrees per second; saccade velocity threshold
-        self.accthresh = saccade_acceleration_threshold # degrees per second**2; saccade acceleration threshold
-        self.blinkthresh = blink_threshold # milliseconds; blink detection threshold used in PyGaze method
+        self.fixtresh = 1.5  # degrees; maximal distance from fixation start (if gaze wanders beyond this, fixation has stopped)
+        self.fixtimetresh = 100  # milliseconds; amount of time gaze has to linger within self.fixtresh to be marked as a fixation
+        self.spdtresh = saccade_velocity_threshold  # degrees per second; saccade velocity threshold
+        self.accthresh = saccade_acceleration_threshold  # degrees per second**2; saccade acceleration threshold
+        self.blinkthresh = blink_threshold  # milliseconds; blink detection threshold used in PyGaze method
         self.eventdetection = eventdetection
         self.set_detection_type(self.eventdetection)
-        self.weightdist = 10 # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
-                
+        self.weightdist = 10  # weighted distance, used for determining whether a movement is due to measurement error (1 is ok, higher is more conservative and will result in only larger saccades to be detected)
+
         # initialize controller
         self.controller = TobiiController(display)
         self.controller.setDataFile("{}_TOBII_output.tsv".format(logfile))
@@ -174,21 +169,35 @@ class TobiiTracker(BaseEyeTracker):
 
         # initiation report
         self.controller.datafile.write("pygaze initiation report start\n")
-        self.controller.datafile.write("display resolution: {}x{}\n".format( \
-            self.dispsize[0], self.dispsize[1]))
-        self.controller.datafile.write("display size in cm: {}x{}\n".format( \
-            self.screensize[0], self.screensize[1]))
-        self.controller.datafile.write("fixation threshold: {} degrees\n".format( \
-            self.fixtresh))
-        self.controller.datafile.write("speed threshold: {} degrees/second\n".format( \
-            self.spdtresh))
-        self.controller.datafile.write("acceleration threshold: {} degrees/second**2\n".format( \
-            self.accthresh))
+        self.controller.datafile.write(
+            "display resolution: {}x{}\n".format( \
+                self.dispsize[0], self.dispsize[1]
+            )
+        )
+        self.controller.datafile.write(
+            "display size in cm: {}x{}\n".format( \
+                self.screensize[0], self.screensize[1]
+            )
+        )
+        self.controller.datafile.write(
+            "fixation threshold: {} degrees\n".format( \
+                self.fixtresh
+            )
+        )
+        self.controller.datafile.write(
+            "speed threshold: {} degrees/second\n".format( \
+                self.spdtresh
+            )
+        )
+        self.controller.datafile.write(
+            "acceleration threshold: {} degrees/second**2\n".format( \
+                self.accthresh
+            )
+        )
         self.controller.datafile.write("pygaze initiation report end\n")
 
-
     def calibrate(self, calibrate=True, validate=True):
-        
+
         """Calibrates the eye tracking system
         
         arguments
@@ -206,55 +215,53 @@ class TobiiTracker(BaseEyeTracker):
                     log file and some properties are updated (i.e. the
                     thresholds for detection algorithms)
         """
-        
+
         # calibration and validation points
-        lb = int(0.1 * self.dispsize[0]) # left bound
-        xc = int(0.5 * self.dispsize[0]) # horizontal center
-        rb = int(0.9 * self.dispsize[0]) # right bound
-        ub = int(0.1 * self.dispsize[1]) # upper bound
-        yc = int(0.5 * self.dispsize[1]) # vertical center
-        bb = int(0.9 * self.dispsize[1]) # bottom bound
+        lb = int(0.1 * self.dispsize[0])  # left bound
+        xc = int(0.5 * self.dispsize[0])  # horizontal center
+        rb = int(0.9 * self.dispsize[0])  # right bound
+        ub = int(0.1 * self.dispsize[1])  # upper bound
+        yc = int(0.5 * self.dispsize[1])  # vertical center
+        bb = int(0.9 * self.dispsize[1])  # bottom bound
 
-        calpos = [(lb,ub), (rb,ub) , (xc,yc), (lb,bb), (rb,bb)]
-
+        calpos = [(lb, ub), (rb, ub), (xc, yc), (lb, bb), (rb, bb)]
 
         # # # # #
         # calibration
-        
-        while True:
-            
-            ret = self.controller.doCalibration(calpos)
-            
-            if ret == 'accept':
-                calibrated =  True
-                break
-                
-            elif ret == 'abort':
-                calibrated =  False
-                return calibrated
 
+        while True:
+
+            ret = self.controller.doCalibration(calpos)
+
+            if ret == 'accept':
+                calibrated = True
+                break
+
+            elif ret == 'abort':
+                calibrated = False
+                return calibrated
 
         # # # # #
         # validation
-        
+
         # show menu
         self.screen.draw_text(text="Press space to start validation")
         self.disp.fill(self.screen)
         self.disp.show()
         self.screen.clear()
-        
+
         # wait for spacepress
-        self.kb.get_key(keylist=['space'],timeout=None)
-        
+        self.kb.get_key(keylist=['space'], timeout=None)
+
         # start recording
         self.start_recording()
-        
+
         # arrays for data storage
         lxacc = numpy.zeros(len(calpos))
         lyacc = numpy.zeros(len(calpos))
         rxacc = numpy.zeros(len(calpos))
         ryacc = numpy.zeros(len(calpos))
-        
+
         # loop through all calibration positions
         for pos in calpos:
             # show validation point
@@ -270,10 +277,10 @@ class TobiiTracker(BaseEyeTracker):
             rxsamples = numpy.zeros(self.nvalsamples)
             rysamples = numpy.zeros(self.nvalsamples)
             prevsample = ()
-            for i in range(0,self.nvalsamples):
+            for i in range(0, self.nvalsamples):
                 # add new sample to list
                 newsample = self.controller.getCurrentGazePosition()
-                if newsample != prevsample and newsample != (None,None,None,None):
+                if newsample != prevsample and newsample != (None, None, None, None):
                     lx, ly, rx, ry = newsample
                     lxsamples[i] = lx
                     lysamples[i] = ly
@@ -281,10 +288,10 @@ class TobiiTracker(BaseEyeTracker):
                     rysamples[i] = ry
                     prevsample = newsample[:]
             # calculate mean deviation
-            lxdev = numpy.mean(abs(lxsamples-pos[0]))
-            lydev = numpy.mean(abs(lysamples-pos[1]))
-            rxdev = numpy.mean(abs(rxsamples-pos[0]))
-            rydev = numpy.mean(abs(rysamples-pos[1]))
+            lxdev = numpy.mean(abs(lxsamples - pos[0]))
+            lydev = numpy.mean(abs(lysamples - pos[1]))
+            rxdev = numpy.mean(abs(rxsamples - pos[0]))
+            rydev = numpy.mean(abs(rysamples - pos[1]))
             i = calpos.index(pos)
             lxacc[i] = lxdev
             lyacc[i] = lydev
@@ -295,13 +302,15 @@ class TobiiTracker(BaseEyeTracker):
 
         # calculate mean accuracy
         self.pxaccuracy = [(numpy.mean(lxacc), numpy.mean(lyacc)), (numpy.mean(rxacc), numpy.mean(ryacc))]
-        
 
         # # # # #
         # RMS noise
-        
+
         # present instructions
-        self.screen.draw_text(text="Noise calibration: please look at the dot\n\n(press space to start)", pos=(self.dispsize[0]/2, int(self.dispsize[1]*0.2)), center=True)
+        self.screen.draw_text(
+            text="Noise calibration: please look at the dot\n\n(press space to start)",
+            pos=(self.dispsize[0] / 2, int(self.dispsize[1] * 0.2)), center=True
+            )
         self.screen.draw_fixation(fixtype='dot')
         self.disp.fill(self.screen)
         self.disp.show()
@@ -315,42 +324,42 @@ class TobiiTracker(BaseEyeTracker):
         self.disp.fill(self.screen)
         self.disp.show()
         self.screen.clear()
-        
+
         # wait for a bit, to allow participant to fixate
         clock.pause(500)
 
         # get samples
-        sl = [self.sample()] # samplelist, prefilled with 1 sample to prevent sl[-1] from producing an error; first sample will be ignored for RMS calculation
-        t0 = clock.get_time() # starting time
+        sl = [
+            self.sample()]  # samplelist, prefilled with 1 sample to prevent sl[-1] from producing an error; first sample will be ignored for RMS calculation
+        t0 = clock.get_time()  # starting time
         while clock.get_time() - t0 < 1000:
-            s = self.sample() # sample
-            if s != sl[-1] and s != (-1,-1) and s != (0,0):
+            s = self.sample()  # sample
+            if s != sl[-1] and s != (-1, -1) and s != (0, 0):
                 sl.append(s)
 
         # calculate RMS noise
         Xvar = []
         Yvar = []
-        for i in range(2,len(sl)):
-            Xvar.append((sl[i][0]-sl[i-1][0])**2)
-            Yvar.append((sl[i][1]-sl[i-1][1])**2)
-        XRMS = (sum(Xvar) / len(Xvar))**0.5
-        YRMS = (sum(Yvar) / len(Yvar))**0.5
+        for i in range(2, len(sl)):
+            Xvar.append((sl[i][0] - sl[i - 1][0]) ** 2)
+            Yvar.append((sl[i][1] - sl[i - 1][1]) ** 2)
+        XRMS = (sum(Xvar) / len(Xvar)) ** 0.5
+        YRMS = (sum(Yvar) / len(Yvar)) ** 0.5
         self.pxdsttresh = (XRMS, YRMS)
-        
-        
+
         # # # # #
         # sample rate
-        
+
         # calculate intersample times
         t0 = self.controller.gazeData[0].Timestamp
-        ist = numpy.zeros(len(self.controller.gazeData)-1)
-        for i in range(0,len(self.controller.gazeData)-1):
-            ist[i] = (self.controller.gazeData[i+1].Timestamp - self.controller.gazeData[i].Timestamp) / 1000.0
-        
+        ist = numpy.zeros(len(self.controller.gazeData) - 1)
+        for i in range(0, len(self.controller.gazeData) - 1):
+            ist[i] = (self.controller.gazeData[i + 1].Timestamp - self.controller.gazeData[i].Timestamp) / 1000.0
+
         # mean intersample time
         self.sampletime = numpy.mean(ist)
         self.samplerate = int(1000.0 / self.sampletime)
-        
+
         # stop recording WITHOUT saving gaze data
         self.controller.eyetracker.StopTracking()
         self.controller.eyetracker.events.OnGazeDataReceived -= self.controller.on_gazedata
@@ -358,41 +367,65 @@ class TobiiTracker(BaseEyeTracker):
         self.controller.eventData = []
         self.recording = False
 
-
         # # # # #
         # calibration report
 
         # recalculate thresholds (degrees to pixels)
         self.pxfixtresh = deg2pix(self.screendist, self.fixtresh, self.pixpercm)
-        self.pxspdtresh = deg2pix(self.screendist, self.spdtresh/1000.0, self.pixpercm) # in pixels per millisecons
-        self.pxacctresh = deg2pix(self.screendist, self.accthresh/1000.0, self.pixpercm) # in pixels per millisecond**2
-        
+        self.pxspdtresh = deg2pix(self.screendist, self.spdtresh / 1000.0, self.pixpercm)  # in pixels per millisecons
+        self.pxacctresh = deg2pix(
+            self.screendist, self.accthresh / 1000.0, self.pixpercm
+            )  # in pixels per millisecond**2
+
         # write report to log
         self.controller.datafile.write("pygaze calibration report start\n")
-        self.controller.datafile.write("samplerate: {} Hz\n".format( \
-            self.samplerate))
-        self.controller.datafile.write("sampletime: {} ms\n".format( \
-            self.sampletime))
-        self.controller.datafile.write("accuracy (in pixels): LX={}, LY={}, RX={}, RY={}\n".format( \
-            self.pxaccuracy[0][0], self.pxaccuracy[0][1], \
-            self.pxaccuracy[1][0], self.pxaccuracy[1][1]))
-        self.controller.datafile.write("precision (RMS noise in pixels): X={}, Y={}\n".format( \
-            self.pxdsttresh[0], self.pxdsttresh[1]))
-        self.controller.datafile.write("distance between participant and display: {} cm\n".format( \
-            self.screendist))
-        self.controller.datafile.write("fixation threshold: {} pixels\n".format( \
-            self.pxfixtresh))
-        self.controller.datafile.write("speed threshold: {} pixels/ms\n".format( \
-            self.pxspdtresh))
-        self.controller.datafile.write("accuracy threshold: {} pixels/ms**2\n".format( \
-            self.pxacctresh))
+        self.controller.datafile.write(
+            "samplerate: {} Hz\n".format( \
+                self.samplerate
+            )
+        )
+        self.controller.datafile.write(
+            "sampletime: {} ms\n".format( \
+                self.sampletime
+            )
+        )
+        self.controller.datafile.write(
+            "accuracy (in pixels): LX={}, LY={}, RX={}, RY={}\n".format( \
+                self.pxaccuracy[0][0], self.pxaccuracy[0][1], \
+                self.pxaccuracy[1][0], self.pxaccuracy[1][1]
+            )
+        )
+        self.controller.datafile.write(
+            "precision (RMS noise in pixels): X={}, Y={}\n".format( \
+                self.pxdsttresh[0], self.pxdsttresh[1]
+            )
+        )
+        self.controller.datafile.write(
+            "distance between participant and display: {} cm\n".format( \
+                self.screendist
+            )
+        )
+        self.controller.datafile.write(
+            "fixation threshold: {} pixels\n".format( \
+                self.pxfixtresh
+            )
+        )
+        self.controller.datafile.write(
+            "speed threshold: {} pixels/ms\n".format( \
+                self.pxspdtresh
+            )
+        )
+        self.controller.datafile.write(
+            "accuracy threshold: {} pixels/ms**2\n".format( \
+                self.pxacctresh
+            )
+        )
         self.controller.datafile.write("pygaze calibration report end\n")
 
         return True
 
-
     def close(self):
-        
+
         """Neatly close connection to tracker
         
         arguments
@@ -408,14 +441,13 @@ class TobiiTracker(BaseEyeTracker):
 
         # save data
         self.controller.closeDataFile()
-        
+
         # close connection
         self.controller.destroy()
         self.connected = False
-    
-    
+
     def connected(self):
-        
+
         """Checks if the tracker is connected
         
         arguments
@@ -424,10 +456,9 @@ class TobiiTracker(BaseEyeTracker):
         returns
         connected    --    True if connection is established, False if not
         """
-        
+
         return self.connected
-    
-    
+
     def drift_correction(self, pos=None, fix_triggered=False):
 
         """Performs a drift check
@@ -471,11 +502,11 @@ class TobiiTracker(BaseEyeTracker):
                     print("libtobii.TobiiTracker.drift_correction: 'q' or 'escape' pressed")
                     return self.calibrate(calibrate=True, validate=True)
                 gazepos = self.sample()
-                if ((gazepos[0]-pos[0])**2  + (gazepos[1]-pos[1])**2)**0.5 < self.pxerrdist:
+                if ((gazepos[0] - pos[0]) ** 2 + (gazepos[1] - pos[1]) ** 2) ** 0.5 < self.pxerrdist:
                     result = True
                 else:
                     self.errorbeep.play()
-        
+
         # stop recording WITHOUT saving gaze data
         if stoprec:
             self.controller.eyetracker.StopTracking()
@@ -485,8 +516,7 @@ class TobiiTracker(BaseEyeTracker):
             self.recording = False
 
         return result
-    
-    
+
     def fix_triggered_drift_correction(self, pos=None, min_samples=10, max_dev=60, reset_threshold=30):
 
         """Performs a fixation triggered drift correction by collecting
@@ -523,7 +553,7 @@ class TobiiTracker(BaseEyeTracker):
         while len(lx) < min_samples:
 
             # pressing escape enters the calibration screen
-            if self.kb.get_key()[0] in ['escape','q']:
+            if self.kb.get_key()[0] in ['escape', 'q']:
                 print("libtobii.TobiiTracker.fix_triggered_drift_correction: 'q' or 'escape' pressed")
                 return self.calibrate(calibrate=True, validate=True)
 
@@ -546,7 +576,7 @@ class TobiiTracker(BaseEyeTracker):
 
                 avg_x = sum(lx) / len(lx)
                 avg_y = sum(ly) / len(ly)
-                d = ((avg_x - pos[0]) ** 2 + (avg_y - pos[1]) ** 2)**0.5
+                d = ((avg_x - pos[0]) ** 2 + (avg_y - pos[1]) ** 2) ** 0.5
 
                 if d < max_dev:
                     return True
@@ -554,7 +584,6 @@ class TobiiTracker(BaseEyeTracker):
                     lx = []
                     ly = []
 
-    
     def get_eyetracker_clock_async(self):
 
         """Retrieve difference between tracker time and experiment time
@@ -568,10 +597,11 @@ class TobiiTracker(BaseEyeTracker):
         returns
         timediff    --    tracker time minus experiment time
         """
-        
-        return self.controller.syncmanager.convert_from_local_to_remote(self.controller.clock.get_time()) - clock.get_time()
-    
-    
+
+        return self.controller.syncmanager.convert_from_local_to_remote(
+            self.controller.clock.get_time()
+            ) - clock.get_time()
+
     def log(self, msg):
 
         """Writes a message to the log file
@@ -583,12 +613,11 @@ class TobiiTracker(BaseEyeTracker):
         Nothing    -- uses native log function of iViewX to include a line
                    in the log file
         """
-        
+
         self.controller.recordEvent(msg)
-    
-    
+
     def log_var(self, var, val):
-        
+
         """Writes a variable to the log file
         
         arguments
@@ -602,22 +631,19 @@ class TobiiTracker(BaseEyeTracker):
 
         msg = "var {} {}".format(var, val)
         self.log(msg)
-    
-    
+
     def prepare_backdrop(self):
 
         """Not supported for TobiiTracker (yet)"""
-        
+
         print("function not supported yet")
-    
 
     def prepare_drift_correction(self, pos):
 
         """Not supported for TobiiTracker (yet)"""
-        
+
         print("function not supported yet")
-    
-    
+
     def pupil_size(self):
 
         """Returns newest available pupil size
@@ -641,8 +667,7 @@ class TobiiTracker(BaseEyeTracker):
             return pupilsize[0]
         else:
             return pupilsize[1]
-    
-    
+
     def sample(self):
 
         """Returns newest available gaze position
@@ -656,31 +681,28 @@ class TobiiTracker(BaseEyeTracker):
 
         # get new sample        
         gazepos = self.controller.getCurrentGazePosition()
-        
+
         # if sample is invalid, return missing value
         if None in gazepos:
-            return (-1,-1)
-        
+            return (-1, -1)
+
         # return gaze x,y
         if self.eye_used == self.left_eye or self.eye_used == self.binocular:
             return gazepos[0], gazepos[1]
         else:
             return gazepos[2], gazepos[3]
-    
-    
+
     def send_command(self, cmd):
 
         """Not supported for TobiiTracker (yet)"""
-        
+
         print("function not supported yet")
-    
-    
+
     def set_backdrop(self):
 
         """Not supported for TobiiTracker (yet)"""
-        
-        print("function not supported yet")
 
+        print("function not supported yet")
 
     def set_eye_used(self):
 
@@ -700,8 +722,7 @@ class TobiiTracker(BaseEyeTracker):
 
         else:
             self.log_var("eye_used", "left")
-    
-    
+
     def start_recording(self):
 
         """Starts recording eye position
@@ -713,7 +734,7 @@ class TobiiTracker(BaseEyeTracker):
         None        -- sets self.recording to True when recording is
                    successfully started
         """
-        
+
         if not self.recording:
             try:
                 self.controller.startTracking()
@@ -724,14 +745,12 @@ class TobiiTracker(BaseEyeTracker):
 
         else:
             print("WARNING! libtobii.TobiiTracker.start_recording: already recording!")
-    
-    
+
     def status_msg(self, msg):
 
         """Not supported for TobiiTracker (yet)"""
-        
+
         print("function not supported yet")
-    
 
     def stop_recording(self):
 
@@ -744,7 +763,7 @@ class TobiiTracker(BaseEyeTracker):
         Nothing    -- sets self.recording to False when recording is
                    successfully started
         """
-        
+
         if self.recording:
             try:
                 self.controller.stopTracking()
@@ -752,13 +771,12 @@ class TobiiTracker(BaseEyeTracker):
             except:
                 self.recording = True
                 raise Exception("Error in libtobii.TobiiTracker.stop_recording: failed to stop recording")
-        
+
         else:
             print("WARNING! libtobii.TobiiTracker.stop_recording: recording has not started yet!")
-    
-    
+
     def set_detection_type(self, eventdetection):
-        
+
         """Set the event detection type to either PyGaze algorithms, or
         native algorithms as provided by the manufacturer (only if
         available: detection type will default to PyGaze if no native
@@ -777,18 +795,19 @@ class TobiiTracker(BaseEyeTracker):
                         was passed, but native detection was not
                         available for saccade detection
         """
-        
+
         # warn if detection is set to native
         if eventdetection == 'native':
-            print("WARNING! 'native' event detection has been selected, \
-                but Tobii does not provide detection algorithms; PyGaze \
-                algorithm will be used instead")
-        
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but Tobii does not provide detection algorithms; PyGaze \
+                                algorithm will be used instead"
+                )
+
         # set event detection methods to PyGaze
         self.eventdetection = 'pygaze'
-        
-        return (self.eventdetection,self.eventdetection,self.eventdetection)
 
+        return (self.eventdetection, self.eventdetection, self.eventdetection)
 
     def wait_for_event(self, event):
 
@@ -822,10 +841,11 @@ class TobiiTracker(BaseEyeTracker):
         elif event == 4:
             outcome = self.wait_for_blink_end()
         else:
-            raise Exception("Error in libtobii.TobiiTracker.wait_for_event: eventcode {} is not supported".format(event))
+            raise Exception(
+                "Error in libtobii.TobiiTracker.wait_for_event: eventcode {} is not supported".format(event)
+                )
 
         return outcome
-
 
     def wait_for_blink_end(self):
 
@@ -839,24 +859,24 @@ class TobiiTracker(BaseEyeTracker):
                         measured from experiment begin time
         """
 
-        
         # # # # #
         # Tobii method
 
         if self.eventdetection == 'native':
-            
             # print warning, since Tobii does not have a blink detection
             # built into their API
-            
-            print("WARNING! 'native' event detection has been selected, \
-                but Tobii does not offer blink detection; PyGaze algorithm \
-                will be used")
+
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but Tobii does not offer blink detection; PyGaze algorithm \
+                                will be used"
+                )
 
         # # # # #
         # PyGaze method
-        
+
         blinking = True
-        
+
         # loop while there is a blink
         while blinking:
             # get newest sample
@@ -865,10 +885,9 @@ class TobiiTracker(BaseEyeTracker):
             if self.is_valid_sample(gazepos):
                 # if it is a valid sample, blinking has stopped
                 blinking = False
-        
+
         # return timestamp of blink end
-        return clock.get_time()        
-        
+        return clock.get_time()
 
     def wait_for_blink_start(self):
 
@@ -881,24 +900,25 @@ class TobiiTracker(BaseEyeTracker):
         timestamp        --    blink starting time in milliseconds, as
                         measured from experiment begin time
         """
-        
+
         # # # # #
         # Tobii method
 
         if self.eventdetection == 'native':
-            
             # print warning, since Tobii does not have a blink detection
             # built into their API
-            
-            print("WARNING! 'native' event detection has been selected, \
-                but Tobii does not offer blink detection; PyGaze algorithm \
-                will be used")
+
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but Tobii does not offer blink detection; PyGaze algorithm \
+                                will be used"
+                )
 
         # # # # #
         # PyGaze method
-        
+
         blinking = False
-        
+
         # loop until there is a blink
         while not blinking:
             # get newest sample
@@ -910,10 +930,9 @@ class TobiiTracker(BaseEyeTracker):
                 # loop until a blink is determined, or a valid sample occurs
                 while not self.is_valid_sample(self.sample()):
                     # check if time has surpassed BLINKTHRESH
-                    if clock.get_time()-t0 >= self.blinkthresh:
+                    if clock.get_time() - t0 >= self.blinkthresh:
                         # return timestamp of blink start
                         return t0
-        
 
     def wait_for_fixation_end(self):
 
@@ -937,36 +956,36 @@ class TobiiTracker(BaseEyeTracker):
         # Tobii method
 
         if self.eventdetection == 'native':
-            
             # print warning, since Tobii does not have a fixation detection
             # built into their API
-            
-            print("WARNING! 'native' event detection has been selected, \
-                but Tobii does not offer fixation detection; PyGaze algorithm \
-                will be used")
+
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but Tobii does not offer fixation detection; PyGaze algorithm \
+                                will be used"
+                )
 
         # # # # #
         # PyGaze method
-        
+
         # function assumes that a 'fixation' has ended when a deviation of more than fixtresh
         # from the initial 'fixation' position has been detected
-        
+
         # get starting time and position
         stime, spos = self.wait_for_fixation_start()
-        
+
         # loop until fixation has ended
         while True:
             # get new sample
-            npos = self.sample() # get newest sample
+            npos = self.sample()  # get newest sample
             # check if sample is valid
             if self.is_valid_sample(npos):
                 # check if sample deviates to much from starting position
-                if (npos[0]-spos[0])**2 + (npos[1]-spos[1])**2 > self.pxfixtresh**2: # Pythagoras
+                if (npos[0] - spos[0]) ** 2 + (npos[1] - spos[1]) ** 2 > self.pxfixtresh ** 2:  # Pythagoras
                     # break loop if deviation is too high
                     break
 
         return clock.get_time(), spos
-
 
     def wait_for_fixation_start(self):
 
@@ -986,31 +1005,31 @@ class TobiiTracker(BaseEyeTracker):
                        tuple of the position from which the fixation
                        was initiated
         """
-        
+
         # # # # #
         # Tobii method
 
         if self.eventdetection == 'native':
-            
             # print warning, since Tobii does not have a fixation start
             # detection built into their API (only ending)
-            
-            print("WARNING! 'native' event detection has been selected, \
-                but Tobii does not offer fixation detection; PyGaze \
-                algorithm will be used")
-            
-            
+
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but Tobii does not offer fixation detection; PyGaze \
+                                algorithm will be used"
+                )
+
         # # # # #
         # PyGaze method
-        
+
         # function assumes a 'fixation' has started when gaze position
         # remains reasonably stable for self.fixtimetresh
-        
+
         # get starting position
         spos = self.sample()
         while not self.is_valid_sample(spos):
             spos = self.sample()
-        
+
         # get starting time
         t0 = clock.get_time()
 
@@ -1022,7 +1041,7 @@ class TobiiTracker(BaseEyeTracker):
             # check if sample is valid
             if self.is_valid_sample(npos):
                 # check if new sample is too far from starting position
-                if (npos[0]-spos[0])**2 + (npos[1]-spos[1])**2 > self.pxfixtresh**2: # Pythagoras
+                if (npos[0] - spos[0]) ** 2 + (npos[1] - spos[1]) ** 2 > self.pxfixtresh ** 2:  # Pythagoras
                     # if not, reset starting position and time
                     spos = copy.copy(npos)
                     t0 = clock.get_time()
@@ -1034,7 +1053,6 @@ class TobiiTracker(BaseEyeTracker):
                     if t1 - t0 >= self.fixtimetresh:
                         # return time and starting position
                         return t0, spos
-
 
     def wait_for_saccade_end(self):
 
@@ -1055,17 +1073,18 @@ class TobiiTracker(BaseEyeTracker):
         # Tobii method
 
         if self.eventdetection == 'native':
-            
             # print warning, since Tobii does not have a blink detection
             # built into their API
-            
-            print("WARNING! 'native' event detection has been selected, \
-                but Tobii does not offer saccade detection; PyGaze \
-                algorithm will be used")
+
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but Tobii does not offer saccade detection; PyGaze \
+                                algorithm will be used"
+                )
 
         # # # # #
         # PyGaze method
-        
+
         # get starting position (no blinks)
         t0, spos = self.wait_for_saccade_start()
         # get valid sample
@@ -1074,8 +1093,9 @@ class TobiiTracker(BaseEyeTracker):
             prevpos = self.sample()
         # get starting time, intersample distance, and velocity
         t1 = clock.get_time()
-        s = ((prevpos[0]-spos[0])**2 + (prevpos[1]-spos[1])**2)**0.5 # = intersample distance = speed in px/sample
-        v0 = s / (t1-t0)
+        s = ((prevpos[0] - spos[0]) ** 2 + (
+                    prevpos[1] - spos[1]) ** 2) ** 0.5  # = intersample distance = speed in px/sample
+        v0 = s / (t1 - t0)
 
         # run until velocity and acceleration go below threshold
         saccadic = True
@@ -1085,13 +1105,14 @@ class TobiiTracker(BaseEyeTracker):
             t1 = clock.get_time()
             if self.is_valid_sample(newpos) and newpos != prevpos:
                 # calculate distance
-                s = ((newpos[0]-prevpos[0])**2 + (newpos[1]-prevpos[1])**2)**0.5 # = speed in pixels/sample
+                s = ((newpos[0] - prevpos[0]) ** 2 + (newpos[1] - prevpos[1]) ** 2) ** 0.5  # = speed in pixels/sample
                 # calculate velocity
-                v1 = s / (t1-t0)
+                v1 = s / (t1 - t0)
                 # calculate acceleration
-                a = (v1-v0) / (t1-t0) # acceleration in pixels/sample**2 (actually is v1-v0 / t1-t0; but t1-t0 = 1 sample)
+                a = (v1 - v0) / (
+                            t1 - t0)  # acceleration in pixels/sample**2 (actually is v1-v0 / t1-t0; but t1-t0 = 1 sample)
                 # check if velocity and acceleration are below threshold
-                if v1 < self.pxspdtresh and (a > -1*self.pxacctresh and a < 0):
+                if v1 < self.pxspdtresh and (a > -1 * self.pxacctresh and a < 0):
                     saccadic = False
                     epos = newpos[:]
                     etime = clock.get_time()
@@ -1102,7 +1123,6 @@ class TobiiTracker(BaseEyeTracker):
             prevpos = newpos[:]
 
         return etime, spos, epos
-
 
     def wait_for_saccade_start(self):
 
@@ -1122,17 +1142,18 @@ class TobiiTracker(BaseEyeTracker):
         # Tobii method
 
         if self.eventdetection == 'native':
-            
             # print warning, since Tobii does not have a blink detection
             # built into their API
-            
-            print("WARNING! 'native' event detection has been selected, \
-                but Tobii does not offer saccade detection; PyGaze \
-                algorithm will be used")
+
+            print(
+                "WARNING! 'native' event detection has been selected, \
+                                but Tobii does not offer saccade detection; PyGaze \
+                                algorithm will be used"
+                )
 
         # # # # #
         # PyGaze method
-        
+
         # get starting position (no blinks)
         newpos = self.sample()
         while not self.is_valid_sample(newpos):
@@ -1151,14 +1172,16 @@ class TobiiTracker(BaseEyeTracker):
             t1 = clock.get_time()
             if self.is_valid_sample(newpos) and newpos != prevpos:
                 # check if distance is larger than precision error
-                sx = newpos[0]-prevpos[0]; sy = newpos[1]-prevpos[1]
-                if (sx/self.pxdsttresh[0])**2 + (sy/self.pxdsttresh[1])**2 > self.weightdist: # weigthed distance: (sx/tx)**2 + (sy/ty)**2 > 1 means movement larger than RMS noise
+                sx = newpos[0] - prevpos[0];
+                sy = newpos[1] - prevpos[1]
+                if (sx / self.pxdsttresh[0]) ** 2 + (sy / self.pxdsttresh[
+                    1]) ** 2 > self.weightdist:  # weigthed distance: (sx/tx)**2 + (sy/ty)**2 > 1 means movement larger than RMS noise
                     # calculate distance
-                    s = ((sx)**2 + (sy)**2)**0.5 # intersampledistance = speed in pixels/ms
+                    s = ((sx) ** 2 + (sy) ** 2) ** 0.5  # intersampledistance = speed in pixels/ms
                     # calculate velocity
-                    v1 = s / (t1-t0)
+                    v1 = s / (t1 - t0)
                     # calculate acceleration
-                    a = (v1-v0) / (t1-t0) # acceleration in pixels/ms**2
+                    a = (v1 - v0) / (t1 - t0)  # acceleration in pixels/ms**2
                     # check if either velocity or acceleration are above threshold values
                     if v1 > self.pxspdtresh or a > self.pxacctresh:
                         saccadic = True
@@ -1172,10 +1195,9 @@ class TobiiTracker(BaseEyeTracker):
                 prevpos = newpos[:]
 
         return stime, spos
-    
-    
+
     def is_valid_sample(self, gazepos):
-        
+
         """Checks if the sample provided is valid, based on Tobii specific
         criteria (for internal use)
         
@@ -1187,15 +1209,15 @@ class TobiiTracker(BaseEyeTracker):
         valid            --    a Boolean: True on a valid sample, False on
                         an invalid sample
         """
-        
+
         # return False if a sample is invalid
-        if gazepos == (-1,-1):
+        if gazepos == (-1, -1):
             return False
         # sometimes, on Tobii devices, invalid samples are the negative
         # display resolution value
-        elif gazepos[0] == -1*self.dispsize[0] or gazepos[1] == -1*self.dispsize[1]:
+        elif gazepos[0] == -1 * self.dispsize[0] or gazepos[1] == -1 * self.dispsize[1]:
             return False
-        
+
         # in any other case, the sample is valid
         return True
 
@@ -1209,12 +1231,11 @@ class TobiiTracker(BaseEyeTracker):
 
 
 class TobiiController:
-    
     """Class to handle communication to Tobii eye trackers, as well as some
     display operations"""
-    
+
     def __init__(self, disp):
-        
+
         """Initializes TobiiController instance
         
         arguments
@@ -1223,29 +1244,32 @@ class TobiiController:
         keyword arguments
         None
         """
-        
+
         # visuals and interaction
         self.disp = disp
         self.screen = Screen()
         self.kb = Keyboard(keylist=None, timeout=None)
-        
+
         # eye tracking
         self.eyetracker = None
         self.eyetrackers = {}
         self.gazeData = []
         self.eventData = []
         self.datafile = None
-        
+
         # initialize communications
         tobii.eye_tracking_io.init()
         self.clock = tobii.eye_tracking_io.time.clock.Clock()
         self.mainloop_thread = tobii.eye_tracking_io.mainloop.MainloopThread()
-        self.browser = tobii.eye_tracking_io.browsing.EyetrackerBrowser(self.mainloop_thread, lambda t, n, i: self.on_eyetracker_browser_event(t, n, i))
+        self.browser = tobii.eye_tracking_io.browsing.EyetrackerBrowser(
+            self.mainloop_thread, lambda t, n, i: self.on_eyetracker_browser_event(
+                t, n, i
+                )
+            )
         self.mainloop_thread.start()
-        
-        
+
     def waitForFindEyeTracker(self):
-        
+
         """Keeps running until an eyetracker is found
         
         arguments
@@ -1258,13 +1282,12 @@ class TobiiController:
         None        --    only returns when an entry has been made to the
                     self.eyetrackers dict
         """
-        
-        while len(self.eyetrackers.keys())==0:
+
+        while len(self.eyetrackers.keys()) == 0:
             pass
-        
-        
+
     def on_eyetracker_browser_event(self, event_type, event_name, eyetracker_info):
-        
+
         """Adds a new or updates an existing tracker to self.eyetrackers,
         if one is available
         
@@ -1285,24 +1308,23 @@ class TobiiController:
         False            --    returns False after adding a new tracker to
                         self.eyetrackers or after deleting it
         """
-        
+
         # When a new eyetracker is found we add it to the treeview and to the 
         # internal list of eyetracker_info objects
         if event_type == tobii.eye_tracking_io.browsing.EyetrackerBrowser.FOUND:
             self.eyetrackers[eyetracker_info.product_id] = eyetracker_info
             return False
-        
+
         # Otherwise we remove the tracker from the treeview and the eyetracker_info list...
         del self.eyetrackers[eyetracker_info.product_id]
-        
+
         # ...and add it again if it is an update message
         if event_type == tobii.eye_tracking_io.browsing.EyetrackerBrowser.UPDATED:
             self.eyetrackers[eyetracker_info.product_id] = eyetracker_info
         return False
 
-
     def destroy(self):
-        
+
         """Removes eye tracker and stops all operations
         
         arguments
@@ -1316,19 +1338,18 @@ class TobiiController:
                     stops browser and the 
                     tobii.eye_tracking_io.mainloop.MainloopThread
         """
-        
+
         self.eyetracker = None
         self.browser.stop()
         self.browser = None
         self.mainloop_thread.stop()
-        
-        
+
     ############################################################################
     # activation methods
     ############################################################################
-    
-    def activate(self,eyetracker):
-        
+
+    def activate(self, eyetracker):
+
         """Connects to specified eye tracker
         
         arguments
@@ -1342,20 +1363,23 @@ class TobiiController:
         None        --    calls TobiiController.on_eyetracker_created, then
                     sets self.syncmanager
         """
-        
+
         eyetracker_info = self.eyetrackers[eyetracker]
         print("Connecting to:", eyetracker_info)
-        tobii.eye_tracking_io.eyetracker.Eyetracker.create_async(self.mainloop_thread,
-                                                     eyetracker_info,
-                                                     lambda error, eyetracker: self.on_eyetracker_created(error, eyetracker, eyetracker_info))
-        
-        while self.eyetracker==None:
+        tobii.eye_tracking_io.eyetracker.Eyetracker.create_async(
+            self.mainloop_thread,
+            eyetracker_info,
+            lambda error, eyetracker: self.on_eyetracker_created(error, eyetracker, eyetracker_info)
+            )
+
+        while self.eyetracker == None:
             pass
-        self.syncmanager = tobii.eye_tracking_io.time.sync.SyncManager(self.clock,eyetracker_info,self.mainloop_thread)
-        
-        
+        self.syncmanager = tobii.eye_tracking_io.time.sync.SyncManager(
+            self.clock, eyetracker_info, self.mainloop_thread
+            )
+
     def on_eyetracker_created(self, error, eyetracker, eyetracker_info):
-        
+
         """Function is called by TobiiController.activate, to handle all
         operations after connecting to a tracker has been succesfull
         
@@ -1373,25 +1397,35 @@ class TobiiController:
         None or False    --    returns nothing and sets self.eyetracke on
                         connection success; returns False on failure
         """
-        
+
         if error:
-            print("WARNING! libtobii.TobiiController.on_eyetracker_created: Connection to {} failed because of an exception: {}".format( \
-                eyetracker_info, error))
+            print(
+                "WARNING! libtobii.TobiiController.on_eyetracker_created: Connection to {} failed because of an exception: {}".format( \
+                    eyetracker_info, error
+                )
+            )
             if error == 0x20000402:
-                print("WARNING! libtobii.TobiiController.on_eyetracker_created: The selected unit is too old, a unit that supports protocol version 1.0 is required.\n\n<b>Details:</b> <i>{}</i>".format(error))
+                print(
+                    "WARNING! libtobii.TobiiController.on_eyetracker_created: The selected unit is too old, a unit that supports protocol version 1.0 is required.\n\n<b>Details:</b> <i>{}</i>".format(
+                        error
+                        )
+                    )
             else:
-                print("WARNING! libtobii.TobiiController.on_eyetracker_created: Could not connect to {}".format(eyetracker_info))
+                print(
+                    "WARNING! libtobii.TobiiController.on_eyetracker_created: Could not connect to {}".format(
+                        eyetracker_info
+                        )
+                    )
             return False
-        
+
         self.eyetracker = eyetracker
-        
-        
+
     ############################################################################
     # calibration methods
     ############################################################################
-    
-    def doCalibration(self,calibrationPoints):
-        
+
+    def doCalibration(self, calibrationPoints):
+
         """Performs a calibration; displaying points and the calibration
         menu and keyboard input are handled by PyGaze routines, calibration
         is handled by Tobii routines
@@ -1414,31 +1448,33 @@ class TobiiController:
                             'retry'
                             'abort'
         """
-        
+
         # immediately return when no eyetracker is connected
         if self.eyetracker is None:
             return
-        
+
         # set some properties
         self.points = calibrationPoints
         self.point_index = -1
-        
+
         # visuals
-        img = Image.new('RGB',self.disp.dispsize)
+        img = Image.new('RGB', self.disp.dispsize)
         draw = ImageDraw.Draw(img)
-        
-        self.calin = {'colour':(0,0,0), 'pos':(int(self.disp.dispsize[0]/2),int(self.disp.dispsize[1]/2)), 'r':2}
-        self.calout = {'colour':(128,255,128), 'pos':(int(self.disp.dispsize[0]/2),int(self.disp.dispsize[1]/2)), 'r':64}
-        self.calresult = {'img':img}
-        self.calresultmsg = {'text':"",'pos':(int(self.disp.dispsize[0]/2),int(self.disp.dispsize[1]/4))}
-        
+
+        self.calin = {'colour': (0, 0, 0), 'pos': (int(self.disp.dispsize[0] / 2), int(self.disp.dispsize[1] / 2)),
+                      'r': 2}
+        self.calout = {'colour': (128, 255, 128),
+                       'pos': (int(self.disp.dispsize[0] / 2), int(self.disp.dispsize[1] / 2)), 'r': 64}
+        self.calresult = {'img': img}
+        self.calresultmsg = {'text': "", 'pos': (int(self.disp.dispsize[0] / 2), int(self.disp.dispsize[1] / 4))}
+
         # start calibration
         self.initcalibration_completed = False
         print("StartCalibration")
         self.eyetracker.StartCalibration(lambda error, r: self.on_calib_start(error, r))
         while not self.initcalibration_completed:
             pass
-        
+
         # draw central target
         self.screen.clear()
         self.screen.draw_circle(colour=self.calout['colour'], pos=self.calout['pos'], r=self.calout['r'], fill=False)
@@ -1446,46 +1482,50 @@ class TobiiController:
         self.disp.fill(self.screen)
         self.disp.show()
         # wait for start command
-        self.kb.get_key(keylist=['space'],timeout=None)
-        
+        self.kb.get_key(keylist=['space'], timeout=None)
+
         # run through all points
         for self.point_index in range(len(self.points)):
             # create tobii.eye_tracking_io.types 2D point
             px, py = self.points[self.point_index]
             p = Point2D()
-            p.x, p.y = float(px)/self.disp.dispsize[0], float(py)/self.disp.dispsize[1]
+            p.x, p.y = float(px) / self.disp.dispsize[0], float(py) / self.disp.dispsize[1]
             # recalculate to psycho coordinates
-            self.calin['pos'] = (int(px),int(py))
-            self.calout['pos'] = (int(px),int(py))
+            self.calin['pos'] = (int(px), int(py))
+            self.calout['pos'] = (int(px), int(py))
 
             # show target while decreasing its size for 1.5 seconds
             t0 = clock.get_time()
             currentTime = (clock.get_time() - t0) / 1000.0
             while currentTime < 1.5:
                 # reduce size of the outer ring, as time passes
-                self.calout['r'] = int(40*(1.5-(currentTime))+4)
+                self.calout['r'] = int(40 * (1.5 - (currentTime)) + 4)
                 # check for input (should this even be here?)
                 self.kb.get_key(keylist=None, timeout=1)
                 # draw calibration point
                 self.screen.clear()
-                self.screen.draw_circle(colour=self.calout['colour'], pos=self.calout['pos'], r=self.calout['r'], fill=False)
-                self.screen.draw_circle(colour=self.calin['colour'], pos=self.calin['pos'], r=self.calin['r'], fill=True)
+                self.screen.draw_circle(
+                    colour=self.calout['colour'], pos=self.calout['pos'], r=self.calout['r'], fill=False
+                    )
+                self.screen.draw_circle(
+                    colour=self.calin['colour'], pos=self.calin['pos'], r=self.calin['r'], fill=True
+                    )
                 self.disp.fill(self.screen)
                 self.disp.show()
                 # get time
                 currentTime = (clock.get_time() - t0) / 1000.0
-            
+
             # wait for point calibration to succeed
             self.add_point_completed = False
             self.eyetracker.AddCalibrationPoint(p, lambda error, r: self.on_add_completed(error, r))
             while not self.add_point_completed:
                 # TODO: why would you continuously show the same stuff and poll the keyboard without using the input?
-#                psychopy.event.getKeys()
-#                self.calout.draw()
-#                self.calin.draw()
-#                win.flip()
+                #                psychopy.event.getKeys()
+                #                self.calout.draw()
+                #                self.calin.draw()
+                #                win.flip()
                 pass
-         
+
         # wait for calibration to be complete
         self.computeCalibration_completed = False
         self.computeCalibration_succeeded = False
@@ -1496,66 +1536,76 @@ class TobiiController:
 
         # reset display (same seems to be done below: what's the use?)
         self.disp.show()
-        
+
         # get calibration info
         self.getcalibration_completed = False
         self.calib = self.eyetracker.GetCalibration(lambda error, calib: self.on_calib_response(error, calib))
         while not self.getcalibration_completed:
             pass
-        
+
         # fill screen with half-gray
-        self.screen.clear(colour=(128,128,128))
-        
+        self.screen.clear(colour=(128, 128, 128))
+
         # show calibration info
         if not self.computeCalibration_succeeded:
             # computeCalibration failed.
             self.calresultmsg['text'] = 'Not enough data was collected (Retry:r/Abort:ESC)'
-            
+
         elif self.calib == None:
             # no calibration data
             self.calresultmsg['text'] = 'No calibration data (Retry:r/Abort:ESC)'
-            
+
         else:
             # show the calibration accuracy
             points = {}
             for data in self.calib.plot_data:
-                points[data.true_point] = {'left':data.left, 'right':data.right}
-            
+                points[data.true_point] = {'left': data.left, 'right': data.right}
+
             if len(points) == 0:
                 self.calresultmsg['text'] = 'No ture calibration data (Retry:r/Abort:ESC)'
-            
+
             else:
-                for p,d in points.iteritems():
+                for p, d in points.iteritems():
                     if d['left'].status == 1:
-                        self.screen.draw_line(colour=(255,0,0), spos=(p.x*self.disp.dispsize[0],p.y*self.disp.dispsize[1]), epos=(d['left'].map_point.x*self.disp.dispsize[0],d['left'].map_point.y*self.disp.dispsize[1]), pw=3)
+                        self.screen.draw_line(
+                            colour=(255, 0, 0), spos=(p.x * self.disp.dispsize[0], p.y * self.disp.dispsize[1]), epos=(
+                            d['left'].map_point.x * self.disp.dispsize[0],
+                            d['left'].map_point.y * self.disp.dispsize[1]), pw=3
+                            )
                     if d['right'].status == 1:
-                        self.screen.draw_line(colour=(0,255,0), spos=(p.x*self.disp.dispsize[0],p.y*self.disp.dispsize[1]), epos=(d['right'].map_point.x*self.disp.dispsize[0],d['right'].map_point.y*self.disp.dispsize[1]), pw=3)
-                    self.screen.draw_ellipse(colour=(0,0,0), x=p.x*self.disp.dispsize[0]-10, y=p.y*self.disp.dispsize[1]-10, w=20, h=20, pw=3, fill=False)
+                        self.screen.draw_line(
+                            colour=(0, 255, 0), spos=(p.x * self.disp.dispsize[0], p.y * self.disp.dispsize[1]), epos=(
+                            d['right'].map_point.x * self.disp.dispsize[0],
+                            d['right'].map_point.y * self.disp.dispsize[1]), pw=3
+                            )
+                    self.screen.draw_ellipse(
+                        colour=(0, 0, 0), x=p.x * self.disp.dispsize[0] - 10, y=p.y * self.disp.dispsize[1] - 10, w=20,
+                        h=20, pw=3, fill=False
+                        )
 
                 self.calresultmsg['text'] = 'Accept calibration results (Accept:a/Retry:r/Abort:ESC)'
-        
+
         # original approach (Sogo): draw an image, then show that image via PscyhoPy
         self.calresult['img'] = img
-        
+
         # alternative approach (Dalmaijer): use PyGaze drawing operations on self.screen, then present self.screen
-        self.screen.draw_text(text=self.calresultmsg['text'],pos=self.calresultmsg['pos'])
+        self.screen.draw_text(text=self.calresultmsg['text'], pos=self.calresultmsg['pos'])
         self.disp.fill(self.screen)
         self.disp.show()
-        
+
         # wait for keyboard input
-        key, presstime = self.kb.get_key(keylist=['a','r','escape'], timeout=None)
+        key, presstime = self.kb.get_key(keylist=['a', 'r', 'escape'], timeout=None)
         if key == 'a':
             retval = 'accept'
         elif key == 'r':
             retval = 'retry'
         elif key == 'escape':
             retval = 'abort'
-        
+
         return retval
 
-    
     def on_calib_start(self, error, r):
-        
+
         """Checks if there was an error on calling
         self.eyetracker.StartCalibration; method is called by 
         TobiiController.doCalibration within a loop, until it sets
@@ -1575,15 +1625,18 @@ class TobiiController:
                     nothing if no error is passed, but does set
                     self.initcalibration_completed to True
         """
-        
+
         if error:
-            print("WARNING! libtobii.TobiiController.on_calib_start: Could not start calibration because of error. ({})".format(error))
+            print(
+                "WARNING! libtobii.TobiiController.on_calib_start: Could not start calibration because of error. ({})".format(
+                    error
+                    )
+                )
             return False
         self.initcalibration_completed = True
-    
-    
+
     def on_add_completed(self, error, r):
-        
+
         """Checks if there was an error on calling
         self.eyetracker.AddCalibrationPoint; method is called by 
         TobiiController.doCalibration within a loop, until it sets
@@ -1605,15 +1658,18 @@ class TobiiController:
         """
 
         if error:
-            print("WARNING! libtobii.TobiiController.on_add_complete: Add Calibration Point failed because of error. ({})".format(error))
+            print(
+                "WARNING! libtobii.TobiiController.on_add_complete: Add Calibration Point failed because of error. ({})".format(
+                    error
+                    )
+                )
             return False
-        
+
         self.add_point_completed = True
         return False
-    
-    
+
     def on_calib_compute(self, error, r):
-        
+
         """Checks if there was an error on calling
         self.eyetracker.ComputeCalibration; method is called by 
         TobiiController.doCalibration within a loop, until it sets
@@ -1636,22 +1692,33 @@ class TobiiController:
 
         if error == 0x20000502:
             self.computeCalibration_succeeded = False
-            print("WARNING! libtobii.TobiiController.on_calib_compute: Not enough data was collected during calibration procedure.")
-            raise Exception("Error in libtobii.TobiiController.on_calib.compute: CalibCompute failed because not enough data was collected:", error)
+            print(
+                "WARNING! libtobii.TobiiController.on_calib_compute: Not enough data was collected during calibration procedure."
+                )
+            raise Exception(
+                "Error in libtobii.TobiiController.on_calib.compute: CalibCompute failed because not enough data was collected:",
+                error
+                )
         elif error != 0:
             self.computeCalibration_succeeded = False
-            print("WARNING! libtobii.TobiiController.on_calib_compute: Could not compute calibration because of a server error.\n\n<b>Details:</b>\n<i>{}</i>".format(error))
-            raise Exception("Error in libtobii.TobiiController.on_calib.compute: CalibCompute failed because of a server error:", error)
+            print(
+                "WARNING! libtobii.TobiiController.on_calib_compute: Could not compute calibration because of a server error.\n\n<b>Details:</b>\n<i>{}</i>".format(
+                    error
+                    )
+                )
+            raise Exception(
+                "Error in libtobii.TobiiController.on_calib.compute: CalibCompute failed because of a server error:",
+                error
+                )
         else:
             print("")
             self.computeCalibration_succeeded = True
-        
+
         self.computeCalibration_completed = True
         return False
-    
-    
+
     def on_calib_response(self, error, calib):
-        
+
         """Checks if there was an error on calling
         self.eyetracker.GetCalibration; method is called by 
         TobiiController.doCalibration within a loop, until it sets
@@ -1670,21 +1737,20 @@ class TobiiController:
         False        --    returns False or throws an exception on an error;
                     sets self.getcalibration_completed to True
         """
-        
+
         if error:
             raise Exception("Error in libtobii.TobiiController.on_calib.response: On_calib_response: Error =", error)
             self.calib = None
             self.getcalibration_completed = True
             return False
-        
+
         print("On_calib_response: Success")
         self.calib = calib
         self.getcalibration_completed = True
-        return False    
-    
-    
+        return False
+
     def on_calib_done(self, status, msg):
-        
+
         """What does this do? Does it get called by some Tobii function?
         There is no reference to this anywhere in the rest of the script...
         
@@ -1701,17 +1767,16 @@ class TobiiController:
         False        --    returns False in any case and sets
                     self.calibration to None
         """
-        
+
         # When the calibration procedure is done we update the calibration plot
         if not status:
             print("WARNING! libtobii.TobiiController.on_calib_done: {}".format(msg))
-            
+
         self.calibration = None
         return False
-    
-    
+
     def startTracking(self):
-        
+
         """Starts the collection of gaze data
         
         arguments
@@ -1726,15 +1791,14 @@ class TobiiController:
                     for self.eyetracker.events.OnGazeDataReceived and
                     calls self.eyetracker.StartTracking()
         """
-        
+
         self.gazeData = []
         self.eventData = []
         self.eyetracker.events.OnGazeDataReceived += self.on_gazedata
         self.eyetracker.StartTracking()
 
-    
     def stopTracking(self):
-        
+
         """Starts the collection of gaze data
         
         arguments
@@ -1750,15 +1814,15 @@ class TobiiController:
                     calls TobiiTracker.flushData before resetting both
                     self.gazeData and self.eventData
         """
-        
+
         self.eyetracker.StopTracking()
         self.eyetracker.events.OnGazeDataReceived -= self.on_gazedata
         self.flushData()
         self.gazeData = []
         self.eventData = []
-    
-    def on_gazedata(self,error,gaze):
-        
+
+    def on_gazedata(self, error, gaze):
+
         """Adds new data point to the data collection (self.gazeData)
         
         arguments
@@ -1771,10 +1835,10 @@ class TobiiController:
         returns
         None        --    appends gaze to self.gazeData list
         """
-        
+
         self.gazeData.append(gaze)
 
-    def getPupilSize(self,gaze):
+    def getPupilSize(self, gaze):
 
         """Extracts the pupil size of both eyes from the Tobii gaze struct.
         
@@ -1807,12 +1871,12 @@ class TobiiController:
         """
 
         if len(self.gazeData) == 0:
-            return (None,None)
+            return (None, None)
         else:
             return self.getPupilSize(self.gazeData[-1])
-    
-    def getGazePosition(self,gaze):
-        
+
+    def getGazePosition(self, gaze):
+
         """Extracts the gaze positions of both eyes from the Tobii gaze
         struct and recalculates them to PyGaze coordinates
         
@@ -1826,14 +1890,14 @@ class TobiiController:
         gazepos    --    a (Lx,Ly,Rx,Ry) tuple for the gaze positions
                     of both eyes
         """
-        
-        return (int(gaze.LeftGazePoint2D.x*self.disp.dispsize[0]),
-                int(gaze.LeftGazePoint2D.y*self.disp.dispsize[1]),
-                int(gaze.RightGazePoint2D.x*self.disp.dispsize[0]),
-                int(gaze.RightGazePoint2D.y*self.disp.dispsize[1]))
-    
+
+        return (int(gaze.LeftGazePoint2D.x * self.disp.dispsize[0]),
+                int(gaze.LeftGazePoint2D.y * self.disp.dispsize[1]),
+                int(gaze.RightGazePoint2D.x * self.disp.dispsize[0]),
+                int(gaze.RightGazePoint2D.y * self.disp.dispsize[1]))
+
     def getCurrentGazePosition(self):
-        
+
         """Provides the newest gaze position sample
         
         arguments
@@ -1847,14 +1911,14 @@ class TobiiController:
                     of both eyes or (None,None,None,None) if no new
                     sample is available
         """
-        
-        if len(self.gazeData)==0:
-            return (None,None,None,None)
+
+        if len(self.gazeData) == 0:
+            return (None, None, None, None)
         else:
             return self.getGazePosition(self.gazeData[-1])
-    
-    def setDataFile(self,filename):
-        
+
+    def setDataFile(self, filename):
+
         """Opens a new textfile and writes date, time and screen resolution
         to it
         
@@ -1868,17 +1932,19 @@ class TobiiController:
         returns
         None        --    sets self.datafile to an open textfile
         """
-        
+
         print('set datafile ' + filename)
-        self.datafile = open(filename,'w')
-        self.datafile.write('Recording date:\t'+datetime.datetime.now().strftime('%Y/%m/%d')+'\n')
-        self.datafile.write('Recording time:\t'+datetime.datetime.now().strftime('%H:%M:%S')+'\n')
-        self.datafile.write('Recording resolution\t{} x {}\n\n'.format( \
-            self.disp.dispsize[0], self.disp.dispsize[1]))
-        
-        
+        self.datafile = open(filename, 'w')
+        self.datafile.write('Recording date:\t' + datetime.datetime.now().strftime('%Y/%m/%d') + '\n')
+        self.datafile.write('Recording time:\t' + datetime.datetime.now().strftime('%H:%M:%S') + '\n')
+        self.datafile.write(
+            'Recording resolution\t{} x {}\n\n'.format( \
+                self.disp.dispsize[0], self.disp.dispsize[1]
+            )
+        )
+
     def closeDataFile(self):
-        
+
         """Closes the datafile after writing the last data to it
         
         arguments
@@ -1891,17 +1957,16 @@ class TobiiController:
         None        --    calls TobiiController.flushData, then closes
                     self.datafile and sets self.datafile to None
         """
-        
+
         print('datafile closed')
         if self.datafile != None:
             self.flushData()
             self.datafile.close()
-        
+
         self.datafile = None
-    
-    
-    def recordEvent(self,event):
-        
+
+    def recordEvent(self, event):
+
         """Adds an event to the event data
         
         arguments
@@ -1914,13 +1979,12 @@ class TobiiController:
         None        --    appends a (timestamp,event) tuple to
                     self.eventData
         """
-        
+
         t = self.syncmanager.convert_from_local_to_remote(self.clock.get_time())
-        self.eventData.append((t,event))
-    
-    
+        self.eventData.append((t, event))
+
     def flushData(self):
-        
+
         """
         
         arguments
@@ -1932,71 +1996,84 @@ class TobiiController:
         returns
         None
         """
-        
+
         # return if there is no datafile or no data
         if self.datafile == None:
             print("WARNING! libtobii.TobiiController.flushData: data file is not set.")
             return
-        
-        if len(self.gazeData)==0:
+
+        if len(self.gazeData) == 0:
             print("WARNING! libtobii.TobiiController.flushData: no data to write to file.")
             return
-        
+
         # write header
-        self.datafile.write('\t'.join(['TimeStamp',
-                                       'GazePointXLeft',
-                                       'GazePointYLeft',
-                                       'ValidityLeft',
-                                       'GazePointXRight',
-                                       'GazePointYRight',
-                                       'ValidityRight',
-                                       'GazePointX',
-                                       'GazePointY',
-                                       'Event'])+'\n')
-        
+        self.datafile.write(
+            '\t'.join(
+                ['TimeStamp',
+                 'GazePointXLeft',
+                 'GazePointYLeft',
+                 'ValidityLeft',
+                 'GazePointXRight',
+                 'GazePointYRight',
+                 'ValidityRight',
+                 'GazePointX',
+                 'GazePointY',
+                 'Event']
+                ) + '\n'
+            )
+
         # time of the first event
         timeStampStart = self.gazeData[0].Timestamp
-        
+
         # loop through all data points
         for g in self.gazeData:
-            
+
             # write timestamp and gaze position for both eyes to the datafile
-            self.datafile.write('{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
-                round((g.Timestamp-timeStampStart)/1000.0, ndigits=1),
-                round(g.LeftGazePoint2D.x*self.disp.dispsize[0] if g.LeftValidity!=4 else -1.0, ndigits=4),
-                round(g.LeftGazePoint2D.y*self.disp.dispsize[1] if g.LeftValidity!=4 else -1.0, ndigits=4),
-                g.LeftValidity,
-                round(g.RightGazePoint2D.x*self.disp.dispsize[0] if g.RightValidity!=4 else -1.0, ndigits=4),
-                round(g.RightGazePoint2D.y*self.disp.dispsize[1] if g.RightValidity!=4 else -1.0, ndigits=4),
-                g.RightValidity))
-            
+            self.datafile.write(
+                '{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+                    round((g.Timestamp - timeStampStart) / 1000.0, ndigits=1),
+                    round(g.LeftGazePoint2D.x * self.disp.dispsize[0] if g.LeftValidity != 4 else -1.0, ndigits=4),
+                    round(g.LeftGazePoint2D.y * self.disp.dispsize[1] if g.LeftValidity != 4 else -1.0, ndigits=4),
+                    g.LeftValidity,
+                    round(g.RightGazePoint2D.x * self.disp.dispsize[0] if g.RightValidity != 4 else -1.0, ndigits=4),
+                    round(g.RightGazePoint2D.y * self.disp.dispsize[1] if g.RightValidity != 4 else -1.0, ndigits=4),
+                    g.RightValidity
+                )
+            )
+
             # if no correct sample is available, data is missing
-            if g.LeftValidity == 4 and g.RightValidity == 4: #not detected
-                ave = (-1.0,-1.0)
+            if g.LeftValidity == 4 and g.RightValidity == 4:  # not detected
+                ave = (-1.0, -1.0)
             # if the right sample is unavailable, use left sample
             elif g.LeftValidity == 4:
-                ave = (g.RightGazePoint2D.x,g.RightGazePoint2D.y)
+                ave = (g.RightGazePoint2D.x, g.RightGazePoint2D.y)
             # if the left sample is unavailable, use right sample
             elif g.RightValidity == 4:
-                ave = (g.LeftGazePoint2D.x,g.LeftGazePoint2D.y)
+                ave = (g.LeftGazePoint2D.x, g.LeftGazePoint2D.y)
             # if we have both samples, use both samples
             else:
                 ave = ((g.LeftGazePoint2D.x + g.RightGazePoint2D.x) / 2.0,
                        (g.LeftGazePoint2D.y + g.RightGazePoint2D.y) / 2.0)
-            
+
             # write gaze position to the datafile, based on the selected sample(s)
-            self.datafile.write('\t{}\t{}\t'.format(\
-                round(ave[0], ndigits=4), round(ave[1], ndigits=4)))
+            self.datafile.write(
+                '\t{}\t{}\t'.format( \
+                    round(ave[0], ndigits=4), round(ave[1], ndigits=4)
+                )
+            )
             self.datafile.write('\n')
-        
+
         # general format of an event string
-        formatstr = '{}'+'\t'*9+'{}\n'
-        
+        formatstr = '{}' + '\t' * 9 + '{}\n'
+
         # write all events to the datafile, using the formatstring
         for e in self.eventData:
-            self.datafile.write(formatstr.format( \
-                round((e[0]-timeStampStart)/1000.0, ndigits=4), e[1]))
-        
+            self.datafile.write(
+                formatstr.format( \
+                    round((e[0] - timeStampStart) / 1000.0, ndigits=4), e[1]
+                )
+            )
+
         # write data to disk
-        self.datafile.flush() # internal buffer to RAM
-        os.fsync(self.datafile.fileno()) # RAM file cache to disk
+        self.datafile.flush()  # internal buffer to RAM
+        os.fsync(self.datafile.fileno())  # RAM file cache to disk

@@ -25,7 +25,6 @@ from pygaze._time.basetime import BaseTime
 
 
 class Time(BaseTime):
-
     """A mouse for collecting responses"""
 
     def __init__(self, disptype=settings.DISPTYPE, **args):

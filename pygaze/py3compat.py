@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 """
 This file is part of OpenSesame.
@@ -19,7 +19,7 @@ along with OpenSesame.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 
-if sys.version_info >= (3,0,0):
+if sys.version_info >= (3, 0, 0):
     py3 = True
     basestring = str
     universal_newline_mode = u'r'
@@ -28,6 +28,7 @@ else:
     str = unicode
     py3 = False
     universal_newline_mode = u'rU'
+
 
 def safe_decode(s, enc='utf-8', errors='strict'):
     if isinstance(s, str):
@@ -51,10 +52,12 @@ def safe_decode(s, enc='utf-8', errors='strict'):
     # encoding. This mostly applies to non-stringy things, such as integers.
     return str(s)
 
+
 def safe_encode(s, enc='utf-8', errors='strict'):
     if isinstance(s, bytes):
         return s
     return s.encode(enc, errors)
+
 
 if py3:
     safe_str = safe_decode
@@ -62,7 +65,7 @@ else:
     safe_str = safe_encode
 
 __all__ = ['py3', 'safe_decode', 'safe_encode', 'safe_str',
-    'universal_newline_mode']
+           'universal_newline_mode']
 if not py3:
     __all__ += ['str', 'bytes']
 else:

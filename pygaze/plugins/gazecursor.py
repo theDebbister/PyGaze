@@ -21,11 +21,10 @@
 
 
 class GazeCursor:
-    
     """Gaze contingent cursor"""
 
     def __init__(self, disptype="", ctype="cross", size=20, \
-            colour=(200,100,100), pw=3, fill=True):
+                 colour=(200, 100, 100), pw=3, fill=True):
 
         """Initializes cursor object
         
@@ -52,29 +51,38 @@ class GazeCursor:
             self.ctype = ctype
         else:
             self.ctype = "arrow"
-            print("WARNING! plugins.gazecursor.__init__: GazeCursor type could not be recognized; Cursor type set to 'arrow'")
-            
+            print(
+                "WARNING! plugins.gazecursor.__init__: GazeCursor type could not be recognized; Cursor type set to 'arrow'"
+                )
+
         self.fill = fill
         self.pw = pw
-        
-        if type(size) in [int,float]:
+
+        if type(size) in [int, float]:
             self.size = (int(size), int(size))
         elif type(size) == tuple or type(size) == list:
             if len(size) == 2:
                 self.size = map(int, size)
             else:
                 self.size = (int(size[0]), int(size[1]))
-                print("WARNING! plugins.gazecursor.__init__: too many entries for cursor size; only the first two are used")
-            
+                print(
+                    "WARNING! plugins.gazecursor.__init__: too many entries for cursor size; only the first two are used"
+                    )
+
         if type(colour) == tuple or type(colour) == list:
-            if len(colour) in [3,4]:
+            if len(colour) in [3, 4]:
                 self.colour = colour
             else:
                 self.colour = colour[:4]
-                print("WARNING! plugins.gazecursor.__init__: too many list entries for cursor colour; only the first four are used")
+                print(
+                    "WARNING! plugins.gazecursor.__init__: too many list entries for cursor colour; only the first four are used"
+                    )
         else:
-            raise Exception("Error in plugins.gazecursor: colour argument '{}' not recognized, please use a RGB tuple (e.g. (255,0,0) for 'red')".format(colour))
-
+            raise Exception(
+                "Error in plugins.gazecursor: colour argument '{}' not recognized, please use a RGB tuple (e.g. (255,0,0) for 'red')".format(
+                    colour
+                    )
+                )
 
     def update(self, screen, gazepos):
 
@@ -92,30 +100,40 @@ class GazeCursor:
 
         # draw cursor
         if self.ctype == "rectangle":
-            screen.draw_rect(colour=self.colour, \
-                x=gazepos[0]-(self.size[0]/2), y=gazepos[1]-(self.size[1]/2), \
-                w=self.size[0], h=self.size[1], pw=self.pw, fill=self.fill)
+            screen.draw_rect(
+                colour=self.colour, \
+                x=gazepos[0] - (self.size[0] / 2), y=gazepos[1] - (self.size[1] / 2), \
+                w=self.size[0], h=self.size[1], pw=self.pw, fill=self.fill
+                )
         if self.ctype == "ellipse":
-            screen.draw_ellipse(colour=self.colour, \
-                x=gazepos[0]-(self.size[0]/2), y=gazepos[1]-(self.size[1]/2), \
-                w=self.size[0], h=self.size[1], pw=self.pw, fill=self.fill)
+            screen.draw_ellipse(
+                colour=self.colour, \
+                x=gazepos[0] - (self.size[0] / 2), y=gazepos[1] - (self.size[1] / 2), \
+                w=self.size[0], h=self.size[1], pw=self.pw, fill=self.fill
+                )
         if self.ctype == "plus":
-            screen.draw_fixation(fixtype="cross", colour=self.colour, \
-                pos=gazepos, pw=self.pw, diameter=self.size)
+            screen.draw_fixation(
+                fixtype="cross", colour=self.colour, \
+                pos=gazepos, pw=self.pw, diameter=self.size
+                )
         if self.ctype == "cross":
-            screen.draw_fixation(fixtype="x", colour=self.colour, \
-                pos=gazepos, pw=self.pw, diameter=self.size)
+            screen.draw_fixation(
+                fixtype="x", colour=self.colour, \
+                pos=gazepos, pw=self.pw, diameter=self.size
+                )
         if self.ctype == "arrow":
             screen.draw_polygon( \
-                [(gazepos[0]+self.size[0],gazepos[1]+(0.5*self.size[1])), \
-                (gazepos[0],gazepos[1]), \
-                (gazepos[0]+(0.5*self.size[0]), \
-                gazepos[1]+self.size[1])], \
-                colour=self.colour, pw=self.pw, fill=self.fill)
-            screen.draw_line(colour=self.colour, \
-                spos=(gazepos[0],gazepos[1]), \
-                epos=(gazepos[0]+self.size[0],gazepos[1]+self.size[1]), \
-                pw=self.pw)
+                [(gazepos[0] + self.size[0], gazepos[1] + (0.5 * self.size[1])), \
+                 (gazepos[0], gazepos[1]), \
+                 (gazepos[0] + (0.5 * self.size[0]), \
+                  gazepos[1] + self.size[1])], \
+                colour=self.colour, pw=self.pw, fill=self.fill
+            )
+            screen.draw_line(
+                colour=self.colour, \
+                spos=(gazepos[0], gazepos[1]), \
+                epos=(gazepos[0] + self.size[0], gazepos[1] + self.size[1]), \
+                pw=self.pw
+                )
 
         return screen
-

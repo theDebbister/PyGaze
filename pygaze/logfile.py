@@ -19,17 +19,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze.py3compat import *
-from pygaze import settings
-from pygaze._misc.misc import copy_docstr
 from pygaze._logfile.baselogfile import BaseLogfile
+from pygaze._misc.misc import copy_docstr
+
 
 class Logfile(BaseLogfile):
 
     # See BaseLogfile
 
     def __init__(self, **args):
-
         # See BaseLogfile
 
         from pygaze._logfile.logfile import Logfile

@@ -19,11 +19,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze.py3compat import *
-from pygaze import settings
-from libopensesame.exceptions import osexception
 from openexp.canvas import canvas
+
+from pygaze import settings
 from pygaze._screen.basescreen import BaseScreen
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -34,7 +34,6 @@ except:
 
 
 class OSScreen(BaseScreen):
-
     """See _display.pygamescreen.PyGameScreen"""
 
     def __init__(self, screen=None, **args):
@@ -59,7 +58,7 @@ class OSScreen(BaseScreen):
     def _pos(self, pos):
 
         """Convert PyGaze coordinates to OpenSesame coordinates."""
-        
+
         if pos in (None, (None, None)):
             return None, None
         x, y = pos
@@ -90,7 +89,7 @@ class OSScreen(BaseScreen):
         self.canvas = screen.copy()
 
     def draw_circle(self, colour=None, color=None, pos=None, r=50, pw=1, \
-        fill=False):
+                    fill=False):
 
         """See _display.pygamescreen.PyGameScreen"""
 
@@ -101,8 +100,12 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         x, y = self._pos(pos)
         kwdict = {}
         if colour is not None:
@@ -111,7 +114,7 @@ class OSScreen(BaseScreen):
         self.canvas.circle(x, y, r, fill=fill, **kwdict)
 
     def draw_ellipse(self, colour=None, color=None, x=None, y=None, w=50, \
-        h=50, pw=1, fill=False):
+                     h=50, pw=1, fill=False):
 
         """See _display.pygamescreen.PyGameScreen"""
 
@@ -122,8 +125,12 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         x, y = self._pos((x, y))
         kwdict = {}
         if colour is not None:
@@ -133,7 +140,7 @@ class OSScreen(BaseScreen):
         self.canvas.ellipse(x, y, w, h, fill=fill, **kwdict)
 
     def draw_rect(self, colour=None, color=None, x=None, y=None, w=50, h=50, \
-        pw=1, fill=False):
+                  pw=1, fill=False):
 
         """See _display.pygamescreen.PyGameScreen"""
 
@@ -144,8 +151,12 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         x, y = self._pos((x, y))
         kwdict = {}
         if colour is not None:
@@ -165,8 +176,12 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         sx, sy = self._pos(spos)
         ex, ey = self._pos(epos)
         kwdict = {}
@@ -177,7 +192,7 @@ class OSScreen(BaseScreen):
         self.canvas.line(sx, sy, ex, ey, **kwdict)
 
     def draw_polygon(self, pointlist, colour=None, color=None, pw=1, \
-        fill=True):
+                     fill=True):
 
         """See _display.pygamescreen.PyGameScreen"""
 
@@ -188,8 +203,12 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         kwdict = {}
         if colour is not None:
             kwdict["color"] = colour
@@ -198,9 +217,8 @@ class OSScreen(BaseScreen):
         pointlist = [self._pos(pt) for pt in pointlist]
         self.canvas.polygon(pointlist, fill=fill, **kwdict)
 
-
     def draw_fixation(self, fixtype='cross', colour=None, color=None, \
-        pos=None, pw=1, diameter=12):
+                      pos=None, pw=1, diameter=12):
 
         """See _display.pygamescreen.PyGameScreen"""
 
@@ -211,8 +229,12 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         # TODO: Respect the fixtype argument
         x, y = self._pos(pos)
         kwdict = {}
@@ -221,7 +243,7 @@ class OSScreen(BaseScreen):
         self.canvas.fixdot(x, y, **kwdict)
 
     def draw_text(self, text="text", colour=None, color=None, pos=None, \
-        centre=None, center=None, font='mono', fontsize=12, antialias=True):
+                  centre=None, center=None, font='mono', fontsize=12, antialias=True):
 
         """See _display.pygamescreen.PyGameScreen"""
 
@@ -232,8 +254,12 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         if center is None and centre is None:
             centre = True
         elif center is None and centre is not None:
@@ -241,7 +267,11 @@ class OSScreen(BaseScreen):
         elif center is not None and centre is None:
             centre = center
         elif centre != center:
-            raise Exception("The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(center,centre))
+            raise Exception(
+                "The arguments 'center' and 'centre' are the same, but set to different values: center={}, centre={}".format(
+                    center, centre
+                    )
+                )
 
         x, y = self._pos(pos)
         kwdict = {}
@@ -268,7 +298,11 @@ class OSScreen(BaseScreen):
         elif color is not None and colour is None:
             colour = color
         elif colour != color:
-            raise Exception("The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(color,colour))
-            
+            raise Exception(
+                "The arguments 'color' and 'colour' are the same, but set to different values: color={}, colour={}".format(
+                    color, colour
+                    )
+                )
+
         if colour is not None:
             self.canvas.set_bgcolor(colour)

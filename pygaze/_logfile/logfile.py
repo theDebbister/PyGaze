@@ -20,8 +20,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import os
+
 from pygaze import settings
 from pygaze._logfile.baselogfile import BaseLogfile
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -52,7 +54,6 @@ class Logfile(BaseLogfile):
         self.filename = filename + ".txt"
         self.logfile = open(self.filename, "w")
 
-
     def write(self, vallist, sync_to_disk=True):
 
         # See _logfile.baselogfile.BaseLogfile
@@ -62,16 +63,15 @@ class Logfile(BaseLogfile):
 
         # all values to string
         vallist = map(str, vallist)
-        
+
         # insert tabs between values, end with newline character
         line = "\t".join(vallist) + "\n"
 
         # write line to file (on disk)
         if sync_to_disk:
-            self.logfile.write(line) # write to internal buffer
-            self.logfile.flush() # internal buffer to RAM
-            os.fsync(self.logfile.fileno()) # RAM file cache to disk
-
+            self.logfile.write(line)  # write to internal buffer
+            self.logfile.flush()  # internal buffer to RAM
+            os.fsync(self.logfile.fileno())  # RAM file cache to disk
 
     def close(self):
 

@@ -21,9 +21,10 @@
 
 import copy
 
-from pygaze.libtime import clock
 from pygaze import settings
 from pygaze._mouse.basemouse import BaseMouse
+from pygaze.libtime import clock
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -37,12 +38,13 @@ from pygaze._misc.misc import pos2psychopos, psychopos2pos
 
 import psychopy.event
 
+
 class PsychoPyMouse(BaseMouse):
 
     # See _mouse.basemouse.BaseMouse
 
     def __init__(self, mousebuttonlist=settings.MOUSEBUTTONLIST,
-        timeout=settings.MOUSETIMEOUT, visible=False):
+                 timeout=settings.MOUSETIMEOUT, visible=False):
 
         # See _mouse.basemouse.BaseMouse
 
@@ -57,14 +59,15 @@ class PsychoPyMouse(BaseMouse):
             pass
 
         # create mouse object
-        self.mouse = psychopy.event.Mouse(visible=False,
-            win=pygaze.expdisplay)
+        self.mouse = psychopy.event.Mouse(
+            visible=False,
+            win=pygaze.expdisplay
+            )
 
         # set mouse characteristics
         self.set_mousebuttonlist(mousebuttonlist)
         self.set_timeout(timeout)
         self.set_visible(visible=visible)
-
 
     def set_mousebuttonlist(self, mousebuttonlist=None):
 
@@ -77,13 +80,11 @@ class PsychoPyMouse(BaseMouse):
             for mbutton in mousebuttonlist:
                 self.mbuttonlist.append(mbutton)
 
-
     def set_timeout(self, timeout=None):
 
         # See _mouse.basemouse.BaseMouse
 
         self.timeout = timeout
-
 
     def set_visible(self, visible=True):
 
@@ -92,20 +93,17 @@ class PsychoPyMouse(BaseMouse):
         self.visible = visible
         self.mouse.setVisible(self.visible)
 
-
-    def set_pos(self, pos=(0,0)):
+    def set_pos(self, pos=(0, 0)):
 
         # See _mouse.basemouse.BaseMouse
 
         self.mouse.setPos(newPos=pos2psychopos(pos))
-
 
     def get_pos(self):
 
         # See _mouse.basemouse.BaseMouse
 
         return psychopos2pos(self.mouse.getPos())
-
 
     def get_clicked(self, mousebuttonlist="default", timeout="default"):
 
@@ -124,13 +122,12 @@ class PsychoPyMouse(BaseMouse):
             time = clock.get_time()
             pressed = self.mouse.getPressed()
             if sum(pressed) > 0:
-                for b in range(0,len(pressed)):
+                for b in range(0, len(pressed)):
                     if pressed[b] == 1:
-                        if mousebuttonlist == None or b+1 in mousebuttonlist:
-                            return b+1, self.get_pos(), time
+                        if mousebuttonlist == None or b + 1 in mousebuttonlist:
+                            return b + 1, self.get_pos(), time
         # in case of timeout
         return None, None, time
-
 
     def get_pressed(self):
 

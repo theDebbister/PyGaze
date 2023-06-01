@@ -21,6 +21,7 @@
 
 from pygaze import settings
 from pygaze._sound.basesound import BaseSound
+
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
 # be imported correctly
@@ -41,9 +42,9 @@ class PyGameSound(BaseSound):
     # see pygaze._sound.basesound.BaseSound
 
     def __init__(self, osc=settings.SOUNDOSCILLATOR,
-        freq=settings.SOUNDFREQUENCY, length=settings.SOUNDLENGTH,
-        attack=settings.SOUNDATTACK, decay=settings.SOUNDDECAY, soundfile=None):
-        
+                 freq=settings.SOUNDFREQUENCY, length=settings.SOUNDLENGTH,
+                 attack=settings.SOUNDATTACK, decay=settings.SOUNDDECAY, soundfile=None):
+
         # see pygaze._sound.basesound.BaseSound
 
         # try to copy docstring (but ignore it if it fails, as we do
@@ -56,16 +57,22 @@ class PyGameSound(BaseSound):
             # in a non-verbose manner, so warning messages would be lost
             pass
 
-        pygame.mixer.init(frequency=settings.SOUNDSAMPLINGFREQUENCY,
+        pygame.mixer.init(
+            frequency=settings.SOUNDSAMPLINGFREQUENCY,
             size=settings.SOUNDSAMPLESIZE, channels=settings.SOUNDCHANNELS,
-            buffer=settings.SOUNDBUFFERSIZE)
+            buffer=settings.SOUNDBUFFERSIZE
+            )
 
         # if a sound file was specified, use soundfile and ignore other keyword arguments
         if soundfile is not None:
             if not os.path.exists(soundfile):
                 raise Exception("Error in libsound.Player.__init__(): Sound file '{}' not found!".format(soundfile))
             if os.path.splitext(soundfile)[1].lower() not in (".ogg", ".wav"):
-                raise Exception("Error in libsound.Player.__init__(): Sound file '{}' is not in .ogg or .wav format!".format(soundfile))
+                raise Exception(
+                    "Error in libsound.Player.__init__(): Sound file '{}' is not in .ogg or .wav format!".format(
+                        soundfile
+                        )
+                    )
 
             self.sound = pygame.mixer.Sound(soundfile)
 
@@ -80,7 +87,11 @@ class PyGameSound(BaseSound):
             elif osc == "whitenoise":
                 _func = self.white_noise
             else:
-                raise Exception("Error in libsound.Sound.__init__(): oscillator '{}' could not be recognized; oscillator is set to 'sine'.".format(osc))
+                raise Exception(
+                    "Error in libsound.Sound.__init__(): oscillator '{}' could not be recognized; oscillator is set to 'sine'.".format(
+                        osc
+                        )
+                    )
 
             l = []
 
@@ -89,7 +100,7 @@ class PyGameSound(BaseSound):
             amp = 32767 // 2
             sps = settings.SOUNDSAMPLINGFREQUENCY
             # cycles per sample
-            cps = float(sps/freq)
+            cps = float(sps / freq)
             # number of samples
             slen = (settings.SOUNDSAMPLINGFREQUENCY * length) // 1000
 
@@ -106,7 +117,6 @@ class PyGameSound(BaseSound):
             b = numpy.array(l, dtype="int16").reshape(len(l) // 2, 2)
 
             self.sound = pygame.mixer.Sound(b)
-
 
     def saw(self, phase):
 
@@ -130,7 +140,6 @@ class PyGameSound(BaseSound):
 
         return float(phase) / (0.5 * math.pi) - 1.0
 
-
     def square(self, phase):
 
         """
@@ -151,7 +160,6 @@ class PyGameSound(BaseSound):
         if phase < math.pi:
             return 1
         return -1
-
 
     def white_noise(self, phase):
 
@@ -174,24 +182,24 @@ class PyGameSound(BaseSound):
 
         return random.random()
 
-
     def pan(self, panning):
 
         # see pygaze._sound.basesound.BaseSound
 
         # raise exception on wrong input
-        if type(panning) not in (int, float) and panning not in ["left","right"]:
-            raise Exception("Error in libsound.Sound.pan(): panning must be a value between -1.0 and 1.0 or either 'left' or 'right'.")
+        if type(panning) not in (int, float) and panning not in ["left", "right"]:
+            raise Exception(
+                "Error in libsound.Sound.pan(): panning must be a value between -1.0 and 1.0 or either 'left' or 'right'."
+                )
 
         # correct wrong inputs
         if panning < -1:
             panning = -1
         elif panning > 1:
             panning = 1
-        
+
         # round off, to prevent too long numbers
         panning = numpy.round(panning, decimals=8)
-        
 
         buf = pygame.sndarray.array(self.sound)
 
@@ -214,20 +222,17 @@ class PyGameSound(BaseSound):
 
         self.sound = pygame.sndarray.make_sound(numpy.array(buf))
 
-
     def play(self, repeats=0):
 
         # see pygaze._sound.basesound.BaseSound
 
         self.sound.play(loops=repeats)
 
-
     def stop(self):
 
         # see pygaze._sound.basesound.BaseSound
 
         self.sound.stop()
-
 
     def set_volume(self, volume):
 

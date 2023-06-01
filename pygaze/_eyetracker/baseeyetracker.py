@@ -26,10 +26,10 @@
 # baseclass, be sure to inherit BaseClass, copy the documentation, and
 # redefine the methods as you see fit, e.g.:
 #
-#import pygaze
-#from pygaze._display.basedisplay import BaseDisplay
+# import pygaze
+# from pygaze._display.basedisplay import BaseDisplay
 #
-#class DummyDisplay(BaseDisplay):
+# class DummyDisplay(BaseDisplay):
 #
 #    """An example child of BaseDisplay"""
 #
@@ -49,15 +49,14 @@
 
 from pygaze.py3compat import *
 
-class BaseEyeTracker:
 
+class BaseEyeTracker:
     """
     desc: |
         A generic Python library for eye tracking.
     """
 
     def __init__(self):
-
         """
         strict:
             False
@@ -144,9 +143,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def calibrate(self):
-
         """
         desc: |
             Calibrates the eye tracking system. The actual behavior of this
@@ -176,7 +173,6 @@ class BaseEyeTracker:
         pass
 
     def close(self):
-
         """
         desc: |
             Neatly closes connection to tracker. Saves data and sets
@@ -185,9 +181,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def connected(self):
-
         """
         desc:
             Checks if the tracker is connected.
@@ -201,9 +195,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def drift_correction(self, pos=None, fix_triggered=False):
-
         """
         desc: |
             Performs a drift-correction procedure. The exact behavior of this
@@ -236,10 +228,8 @@ class BaseEyeTracker:
 
         pass
 
-
     def fix_triggered_drift_correction(self, pos=None, min_samples=30,
-        max_dev=60, reset_threshold=10):
-
+                                       max_dev=60, reset_threshold=10):
         """
         desc: |
             Performs a fixation triggered drift correction by collecting
@@ -272,9 +262,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def get_eyetracker_clock_async(self):
-
         """
         desc:
             Returns the difference between tracker time and PyGaze time, which
@@ -288,7 +276,6 @@ class BaseEyeTracker:
         pass
 
     def log(self, msg):
-
         """
         desc:
             Writes a message to the log file.
@@ -301,9 +288,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def log_var(self, var, val):
-
         """
         desc:
             Writes a variable's name and value to the log file
@@ -319,7 +304,6 @@ class BaseEyeTracker:
         self.log(u"var {} {}".format(safe_decode(var), safe_decode(val)))
 
     def pupil_size(self):
-
         """
         desc:
             Returns the newest pupil size sample; size may be measured as the
@@ -336,7 +320,6 @@ class BaseEyeTracker:
         pass
 
     def sample(self):
-
         """
         desc:
             Returns newest available gaze position.
@@ -349,7 +332,6 @@ class BaseEyeTracker:
         pass
 
     def send_command(self, cmd):
-
         """
         desc:
             Directly sends a command to the eye tracker (not supported for all
@@ -365,7 +347,6 @@ class BaseEyeTracker:
         pass
 
     def set_eye_used(self):
-
         """
         desc:
             Logs the `eye_used` variable, based on which eye was specified
@@ -376,7 +357,6 @@ class BaseEyeTracker:
         pass
 
     def draw_drift_correction_target(self, x, y):
-
         """
         desc:
             Draws a drift-correction target.
@@ -393,7 +373,6 @@ class BaseEyeTracker:
         pass
 
     def draw_calibration_target(self, x, y):
-
         """
         desc:
             Draws a calibration target.
@@ -410,7 +389,6 @@ class BaseEyeTracker:
         pass
 
     def set_draw_calibration_target_func(self, func):
-
         """
         desc:
             Specifies a custom function to draw the calibration target. This
@@ -427,7 +405,6 @@ class BaseEyeTracker:
         self.draw_calibration_target = func
 
     def set_draw_drift_correction_target_func(self, func):
-
         """
         desc:
             Specifies a custom function to draw the drift-correction target.
@@ -445,7 +422,6 @@ class BaseEyeTracker:
         self.draw_drift_correction_target = func
 
     def start_recording(self):
-
         """
         desc:
             Starts recording. Sets `self.recording` to `True` when recording
@@ -455,7 +431,6 @@ class BaseEyeTracker:
         pass
 
     def status_msg(self, msg):
-
         """
         desc:
             Sends a status message to the eye tracker, which is displayed in
@@ -471,9 +446,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def stop_recording(self):
-
         """
         desc:
             Stops recording. Sets `self.recording` to `False` when recording is
@@ -482,9 +455,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def set_detection_type(self, eventdetection):
-
         """
         desc: |
             Set the event detection type to either PyGaze algorithms, or
@@ -515,7 +486,6 @@ class BaseEyeTracker:
         pass
 
     def wait_for_event(self, event):
-
         """
         desc:
             Waits for an event.
@@ -542,9 +512,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def wait_for_blink_end(self):
-
         """
         desc: |
             Waits for a blink end and returns the blink ending time.
@@ -562,7 +530,6 @@ class BaseEyeTracker:
         pass
 
     def wait_for_blink_start(self):
-
         """
         desc: |
             Waits for a blink start and returns the blink starting time.
@@ -579,9 +546,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def wait_for_fixation_end(self):
-
         """
         desc: |
             Returns time and gaze position when a fixation has ended;
@@ -604,9 +569,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def wait_for_fixation_start(self):
-
         """
         desc: |
             Returns starting time and position when a fixation is started;
@@ -630,9 +593,7 @@ class BaseEyeTracker:
 
         pass
 
-
     def wait_for_saccade_end(self):
-
         """
         desc: |
             Returns ending time, starting and end position when a saccade is
@@ -652,7 +613,6 @@ class BaseEyeTracker:
         pass
 
     def wait_for_saccade_start(self):
-
         """
         desc: |
             Returns starting time and starting position when a saccade is

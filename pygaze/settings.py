@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 """
 This file is part of PyGaze.
@@ -19,11 +19,12 @@ along with PyGaze.  If not, see <http://www.gnu.org/licenses/>.
 
 from pygaze.py3compat import *
 
+
 class Settings(object):
-    
+
     def __init__(self):
-        
-        object.__setattr__(self, "config", {"cfg_ver" : 0})
+
+        object.__setattr__(self, "config", {"cfg_ver": 0})
         from pygaze import defaults
         self.read_module(defaults)
         try:
@@ -31,9 +32,9 @@ class Settings(object):
             self.read_module(constants)
         except:
             pass
-            
+
     def read_module(self, mod):
-        
+
         for key in dir(mod):
             if key.startswith("__") and key.endswith("__"):
                 continue
@@ -41,10 +42,10 @@ class Settings(object):
                 continue
             val = getattr(mod, key)
             if val is not None and type(val) not in \
-                [tuple, list, int, float, str, bytes, bool]:
+                    [tuple, list, int, float, str, bytes, bool]:
                 continue
             self.config[key] = val
-            
+
     def __getattr__(self, setting):
 
         if setting not in self.config:
@@ -55,5 +56,6 @@ class Settings(object):
 
         self.config[setting] = value
         self.config["cfg_ver"] += 1
-            
+
+
 settings = Settings()

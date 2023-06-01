@@ -19,14 +19,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze.py3compat import *
 from pygaze import settings
-from pygaze._misc.misc import copy_docstr
 from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
+from pygaze._misc.misc import copy_docstr
 
 
 class EyeTracker(BaseEyeTracker):
-
     """
     Generic EyeTracker class, which morphs into an eye-tracker specific class.
     """
@@ -54,12 +52,15 @@ class EyeTracker(BaseEyeTracker):
             trackertype = "dummy"
 
         # correct wrong input
-        allowed_trackers = ["dumbdummy", "dummy", "eyelink", "eyelogic", "smi", \
-            "eyetribe", "opengaze", "alea", "tobii", "tobii-legacy", \
-            "tobiiglasses"]
+        allowed_trackers = ["dumbdummy", "dummy", "eyelink", "eyelogic", "smi", "eyetribe", "opengaze", "alea", "tobii",
+                            "tobii-legacy",
+                            "tobiiglasses"]
         if trackertype not in allowed_trackers:
-            raise Exception( \
-                "Error in eyetracker.EyeTracker: trackertype {} not recognized; it should be one of {}".format(trackertype,allowed_trackers))
+            raise Exception(
+                "Error in eyetracker.EyeTracker: trackertype {} not recognized; it should be one of {}".format(
+                    trackertype, allowed_trackers
+                )
+            )
 
         # EyeLink
         if trackertype == "eyelink":
@@ -79,7 +80,7 @@ class EyeTracker(BaseEyeTracker):
             # initialize
             self.__class__.__init__(self, display, **args)
 
-		# SMI
+        # SMI
         elif trackertype == "smi":
             # import libraries
             from pygaze._eyetracker.libsmi import SMItracker
@@ -149,7 +150,7 @@ class EyeTracker(BaseEyeTracker):
             # morph class
             self.__class__ = Dummy
             # initialize
-            self.__class__.__init__(self, display)
+            self.__class__.__init__(self, display, **args)
 
         # dumb dummy mode
         elif trackertype == "dumbdummy":
@@ -161,8 +162,11 @@ class EyeTracker(BaseEyeTracker):
             self.__class__.__init__(self, display)
 
         else:
-            raise Exception( \
-                "Error in eyetracker.EyeTracker.__init__: trackertype {} not recognized, this should not happen!".format(trackertype))
+            raise Exception(
+                "Error in eyetracker.EyeTracker.__init__: trackertype {} not recognized, this should not happen!".format(
+                    trackertype
+                )
+            )
 
         # copy docstrings
         copy_docstr(BaseEyeTracker, EyeTracker)

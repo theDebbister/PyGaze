@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 #
 # This file is part of PyGaze - the open-source toolbox for eye tracking
@@ -20,13 +19,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze.py3compat import *
 from pygaze import settings
 from pygaze._misc.misc import copy_docstr
 from pygaze._screen.basescreen import BaseScreen
 
-class Screen(BaseScreen):
 
+class Screen(BaseScreen):
     """
     A class for Screen objects, for visual stimuli (to be displayed via a
     Display object)

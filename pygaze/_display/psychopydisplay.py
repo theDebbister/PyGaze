@@ -19,13 +19,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from pygaze import settings
+from psychopy.visual import Window
+
 import pygaze
+from pygaze import settings
+from pygaze._display.basedisplay import BaseDisplay
 from pygaze._misc.misc import rgb2psychorgb
 from pygaze.libtime import clock
-from pygaze._display.basedisplay import BaseDisplay
-
-from psychopy.visual import Window
 
 # we try importing the copy_docstr function, but as we do not really need it
 # for a proper functioning of the code, we simply ignore it when it fails to
@@ -63,10 +63,12 @@ class PsychoPyDisplay(BaseDisplay):
         self.monitor = monitor
 
         # create window
-        pygaze.expdisplay = Window(size=self.dispsize, pos=None,
-                                   color=rgb2psychorgb(self.bgc), colorSpace="rgb",
-                                   fullscr=settings.FULLSCREEN, monitor=self.monitor,
-                                   screen=self.screennr, units="pix")
+        pygaze.expdisplay = Window(
+            size=self.dispsize, pos=None,
+            color=rgb2psychorgb(self.bgc), colorSpace="rgb",
+            fullscr=settings.FULLSCREEN, monitor=self.monitor,
+            screen=self.screennr, units="pix"
+            )
         # set mouse visibility
         pygaze.expdisplay.setMouseVisible(self.mousevis)
         # get screen in window
@@ -88,7 +90,8 @@ class PsychoPyDisplay(BaseDisplay):
         self.fill(screen)
         self.show()
         print(
-            "WARNING! screen.Display.show_part not available for PsychoPy display type; fill() and show() are used instead")
+            "WARNING! screen.Display.show_part not available for PsychoPy display type; fill() and show() are used instead"
+        )
 
         return clock.get_time()
 
