@@ -78,7 +78,7 @@ class libeyelink(BaseEyeTracker):
                  saccade_velocity_threshold=35, saccade_acceleration_threshold=9500,
                  blink_threshold=settings.BLINKTHRESH,
                  force_drift_correct=True, pupil_size_mode=settings.EYELINKPUPILSIZEMODE,
-                 screen: Screen = None, **args):
+                 screen: Screen = None, **kwargs):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
@@ -180,7 +180,7 @@ class libeyelink(BaseEyeTracker):
         else:
             self.eyelink_model = 'EyeLink (model unknown)'
         # Open graphics
-        self.eyelink_graphics = EyelinkGraphics(self, _eyelink)
+        self.eyelink_graphics = EyelinkGraphics(self, _eyelink, self.scr)
         pylink.openGraphicsEx(self.eyelink_graphics)
         # Optionally force drift correction. For some reason this must be done
         # as (one of) the first things, otherwise a segmentation fault occurs.
@@ -293,7 +293,7 @@ class libeyelink(BaseEyeTracker):
             # attempt calibrate; confirm abort when esc pressed
             while True:
                 self.eyelink_graphics.esc_pressed = False
-                pylink.getEYELINK().doTrackerSetup()
+                pylink.getEYELINK().doTrackerSetup(width=1395, height=1057)
                 if not self.eyelink_graphics.esc_pressed:
                     break
                 self.confirm_abort_experiment()
@@ -634,14 +634,28 @@ class libeyelink(BaseEyeTracker):
             sys.stdout = _out
         pylink.msecDelay(500)
         print(u"libeyelink.libeyelink.close(): Closing eyelink")
-        pylink.getEYELINK().close();
+        pylink.getEYELINK().close()
         pylink.msecDelay(500)
 
-    def set_eye_used(self):
+    def set_eye_used(self, eye_used: str = ""):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
-        self.eye_used = pylink.getEYELINK().eyeAvailable()
+        if not eye_used:
+            self.eye_used = pylink.getEYELINK().eyeAvailable()
+        else:
+            if eye_used == 'right':
+                self.eye_used = self.right_eye
+            elif eye_used == 'left':
+                self.eye_used = self.left_eye
+            elif eye_used == 'binocular':
+                self.eye_used = self.binocular
+            else:
+                raise ValueError(
+                    "Error in libeyelink.libeyelink.set_eye_used(): "
+                    "eye_used must be 'right', 'left', or 'binocular'"
+                )
+
         if self.eye_used == self.right_eye:
             self.log_var("eye_used", "right")
         elif self.eye_used == self.left_eye or self.eye_used == self.binocular:

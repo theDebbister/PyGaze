@@ -56,7 +56,7 @@ class BaseEyeTracker:
         A generic Python library for eye tracking.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """
         strict:
             False
@@ -346,7 +346,7 @@ class BaseEyeTracker:
 
         pass
 
-    def set_eye_used(self):
+    def set_eye_used(self, eye_used: str = ''):
         """
         desc:
             Logs the `eye_used` variable, based on which eye was specified

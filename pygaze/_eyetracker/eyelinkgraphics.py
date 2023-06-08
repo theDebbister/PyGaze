@@ -59,7 +59,7 @@ class EyelinkGraphics(custom_display):
     which is implemented in PyLink.
     """
 
-    def __init__(self, libeyelink, tracker):
+    def __init__(self, libeyelink, tracker, screen):
 
         """
         Constructor.
@@ -74,7 +74,11 @@ class EyelinkGraphics(custom_display):
         # objects
         self.libeyelink = libeyelink
         self.display = libeyelink.display
-        self.screen = Screen(disptype=settings.DISPTYPE, mousevisible=False)
+
+        if not screen:
+            self.screen = Screen(disptype=settings.DISPTYPE, mousevisible=False)
+        else:
+            self.screen = screen
         self.kb = Keyboard(keylist=None, timeout=1)
         self.mouse = Mouse(timeout=1)
         # If we are using a DISPTYPE that cannot be used directly, we have to
@@ -84,8 +88,8 @@ class EyelinkGraphics(custom_display):
         import os
         self.tmp_file = os.path.join(tempfile.gettempdir(), "__eyelink__.jpg")
         # drawing properties
-        self.xc = self.display.dispsize[0] / 2
-        self.yc = self.display.dispsize[1] / 2
+        self.xc = settings.IMAGE_WIDTH_PX // 2
+        self.yc = settings.IMAGE_HEIGHT_PX // 2
         self.extra_info = True
         self.ld = 40  # line distance
         self.fontsize = libeyelink.fontsize
@@ -254,7 +258,7 @@ class EyelinkGraphics(custom_display):
         """
 
         # show instructions
-        self.display.fill(self.menuscreen)
+        # self.display.fill(self.menuscreen)
         self.display.show()
 
     def exit_cal_display(self):
@@ -273,7 +277,8 @@ class EyelinkGraphics(custom_display):
 
         """Clears the calibration display"""
 
-        self.display.fill()
+        self.screen.clear(color=settings.IMAGE_BGC)
+        self.display.fill(self.screen)
         self.display.show()
 
     def erase_cal_target(self):
@@ -293,8 +298,8 @@ class EyelinkGraphics(custom_display):
         """
 
         self.play_beep(pylink.CAL_TARG_BEEP)
-        self.screen.clear()
-        self.screen.set_background_colour(colour=(231, 230, 230))
+        self.screen.clear(color=settings.IMAGE_BGC)
+        self.screen.set_background_colour(colour=settings.IMAGE_BGC)
         self.screen.draw_fixation(fixtype='circle', pos=(x, y))
         self.display.fill(screen=self.screen)
         self.display.show()
@@ -315,7 +320,7 @@ class EyelinkGraphics(custom_display):
                 self.__target_beep__.play()
         elif beepid == pylink.CAL_ERR_BEEP or beepid == pylink.DC_ERR_BEEP:
             # show a picture
-            self.screen.clear()
+            self.screen.clear(color=settings.IMAGE_BGC)
             self.screen.draw_text(
                 text="calibration lost, press 'Enter' to return to menu",
                 pos=(self.xc, self.yc), center=True, font='mono',
@@ -327,7 +332,7 @@ class EyelinkGraphics(custom_display):
             if settings.EYELINKCALBEEP:
                 self.__target_beep__error__.play()
         elif beepid == pylink.CAL_GOOD_BEEP:
-            self.screen.clear()
+            self.screen.clear(color=settings.IMAGE_BGC)
             if self.state == "calibration":
                 self.screen.draw_text(
                     text="Calibration succesfull, press 'v' to validate",
