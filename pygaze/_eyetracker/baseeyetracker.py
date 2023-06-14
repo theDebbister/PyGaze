@@ -629,3 +629,6 @@ class BaseEyeTracker:
         """
 
         pass
+
+    def send_backdrop_image(self, image_path: str) -> None:
+        pass

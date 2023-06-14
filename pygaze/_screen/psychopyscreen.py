@@ -85,7 +85,7 @@ class PsychoPyScreen(BaseScreen):
             # in a non-verbose manner, so warning messages would be lost
             pass
 
-        self.dispsize = (1395, 1057)
+        self.dispsize = (settings.IMAGE_WIDTH_PX, settings.IMAGE_HEIGHT_PX)
         self.fgc = fgc
         self.bgc = bgc
         self.screennr = screennr

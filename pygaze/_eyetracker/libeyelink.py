@@ -641,15 +641,21 @@ class libeyelink(BaseEyeTracker):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
+        # if the eye has not been specified explicitely, use the eye that is set in the hardware settings
         if not eye_used:
             self.eye_used = pylink.getEYELINK().eyeAvailable()
         else:
             if eye_used == 'right':
                 self.eye_used = self.right_eye
+                self.send_command("active_eye = 1")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
+
             elif eye_used == 'left':
                 self.eye_used = self.left_eye
+                self.send_command("active_eye = 3")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
             elif eye_used == 'binocular':
                 self.eye_used = self.binocular
+                self.send_command("binocular_enabled")  # binocular_enabled can be set to YES for binocular or NO for monocular
+
             else:
                 raise ValueError(
                     "Error in libeyelink.libeyelink.set_eye_used(): "
@@ -721,6 +727,44 @@ class libeyelink(BaseEyeTracker):
         else:
             gaze = self.prevsample[:]
         return gaze
+
+    def send_backdrop_image(self, image_path: str) -> None:
+        # put the tracker in the offline mode first
+        pylink.getEYELINK().setOfflineMode()
+
+        # clear the host screen before we draw the backdrop
+        self.sendCommand('clear_screen 0')
+
+        # show a backdrop image on the Host screen, imageBackdrop() the recommended
+        # function, if you do not need to scale the image on the Host
+        # parameters: image_file, crop_x, crop_y, crop_width, crop_height,
+        #            x, y on the Host, drawing options
+
+        pylink.getEYELINK().imageBackdrop(image_path,
+                                    0, 0, settings.IMAGE_WIDTH_PX, settings.IMAGE_HIGHT_PX, 0, 0,
+                                    pylink.BX_MAXCONTRAST)
+
+        # If you need to scale the backdrop image on the Host, use the old Pylink
+        # bitmapBackdrop(), which requires an additional step of converting the
+        # image pixels into a recognizable format by the Host PC.
+        # pixels = [line1, ...lineH], line = [pix1,...pixW], pix=(R,G,B)
+        #
+        # the bitmapBackdrop() command takes time to return, not recommended
+        # for tasks where the ITI matters, e.g., in an event-related fMRI task
+        # parameters: width, height, pixel, crop_x, crop_y,
+        #            crop_width, crop_height, x, y on the Host, drawing options
+        #
+        # Use the code commented below to convert the image and send the backdrop
+        # im = Image.open('images' + os.sep + pic)  # read image with PIL
+        # im = im.resize((scn_width, scn_height))
+        # img_pixels = im.load()  # access the pixel data of the image
+        # pixels = [[img_pixels[i, j] for i in range(scn_width)]
+        #           for j in range(scn_height)]
+        # el_tracker.bitmapBackdrop(
+        #     scn_width, scn_height, pixels,
+        #     0, 0, scn_width, scn_height,
+        #     0, 0, pylink.BX_MAXCONTRAST
+        #     )
 
     def set_detection_type(self, eventdetection):
 
