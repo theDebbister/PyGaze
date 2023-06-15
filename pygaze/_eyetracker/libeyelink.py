@@ -513,7 +513,7 @@ class libeyelink(BaseEyeTracker):
             if len(lx) == 0 or x != lx[-1] or y != ly[-1]:
                 # if present sample deviates too much from previous sample,
                 # start from scratch.
-                if len(lx) > 0 and (abs(x - lx[-1]) > reset_threshold or \
+                if len(lx) > 0 and (abs(x - lx[-1]) > reset_threshold or
                                     abs(y - ly[-1]) > reset_threshold):
                     lx = []
                     ly = []
@@ -570,14 +570,15 @@ class libeyelink(BaseEyeTracker):
             if not error:
                 break
             if i > self.MAX_TRY:
+                self.close()
+                clock.expend()
                 raise Exception(
                     u"Error in libeyelink.libeyelink.start_recording(): Failed to start recording!"
                 )
-                self.close()
-                clock.expend()
+
             i += 1
             print(
-                u"WARNING libeyelink.libeyelink.start_recording(): Failed to start recording (attempt {} of {})".format( \
+                u"WARNING libeyelink.libeyelink.start_recording(): Failed to start recording (attempt {} of {})".format(
                     i, self.MAX_TRY
                 )
             )
@@ -619,7 +620,7 @@ class libeyelink(BaseEyeTracker):
         pylink.getEYELINK().closeDataFile()
         pylink.msecDelay(500)
         print(
-            u"libeyelink.libeyelink.close(): Transferring {} to {}".format( \
+            u"libeyelink.libeyelink.close(): Transferring {} to {}".format(
                 self.eyelink_data_file, self.local_data_file
             )
         )
@@ -733,7 +734,7 @@ class libeyelink(BaseEyeTracker):
         pylink.getEYELINK().setOfflineMode()
 
         # clear the host screen before we draw the backdrop
-        self.sendCommand('clear_screen 0')
+        self.send_command('clear_screen 0')
 
         # show a backdrop image on the Host screen, imageBackdrop() the recommended
         # function, if you do not need to scale the image on the Host
@@ -741,7 +742,7 @@ class libeyelink(BaseEyeTracker):
         #            x, y on the Host, drawing options
 
         pylink.getEYELINK().imageBackdrop(image_path,
-                                    0, 0, settings.IMAGE_WIDTH_PX, settings.IMAGE_HIGHT_PX, 0, 0,
+                                    0, 0, settings.IMAGE_WIDTH_PX, settings.IMAGE_HEIGHT_PX, 0, 0,
                                     pylink.BX_MAXCONTRAST)
 
         # If you need to scale the backdrop image on the Host, use the old Pylink
