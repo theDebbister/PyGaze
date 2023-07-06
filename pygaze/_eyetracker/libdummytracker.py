@@ -39,7 +39,7 @@ except:
 class Dummy(DumbDummy):
     """A dummy class to run experiments in dummy mode, where eye movements are simulated by the mouse"""
 
-    def __init__(self, display, screen=None):
+    def __init__(self, display, screen=None, data_file=None):
 
         """Initiates an eyetracker dummy object, that simulates gaze position using the mouse
         
