@@ -1156,20 +1156,20 @@ class libeyelink(BaseEyeTracker):
         # Display the confirmation screen
         scr = Screen(disptype=settings.DISPTYPE)
         kb = Keyboard(timeout=5000)
-        yc = settings.DISPSIZE[1] / 2
-        xc = settings.DISPSIZE[0] / 2
+        yc = settings.DISPSIZE[1] / 8
+        xc = settings.DISPSIZE[0] / 8
         ld = 40  # Line height
         scr.draw_text(
             u'Really abort experiment?', pos=(xc, yc - 3 * ld),
-            fontsize=self.fontsize
+            fontsize=self.fontsize, color='#D3D3D3',
         )
         scr.draw_text(
             u'Press \'Y\' to abort', pos=(xc, yc - 0.5 * ld),
-            fontsize=self.fontsize
+            fontsize=self.fontsize, color='#D3D3D3',
         )
         scr.draw_text(
             u'Press any other key or wait 5s to go to setup',
-            pos=(xc, yc + 0.5 * ld), fontsize=self.fontsize
+            pos=(xc, yc + 0.5 * ld), fontsize=self.fontsize, color='#D3D3D3',
         )
         self.display.fill(scr)
         self.display.show()
@@ -1180,6 +1180,8 @@ class libeyelink(BaseEyeTracker):
             return False
         # if confirmation, close experiment
         if key == u'y':
+            self.close()
+            clock.expend()
             raise Exception(u'The experiment was aborted')
         self.eyelink_graphics.esc_pressed = False
         return False
