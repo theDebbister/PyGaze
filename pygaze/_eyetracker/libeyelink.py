@@ -647,15 +647,17 @@ class libeyelink(BaseEyeTracker):
             self.eye_used = pylink.getEYELINK().eyeAvailable()
         else:
             if eye_used == 'right':
+                self.send_command("binocular_enabled NO")
                 self.eye_used = self.right_eye
-                self.send_command("active_eye = 1")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
+                self.send_command("active_eye = 3")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
 
             elif eye_used == 'left':
+                self.send_command("binocular_enabled NO")
                 self.eye_used = self.left_eye
-                self.send_command("active_eye = 3")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
+                self.send_command("active_eye = 1")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
             elif eye_used == 'binocular':
                 self.eye_used = self.binocular
-                self.send_command("binocular_enabled")  # binocular_enabled can be set to YES for binocular or NO for monocular
+                self.send_command("binocular_enabled YES")  # binocular_enabled can be set to YES for binocular or NO for monocular
 
             else:
                 raise ValueError(
@@ -664,10 +666,11 @@ class libeyelink(BaseEyeTracker):
                 )
 
         if self.eye_used == self.right_eye:
-            self.log_var("eye_used", "right")
-        elif self.eye_used == self.left_eye or self.eye_used == self.binocular:
-            self.log_var("eye_used", "left")
-            self.eye_used = self.left_eye
+            self.log_var("initial eye_used", "right")
+        elif self.eye_used == self.left_eye:
+            self.log_var("initial eye_used", "left")
+        elif self.eye_used == self.binocular:
+            self.log_var("initial eye_used", "binocular")
         else:
             print(
                 "WARNING libeyelink.libeyelink.set_eye_used(): Failed to "

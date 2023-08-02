@@ -322,7 +322,7 @@ class EyelinkGraphics(custom_display):
             # show a picture
             self.screen.clear(color=settings.IMAGE_BGC)
             self.screen.draw_text(
-                text="calibration lost, press 'Enter' to return to menu",
+                text="Calibration lost, press 'Enter' to return to menu",
                 pos=(self.xc, self.yc), center=True, font='mono',
                 fontsize=self.fontsize, antialias=True
             )
@@ -335,13 +335,13 @@ class EyelinkGraphics(custom_display):
             self.screen.clear(color=settings.IMAGE_BGC)
             if self.state == "calibration":
                 self.screen.draw_text(
-                    text="Calibration succesfull, press 'v' to validate",
+                    text="Calibration successful, press 'v' to validate",
                     pos=(self.xc, self.yc), center=True, font='mono',
                     fontsize=self.fontsize, antialias=True
                 )
             elif self.state == "validation":
                 self.screen.draw_text(
-                    text="Validation succesfull, press 'Enter' to return to menu",
+                    text="Validation successful, press 'Enter' to return to menu",
                     pos=(self.xc, self.yc), center=True, font='mono',
                     fontsize=self.fontsize, antialias=True
                 )
@@ -537,6 +537,8 @@ class EyelinkGraphics(custom_display):
         self.clear_cal_display()
         self.last_mouse_state = -1
         self.imagebuffer = self.new_array()
+
+        pylink.getEYELINK().imageModeDisplay()
 
     def image_title(self, text):
 
