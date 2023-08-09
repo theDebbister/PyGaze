@@ -18,7 +18,7 @@ For more information, see: <https://www.pygaze.org/contributors>
 
 ## Installation
 
-```
+```     
 pip install python-pygaze
 ```
 

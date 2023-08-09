@@ -146,7 +146,6 @@ class libeyelink(BaseEyeTracker):
         self.weightdist = 10
         # distance between participant and screen in cm
         self.screendist = settings.SCREENDIST
-        # distance between participant and screen in cm
         self.screensize = settings.SCREENSIZE
         self.pixpercm = (self.resolution[0] / float(self.screensize[0]) +
                          self.resolution[1] / float(self.screensize[1])) / 2.0
@@ -293,7 +292,7 @@ class libeyelink(BaseEyeTracker):
             # attempt calibrate; confirm abort when esc pressed
             while True:
                 self.eyelink_graphics.esc_pressed = False
-                pylink.getEYELINK().doTrackerSetup(width=1395, height=1057)
+                pylink.getEYELINK().doTrackerSetup()
                 if not self.eyelink_graphics.esc_pressed:
                     break
                 self.confirm_abort_experiment()

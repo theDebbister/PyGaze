@@ -277,7 +277,7 @@ class EyelinkGraphics(custom_display):
 
         """Clears the calibration display"""
 
-        self.screen.clear(color=settings.IMAGE_BGC)
+        self.screen.clear(color=settings.BGC)
         self.display.fill(self.screen)
         self.display.show()
 
@@ -298,8 +298,8 @@ class EyelinkGraphics(custom_display):
         """
 
         self.play_beep(pylink.CAL_TARG_BEEP)
-        self.screen.clear(color=settings.IMAGE_BGC)
-        self.screen.set_background_colour(colour=settings.IMAGE_BGC)
+        self.screen.clear(color=settings.BGC)
+        self.screen.set_background_colour(colour=settings.BGC)
         self.screen.draw_fixation(fixtype='circle', pos=(x, y))
         self.display.fill(screen=self.screen)
         self.display.show()
@@ -320,7 +320,7 @@ class EyelinkGraphics(custom_display):
                 self.__target_beep__.play()
         elif beepid == pylink.CAL_ERR_BEEP or beepid == pylink.DC_ERR_BEEP:
             # show a picture
-            self.screen.clear(color=settings.IMAGE_BGC)
+            self.screen.clear(color=settings.BGC)
             self.screen.draw_text(
                 text="Calibration lost, press 'Enter' to return to menu",
                 pos=(self.xc, self.yc), center=True, font='mono',
@@ -332,7 +332,7 @@ class EyelinkGraphics(custom_display):
             if settings.EYELINKCALBEEP:
                 self.__target_beep__error__.play()
         elif beepid == pylink.CAL_GOOD_BEEP:
-            self.screen.clear(color=settings.IMAGE_BGC)
+            self.screen.clear(color=settings.BGC)
             if self.state == "calibration":
                 self.screen.draw_text(
                     text="Calibration successful, press 'v' to validate",
