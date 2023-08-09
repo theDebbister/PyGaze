@@ -292,7 +292,7 @@ class libeyelink(BaseEyeTracker):
             # attempt calibrate; confirm abort when esc pressed
             while True:
                 self.eyelink_graphics.esc_pressed = False
-                pylink.getEYELINK().doTrackerSetup()
+                pylink.getEYELINK().doTrackerSetup(width=settings.IMAGE_WIDTH_PX, height=settings.IMAGE_HEIGHT_PX)
                 if not self.eyelink_graphics.esc_pressed:
                     break
                 self.confirm_abort_experiment()
