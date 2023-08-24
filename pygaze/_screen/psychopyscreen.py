@@ -148,6 +148,8 @@ class PsychoPyScreen(BaseScreen):
             colour = self.bgc
 
         self.screen = []
+        self.draw_rect(colour=colour, x=0, y=0, w=self.dispsize[0], 
+            h=self.dispsize[1], fill=True)
 
     def copy(self, screen):
 
