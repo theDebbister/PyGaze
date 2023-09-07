@@ -18,6 +18,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
+from pylink import Sample
 
 from pygaze import settings
 from pygaze._eyetracker.baseeyetracker import BaseEyeTracker
@@ -158,6 +159,7 @@ class libeyelink(BaseEyeTracker):
                     "Error in libeyelink.libeyelink.__init__(): Failed to "
                     "connect to the tracker!"
                 )
+
         # determine software version of tracker
         self.tracker_software_ver = 0
         self.eyelink_ver = pylink.getEYELINK().getTrackerVersion()
@@ -201,6 +203,15 @@ class libeyelink(BaseEyeTracker):
             )
         pylink.getEYELINK().openDataFile(self.eyelink_data_file)
         pylink.flushGetkeyQueue()
+
+        # Add a header text to the EDF file to identify the current experiment name
+        # This is OPTIONAL. If your text starts with "RECORDED BY " it will be
+        # available in DataViewer's Inspector window by clicking
+        # the EDF session node in the top panel and looking for the "Recorded By:"
+        # field in the bottom panel of the Inspector.
+        preamble_text = 'RECORDED BY %s' % os.path.basename(__file__)     #cui
+        self.send_command("add_file_preamble_text '%s'" % preamble_text)         #cui
+
         pylink.getEYELINK().setOfflineMode()
         # notify eyelink of display resolution
         self.send_command(
@@ -211,34 +222,37 @@ class libeyelink(BaseEyeTracker):
         # get some configuration stuff
         if self.eyelink_ver >= 2:
             self.send_command("select_parser_configuration 0")
+            self.log("!CMD select_parser_configuration 0")  #cui
             if self.eyelink_ver == 2:  # turn off scenelink camera stuff
                 self.send_command("scene_camera_gazemap = NO")
         # set EDF file contents (this specifies which data is written to the EDF
         # file)
         self.send_command(
-            "file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON"
+            "file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT"
         )
         if self.tracker_software_ver >= 4:
             self.send_command(
-                "file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS,HTARGET"
+                #"file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS,HTARGET,INPUT"
+                "file_sample_data  = LEFT,RIGHT,GAZE,HREF,RAW,AREA,HTARGET,GAZERES,BUTTON,STATUS,INPUT" #cui
             )
         else:
             self.send_command(
-                "file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS"
+                #"file_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,INPUT"
+                "file_sample_data  = LEFT,RIGHT,GAZE,HREF,RAW,AREA,GAZERES,BUTTON,STATUS,INPUT"  #cui
             )
         # set link data (this specifies which data is sent through the link and
         # thus can be used in gaze contingent displays)
         self.send_command(
-            "link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,BUTTON"
+            "link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,BUTTON,FIXUPDATE,INPUT" #cui
         )
         if self.tracker_software_ver >= 4:
             self.send_command(
-                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,HTARGET"
+                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,HTARGET,STATUS,INPUT"  #cui
             )
         else:
             self.send_command(
 
-                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS"
+                "link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,INPUT"
             )
         # not quite sure what this means (according to Sebastiaan Mathot, it
         # might be the button that is used to end drift correction?)
@@ -274,6 +288,38 @@ class libeyelink(BaseEyeTracker):
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
         return pylink.getEYELINK().isConnected()
+
+    def validate(self, width: int, height: int):
+        if self.recording:
+            raise Exception(
+                "Error in libeyelink.libeyelink.calibrate(): Trying to "
+                "calibrate after recording has started!"
+            )
+
+        print(pylink.getEYELINK().getTrackerMode())
+        self.display.fill()  # clear display
+
+        displayCoords = " 0 0 %d %d" % (width, height)
+        pylink.getEYELINK().sendMessage("DISPLAY_COORDS" + displayCoords)
+        pylink.getEYELINK().sendCommand("screen_pixel_coords" + displayCoords)
+        # # # # #
+        # EyeLink validation
+        #pylink.getEYELINK().doTrackerSetup(width=settings.IMAGE_WIDTH_PX, height=settings.IMAGE_HEIGHT_PX)
+        pylink.getEYELINK().startSetup()
+
+        #pylink.getEYELINK().waitForModeReady(100)
+
+        print(pylink.getEYELINK().getTrackerMode())
+
+        pylink.getEYELINK().sendCommand("start_validation")
+        print(pylink.getEYELINK().getTrackerMode())
+
+
+        res = pylink.getEYELINK().getCalibrationResult()
+        print(res)
+        while res != 0:
+            res = pylink.getEYELINK().getCalibrationResult()
+
 
     def calibrate(self):
 
@@ -645,16 +691,16 @@ class libeyelink(BaseEyeTracker):
         if not eye_used:
             self.eye_used = pylink.getEYELINK().eyeAvailable()
         else:
-            if eye_used == 'right':
+            if eye_used == 'RIGHT':
                 self.send_command("binocular_enabled NO")
                 self.eye_used = self.right_eye
                 self.send_command("active_eye = 3")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
 
-            elif eye_used == 'left':
+            elif eye_used == 'LEFT':
                 self.send_command("binocular_enabled NO")
                 self.eye_used = self.left_eye
                 self.send_command("active_eye = 1")  # active_eye can be set to 1 or LEFT; 3 or RIGHT
-            elif eye_used == 'binocular':
+            elif eye_used == 'BOTH':
                 self.eye_used = self.binocular
                 self.send_command("binocular_enabled YES")  # binocular_enabled can be set to YES for binocular or NO for monocular
 
@@ -730,6 +776,14 @@ class libeyelink(BaseEyeTracker):
         else:
             gaze = self.prevsample[:]
         return gaze
+
+    def get_newest_sample(self) -> Sample:
+        """
+        Returns the newest sample that can be used for gaze contingency
+        See pylink documentation of getNewestSample() for details
+        """
+
+        return pylink.getEYELINK().getNewestSample()
 
     def send_backdrop_image(self, image_path: str) -> None:
         # put the tracker in the offline mode first

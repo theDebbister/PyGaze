@@ -331,6 +331,9 @@ class BaseEyeTracker:
 
         pass
 
+    def get_newest_sample(self):
+        pass
+
     def send_command(self, cmd):
         """
         desc:
@@ -631,4 +634,7 @@ class BaseEyeTracker:
         pass
 
     def send_backdrop_image(self, image_path: str) -> None:
+        pass
+
+    def validate(self, width: int, height: int) -> None:
         pass
