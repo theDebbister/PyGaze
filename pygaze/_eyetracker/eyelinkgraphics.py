@@ -336,19 +336,19 @@ class EyelinkGraphics(custom_display):
             self.screen.clear(color=settings.IMAGE_BGC)
             if self.state == "calibration":
                 self.screen.draw_text(
-                    text="Calibration successful, press 'v' to validate",
+                    text="",
                     pos=(self.xc, self.yc), center=True, font='mono',
                     fontsize=self.fontsize, antialias=True
                 )
             elif self.state == "validation":
                 self.screen.draw_text(
-                    text="Validation successful, press 'Enter' to return to menu",
+                    text="",
                     pos=(self.xc, self.yc), center=True, font='mono',
                     fontsize=self.fontsize, antialias=True
                 )
             else:
                 self.screen.draw_text(
-                    text="Press 'Enter' to return to menu",
+                    text="",
                     pos=(self.xc, self.yc), center=True, font='mono',
                     fontsize=self.fontsize, antialias=True
                     )
