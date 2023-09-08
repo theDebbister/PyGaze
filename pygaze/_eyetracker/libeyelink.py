@@ -296,9 +296,11 @@ class libeyelink(BaseEyeTracker):
                 "calibrate after recording has started!"
             )
 
+        pylink.getEYELINK().setOfflineMode()
         print(pylink.getEYELINK().getTrackerMode())
         self.display.fill()  # clear display
 
+        pylink.getEYELINK().dataSwitch(pylink.RECORD_LINK_SAMPLES)
         displayCoords = " 0 0 %d %d" % (width, height)
         pylink.getEYELINK().sendMessage("DISPLAY_COORDS" + displayCoords)
         pylink.getEYELINK().sendCommand("screen_pixel_coords" + displayCoords)
@@ -311,6 +313,8 @@ class libeyelink(BaseEyeTracker):
 
         print(pylink.getEYELINK().getTrackerMode())
 
+        self.eyelink_graphics.state = 'validation'
+
         pylink.getEYELINK().sendCommand("start_validation")
         print(pylink.getEYELINK().getTrackerMode())
 
@@ -321,9 +325,19 @@ class libeyelink(BaseEyeTracker):
             res = pylink.getEYELINK().getCalibrationResult()
 
 
-    def calibrate(self):
+    def calibrate(self, validation_only=False):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
+
+        if validation_only:
+            self.scr.clear(color=settings.IMAGE_BGC)
+            self.scr.draw_text(
+                text="We will perform a validation now.",
+                pos=settings.TOP_LEFT_CORNER, center=True, font='mono',
+                fontsize=self.fontsize, antialias=True
+            )
+            self.display.fill(self.scr)
+            self.display.show()
 
         while True:
             if self.recording:
@@ -433,7 +447,7 @@ class libeyelink(BaseEyeTracker):
                     if keypressed[0] == 'space':
                         break
 
-    def drift_correction(self, pos=None, fix_triggered=False):
+    def drift_correction(self, pos=None, fix_triggered=False, overwrite=False):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
@@ -451,9 +465,9 @@ class libeyelink(BaseEyeTracker):
             pos = self.resolution[0] / 2, self.resolution[1] / 2
         if fix_triggered:
             return self.fix_triggered_drift_correction(pos)
-        return self.manual_drift_correction(pos)
+        return self.manual_drift_correction(pos, overwrite)
 
-    def manual_drift_correction(self, pos):
+    def manual_drift_correction(self, pos, overwrite=False):
 
         """
         Performs a manual, i.e. spacebar-triggered drift correction.
@@ -484,6 +498,9 @@ class libeyelink(BaseEyeTracker):
         # If escape was pressed, we present the confirm abort screen
         if self.eyelink_graphics.esc_pressed:
             self.confirm_abort_experiment()
+        if overwrite:
+            self.eyelink_graphics.skip_drift_correction = True
+            return True
         # If 'q' was pressed, we drop back to the calibration screen
         else:
             self.calibrate()

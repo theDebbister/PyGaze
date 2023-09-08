@@ -95,6 +95,7 @@ class EyelinkGraphics(custom_display):
         self.fontsize = libeyelink.fontsize
         self.title = ""
         self.display_open = True
+        self.skip_drift_correction = False
         # self.draw_menu_screen()
         # A crosshair is drawn onto the eye image. This should be scaled in
         # pylink 1.1.0.5 (tested on Python 2.7) but not on pylink 1.11.0.0
@@ -318,11 +319,11 @@ class EyelinkGraphics(custom_display):
             # to play it when the calibration target is drawn.
             if settings.EYELINKCALBEEP:
                 self.__target_beep__.play()
-        elif beepid == pylink.CAL_ERR_BEEP or beepid == pylink.DC_ERR_BEEP:
+        elif (beepid == pylink.CAL_ERR_BEEP or beepid == pylink.DC_ERR_BEEP) and not self.skip_drift_correction:
             # show a picture
             self.screen.clear(color=settings.IMAGE_BGC)
             self.screen.draw_text(
-                text="Calibration lost, press 'Enter' to return to menu",
+                text="",
                 pos=(self.xc, self.yc), center=True, font='mono',
                 fontsize=self.fontsize, antialias=True
             )
@@ -490,6 +491,9 @@ class EyelinkGraphics(custom_display):
             self.state = "validation"
         elif key == "a":
             keycode = ord("a")
+        elif key == 's':
+            self.skip_drift_correction = True
+            keycode = ord("s")
         elif key == "i":
             self.extra_info = not self.extra_info
             keycode = 0

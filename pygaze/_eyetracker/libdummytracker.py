@@ -90,7 +90,7 @@ class Dummy(DumbDummy):
         print("Calibration would now take place")
         clock.pause(1000)
 
-    def drift_correction(self, pos=None, fix_triggered=False):
+    def drift_correction(self, pos=None, fix_triggered=False, **kwargs):
 
         """Dummy drift correction"""
 

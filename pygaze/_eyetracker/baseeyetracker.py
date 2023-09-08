@@ -143,7 +143,7 @@ class BaseEyeTracker:
 
         pass
 
-    def calibrate(self):
+    def calibrate(self, **kwargs):
         """
         desc: |
             Calibrates the eye tracking system. The actual behavior of this
@@ -195,7 +195,7 @@ class BaseEyeTracker:
 
         pass
 
-    def drift_correction(self, pos=None, fix_triggered=False):
+    def drift_correction(self, pos=None, fix_triggered=False, **kwargs):
         """
         desc: |
             Performs a drift-correction procedure. The exact behavior of this
@@ -636,5 +636,5 @@ class BaseEyeTracker:
     def send_backdrop_image(self, image_path: str) -> None:
         pass
 
-    def validate(self, width: int, height: int) -> None:
+    def validate(self, **kwargs) -> None:
         pass
