@@ -52,7 +52,7 @@ class Logfile(BaseLogfile):
             pass
 
         self.filename = filename + ".txt"
-        self.logfile = open(self.filename, "w")
+        self.logfile = open(self.filename, "w", encoding='utf8')
 
     def write(self, vallist, sync_to_disk=True):
 

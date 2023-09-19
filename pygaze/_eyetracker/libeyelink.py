@@ -481,6 +481,7 @@ class libeyelink(BaseEyeTracker):
 
         self.draw_drift_correction_target(pos[0], pos[1])
         self.eyelink_graphics.esc_pressed = False
+        self.eyelink_graphics.skip_drift_correction = False
         try:
             # The 0 parameters indicate that the display should not be cleared
             # and we should not be allowed to fall back to the set-up screen.
@@ -498,9 +499,11 @@ class libeyelink(BaseEyeTracker):
         # If escape was pressed, we present the confirm abort screen
         if self.eyelink_graphics.esc_pressed:
             self.confirm_abort_experiment()
+
         if overwrite:
             self.eyelink_graphics.skip_drift_correction = True
-            return True
+
+            return "skipped"
         # If 'q' was pressed, we drop back to the calibration screen
         else:
             self.calibrate()
