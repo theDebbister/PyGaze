@@ -549,7 +549,7 @@ class BaseEyeTracker:
 
         pass
 
-    def wait_for_fixation_end(self):
+    def wait_for_fixation_end(self, **kwargs):
         """
         desc: |
             Returns time and gaze position when a fixation has ended;
@@ -636,5 +636,17 @@ class BaseEyeTracker:
     def send_backdrop_image(self, image_path: str) -> None:
         pass
 
-    def validate(self, **kwargs) -> None:
+    def get_key(self):
+        """
+        Gets the key that was pressed on the experimenter keyboard.
+        """
+        pass
+
+    def is_recording(self):
+        pass
+
+    def get_tracker(self):
+        """
+        Can be used to get the tracker object to call hardware specific functions directly on the tracker.
+        """
         pass

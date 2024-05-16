@@ -78,7 +78,7 @@ class libeyelink(BaseEyeTracker):
                  bg_color=settings.BGC, eventdetection=settings.EVENTDETECTION,
                  saccade_velocity_threshold=35, saccade_acceleration_threshold=9500,
                  blink_threshold=settings.BLINKTHRESH,
-                 force_drift_correct=True, pupil_size_mode=settings.EYELINKPUPILSIZEMODE,
+                 force_drift_correct=False, pupil_size_mode=settings.EYELINKPUPILSIZEMODE,
                  screen: Screen = None, **kwargs):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
@@ -209,8 +209,8 @@ class libeyelink(BaseEyeTracker):
         # available in DataViewer's Inspector window by clicking
         # the EDF session node in the top panel and looking for the "Recorded By:"
         # field in the bottom panel of the Inspector.
-        preamble_text = 'RECORDED BY %s' % os.path.basename(__file__)     #cui
-        self.send_command("add_file_preamble_text '%s'" % preamble_text)         #cui
+        preamble_text = 'RECORDED BY %s' % os.path.basename(__file__)
+        self.send_command("add_file_preamble_text '%s'" % preamble_text)
 
         pylink.getEYELINK().setOfflineMode()
         # notify eyelink of display resolution
@@ -289,55 +289,10 @@ class libeyelink(BaseEyeTracker):
 
         return pylink.getEYELINK().isConnected()
 
-    def validate(self, width: int, height: int):
-        if self.recording:
-            raise Exception(
-                "Error in libeyelink.libeyelink.calibrate(): Trying to "
-                "calibrate after recording has started!"
-            )
 
-        pylink.getEYELINK().setOfflineMode()
-        print(pylink.getEYELINK().getTrackerMode())
-        self.display.fill()  # clear display
-
-        pylink.getEYELINK().dataSwitch(pylink.RECORD_LINK_SAMPLES)
-        displayCoords = " 0 0 %d %d" % (width, height)
-        pylink.getEYELINK().sendMessage("DISPLAY_COORDS" + displayCoords)
-        pylink.getEYELINK().sendCommand("screen_pixel_coords" + displayCoords)
-        # # # # #
-        # EyeLink validation
-        #pylink.getEYELINK().doTrackerSetup(width=settings.IMAGE_WIDTH_PX, height=settings.IMAGE_HEIGHT_PX)
-        pylink.getEYELINK().startSetup()
-
-        #pylink.getEYELINK().waitForModeReady(100)
-
-        print(pylink.getEYELINK().getTrackerMode())
-
-        self.eyelink_graphics.state = 'validation'
-
-        pylink.getEYELINK().sendCommand("start_validation")
-        print(pylink.getEYELINK().getTrackerMode())
-
-
-        res = pylink.getEYELINK().getCalibrationResult()
-        print(res)
-        while res != 0:
-            res = pylink.getEYELINK().getCalibrationResult()
-
-
-    def calibrate(self, validation_only=False):
+    def calibrate(self):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
-
-        if validation_only:
-            self.scr.clear(color=settings.IMAGE_BGC)
-            self.scr.draw_text(
-                text="We will perform a validation now.",
-                pos=settings.TOP_LEFT_CORNER, center=True, font='mono',
-                fontsize=self.fontsize, antialias=True
-            )
-            self.display.fill(self.scr)
-            self.display.show()
 
         while True:
             if self.recording:
@@ -481,7 +436,6 @@ class libeyelink(BaseEyeTracker):
 
         self.draw_drift_correction_target(pos[0], pos[1])
         self.eyelink_graphics.esc_pressed = False
-        self.eyelink_graphics.skip_drift_correction = False
         try:
             # The 0 parameters indicate that the display should not be cleared
             # and we should not be allowed to fall back to the set-up screen.
@@ -866,7 +820,7 @@ class libeyelink(BaseEyeTracker):
         """
         return pylink.getEYELINK().trackerTime() - clock.get_time()
 
-    def wait_for_event(self, event):
+    def wait_for_event(self, event, timeout=None):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
@@ -890,6 +844,8 @@ class libeyelink(BaseEyeTracker):
                     tc = float_data.getTime() - self._get_eyelink_clock_async()
                     if tc > t0:
                         return tc, float_data
+                if timeout is not None and clock.get_time() - t0 > timeout:
+                    return None, None
 
         if event == 5:
             outcome = self.wait_for_saccade_start()
@@ -1079,7 +1035,7 @@ class libeyelink(BaseEyeTracker):
                             # return time and starting position
                             return t1, spos
 
-    def wait_for_fixation_end(self):
+    def wait_for_fixation_end(self, timeout=None):
 
         """See pygaze._eyetracker.baseeyetracker.BaseEyeTracker"""
 
@@ -1087,8 +1043,8 @@ class libeyelink(BaseEyeTracker):
         # EyeLink method
 
         if self.eventdetection == 'native':
-            t, d = self.wait_for_event(pylink.ENDFIX)
-            return t, d.getTime(), d.getStartGaze()
+            timestamp, event_data = self.wait_for_event(pylink.ENDFIX, timeout)
+            return timestamp, event_data
 
 
         # # # # #
@@ -1232,8 +1188,8 @@ class libeyelink(BaseEyeTracker):
         # Display the confirmation screen
         scr = Screen(disptype=settings.DISPTYPE)
         kb = Keyboard(timeout=5000)
-        yc = settings.DISPSIZE[1] / 8
-        xc = settings.DISPSIZE[0] / 8
+        yc = settings.DISPSIZE[1] // 2
+        xc = settings.DISPSIZE[0] // 2
         ld = 40  # Line height
         scr.draw_text(
             u'Really abort experiment?', pos=(xc, yc - 3 * ld),
@@ -1280,3 +1236,10 @@ class libeyelink(BaseEyeTracker):
 
         self.display.fill(self.scr)
         self.display.show()
+
+    def is_recording(self):
+        return pylink.getEYELINK().isRecording()
+
+    def get_tracker(self):
+        return pylink.getEYELINK()
+
