@@ -67,6 +67,7 @@ class TobiiProTracker(BaseEyeTracker):
         self.BINOCULAR = 2
         self.eye_used = 0  # 0=left, 1=right, 2=binocular
 
+        # TODO tobii: at the moment it is 5 point cal, we need 9 point in RANDOM order (I think is is not random now)
         # calibration and validation points
         lb = 0.1  # left bound
         xc = 0.5  # horizontal center
@@ -107,32 +108,34 @@ class TobiiProTracker(BaseEyeTracker):
         self.t0 = None
         self._write_enabled = True
 
+        # TODO tobii: needs to be adapted to be stored in the same output folder format as for eyelink name should be
+        #  passed from experiment
         self.datafile = open("{0}_TOBII_output.tsv".format(logfile), 'w')
 
         # initiation report
         self.datafile.write("pygaze initiation report start\n")
         self.datafile.write(
-            "display resolution: {}x{}\n".format( \
+            "display resolution: {}x{}\n".format(
                 self.disp.dispsize[0], self.disp.dispsize[1]
             )
         )
         self.datafile.write(
-            "display size in cm: {}x{}\n".format( \
+            "display size in cm: {}x{}\n".format(
                 self.screensize[0], self.screensize[1]
             )
         )
         self.datafile.write(
-            "fixation threshold: {} degrees\n".format( \
+            "fixation threshold: {} degrees\n".format(
                 self.fixtresh
             )
         )
         self.datafile.write(
-            "speed threshold: {} degrees/second\n".format( \
+            "speed threshold: {} degrees/second\n".format(
                 self.spdtresh
             )
         )
         self.datafile.write(
-            "acceleration threshold: {} degrees/second**2\n".format( \
+            "acceleration threshold: {} degrees/second**2\n".format(
                 self.accthresh
             )
         )
@@ -143,7 +146,7 @@ class TobiiProTracker(BaseEyeTracker):
                 round(normalized_point[1] * self.disp.dispsize[1], 0))
 
     def _px_2_norm(self, pixelized_point):
-        return (pixelized_point[0] / self.disp.dispsize[0], pixelized_point[1] / self.disp.dispsize[1])
+        return pixelized_point[0] / self.disp.dispsize[0], pixelized_point[1] / self.disp.dispsize[1]
 
     def _mean(self, array):
         if array:
@@ -166,7 +169,7 @@ class TobiiProTracker(BaseEyeTracker):
         """
         self.log("var {} {}".format(var, val))
 
-    def set_eye_used(self):
+    def set_eye_used(self, eye_used: str = ''):
         """Logs the eye_used variable, based on which eye was specified.
 
         arguments
@@ -318,6 +321,9 @@ class TobiiProTracker(BaseEyeTracker):
                     log file and some properties are updated (i.e. the
                     thresholds for detection algorithms)
         """
+        # TODO tobii: from what I understand, all of this is implemented
+
+
         self._write_enabled = False
         self.start_recording()
         self.screen.set_background_colour(colour=(0, 0, 0))
@@ -408,6 +414,7 @@ class TobiiProTracker(BaseEyeTracker):
                 self.stop_recording()
                 return False
 
+            # TODO tobii: find out what this does (in tobii_research)
             calibration = tr.ScreenBasedCalibration(self.eyetracker)
 
             calibrating = True
@@ -415,8 +422,10 @@ class TobiiProTracker(BaseEyeTracker):
             while calibrating:
                 calibration.enter_calibration_mode()
 
+                # TODO tobii: randomize order of points
                 for point in self.points_to_calibrate:
                     self.screen.clear()
+                    # TODO tobii: make sure the target is drawn like in eyelink
                     self.screen.draw_circle(
                         colour=(255, 255, 255),
                         pos=point,
@@ -527,6 +536,7 @@ class TobiiProTracker(BaseEyeTracker):
                 if pressed_key[0] == 'space':
                     calibrating = False
 
+        # TODO tobii: apply same changes for validation as for calibration (randomization, target drawing, ...)
         if validate:
             # # # show menu
             self.screen.clear()
@@ -652,6 +662,7 @@ class TobiiProTracker(BaseEyeTracker):
             # in pixels per millisecond**2
             self.pxacctresh = self._deg2pix(self.screendist, self.accthresh / 1000.0, self.pixpercm)
 
+            # TODO tobii: make sur eto also write validation scores etc. to file
             data_to_write = ''
             data_to_write += "pygaze calibration report start\n"
             data_to_write += "samplerate: {} Hz\n".format(self.samplerate)
@@ -922,6 +933,8 @@ class TobiiProTracker(BaseEyeTracker):
                                 but Tobii does not offer fixation detection; PyGaze algorithm \
                                 will be used"
                 )
+
+        # TODO tobii: check that this works
 
         # # # # #
         # PyGaze method
