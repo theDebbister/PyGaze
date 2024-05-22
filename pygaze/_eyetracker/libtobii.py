@@ -422,8 +422,10 @@ class TobiiProTracker(BaseEyeTracker):
             while calibrating:
                 calibration.enter_calibration_mode()
 
-                # TODO tobii: randomize order of points
-                for point in self.points_to_calibrate:
+                # randomize order of points
+                shuffled_points_to_calibrate = random.sample(self.points_to_calibrate, len(self.points_to_calibrate))
+
+                for point in shuffled_points_to_calibrate:
                     self.screen.clear()
                     # TODO tobii: make sure the target is drawn like in eyelink
                     self.screen.draw_circle(
@@ -553,8 +555,11 @@ class TobiiProTracker(BaseEyeTracker):
             # # # arrays for data storage
             lxacc, lyacc, rxacc, ryacc = [], [], [], []
 
+            # randomize order of points
+            shuffled_points_to_calibrate = random.sample(self.points_to_calibrate, len(self.points_to_calibrate))
+
             # # loop through all calibration positions
-            for pos in self.points_to_calibrate:
+            for point in shuffled_points_to_calibrate:
                 # show validation point
                 self.screen.clear()
                 self.screen.draw_fixation(fixtype='dot', pos=pos, colour=(255, 255, 255))
