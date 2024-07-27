@@ -380,7 +380,7 @@ class PsychoPyScreen(BaseScreen):
         None
         
         keyword arguments
-        colour    -- colour for the circle (a colour name (e.g. 'red') or
+        colour    -- colour for the rectangle (a colour name (e.g. 'red') or
                    a RGB(A) tuple (e.g. (255,0,0) or (255,0,0,255))) or
                    None for the default foreground colour, self.fgc
                    (default = None)

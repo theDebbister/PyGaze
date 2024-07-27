@@ -215,10 +215,12 @@ class libeyelink(BaseEyeTracker):
         pylink.getEYELINK().setOfflineMode()
         # notify eyelink of display resolution
         self.send_command(
-            "screen_pixel_coords = 0 0 {} {}".format( \
-                self.resolution[0], self.resolution[1]
+            "screen_pixel_coords = 0 0 {} {}".format(
+                self.resolution[0] - 1, self.resolution[1] - 1
             )
         )
+        # self.log(f"DISPLAY_COORDS 0 0 {self.resolution[0] - 1} {self.resolution[1] - 1}")
+
         # get some configuration stuff
         if self.eyelink_ver >= 2:
             self.send_command("select_parser_configuration 0")
