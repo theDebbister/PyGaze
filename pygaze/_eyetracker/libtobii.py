@@ -23,7 +23,9 @@ class TobiiProTracker(BaseEyeTracker):
                  eventdetection=settings.EVENTDETECTION,
                  saccade_velocity_threshold=35,
                  saccade_acceleration_threshold=9500,
-                 blink_threshold=settings.BLINKTHRESH, **args):
+                 blink_threshold=settings.BLINKTHRESH, 
+                 calibration_points=9,
+                 **args):
         """Initializes a TobiiProTracker instance
 
         arguments
@@ -67,16 +69,37 @@ class TobiiProTracker(BaseEyeTracker):
         self.BINOCULAR = 2
         self.eye_used = 0  # 0=left, 1=right, 2=binocular
 
-        # TODO tobii: at the moment it is 5 point cal, we need 9 point in RANDOM order (I think is is not random now)
-        # calibration and validation points
-        lb = 0.1  # left bound
-        xc = 0.5  # horizontal center
-        rb = 0.9  # right bound
-        ub = 0.1  # upper bound
-        yc = 0.5  # vertical center
-        bb = 0.9  # bottom bound
+        if isinstance(calibration_points, list):
+            self.points_to_calibrate = [self._norm_2_px(2) for p in calibrations_points]
+        elif isinstance(calibration_points, int):
+            if calibration_points == ´5:
+                # calibration and validation points
+                lb = 0.1  # left bound
+                xc = 0.5  # horizontal center
+                rb = 0.9  # right bound
+                ub = 0.1  # upper bound
+                yc = 0.5  # vertical center
+                bb = 0.9  # bottom bound
+        
+                self.points_to_calibrate = [self._norm_2_px(p) for p in [(lb, ub), (rb, ub), (xc, yc), (lb, bb), (rb, bb)]]
 
-        self.points_to_calibrate = [self._norm_2_px(p) for p in [(lb, ub), (rb, ub), (xc, yc), (lb, bb), (rb, bb)]]
+            elif calibration_points ==  9:
+                normalized_calibration_points = [
+                    (.5, .5),
+                    (.5, .085), (.5, .915),
+                    (.06, .5), (.94, .5),
+                    (.115, .135), (.885, .135),
+                    (.115, .865), (.885, .865),
+                ]
+                self.points_to_calibrate = [self._norm_2_px(p) for p in normalized_calibration_points]
+            else:
+                raise ValueError(
+                    f'number of calibration_points must be either 5 or 9 but is {calibration_points}'
+                )
+        else:
+            raise TypeError(
+                f'calibration_points must be of type int or a list of normalized points, but is {type(calibration_points)}',
+            )
 
         # event detection properties
 
@@ -422,8 +445,10 @@ class TobiiProTracker(BaseEyeTracker):
             while calibrating:
                 calibration.enter_calibration_mode()
 
-                # TODO tobii: randomize order of points
-                for point in self.points_to_calibrate:
+                # randomize order of points
+                shuffled_points_to_calibrate = random.sample(self.points_to_calibrate, len(self.points_to_calibrate))
+
+                for point in shuffled_points_to_calibrate:
                     self.screen.clear()
                     # TODO tobii: make sure the target is drawn like in eyelink
                     self.screen.draw_circle(
@@ -553,8 +578,11 @@ class TobiiProTracker(BaseEyeTracker):
             # # # arrays for data storage
             lxacc, lyacc, rxacc, ryacc = [], [], [], []
 
+            # randomize order of points
+            shuffled_points_to_calibrate = random.sample(self.points_to_calibrate, len(self.points_to_calibrate))
+
             # # loop through all calibration positions
-            for pos in self.points_to_calibrate:
+            for point in shuffled_points_to_calibrate:
                 # show validation point
                 self.screen.clear()
                 self.screen.draw_fixation(fixtype='dot', pos=pos, colour=(255, 255, 255))
