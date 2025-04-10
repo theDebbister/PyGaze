@@ -758,10 +758,13 @@ class libeyelink(BaseEyeTracker):
         Returns the newest sample that can be used for gaze contingency
         See pylink documentation of getNewestSample() for details
         """
+        # TODO tobii: check if this needs to be implemented for tobii as well. Check where it is used in the exp.
 
         return pylink.getEYELINK().getNewestSample()
 
     def send_backdrop_image(self, image_path: str) -> None:
+        # TODO tobii: this function is necessary for eyelink eyetrackers such that the current image is visible on the
+        #  host PC. I am not sure whether this is also possible for tobii. Please check.
         # put the tracker in the offline mode first
         pylink.getEYELINK().setOfflineMode()
 
@@ -902,7 +905,7 @@ class libeyelink(BaseEyeTracker):
                 t1 = clock.get_time()
                 if self.is_valid_sample(newpos) and newpos != prevpos:
                     # check if distance is larger than precision error
-                    sx = newpos[0] - prevpos[0];
+                    sx = newpos[0] - prevpos[0]
                     sy = newpos[1] - prevpos[1]
                     # weigthed distance: (sx/tx)**2 + (sy/ty)**2 > 1 means
                     # movement larger than RMS noise

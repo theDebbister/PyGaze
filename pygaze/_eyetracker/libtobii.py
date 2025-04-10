@@ -344,7 +344,6 @@ class TobiiProTracker(BaseEyeTracker):
                     log file and some properties are updated (i.e. the
                     thresholds for detection algorithms)
         """
-        # TODO tobii: from what I understand, all of this is implemented
 
 
         self._write_enabled = False
@@ -356,9 +355,6 @@ class TobiiProTracker(BaseEyeTracker):
             size = (int(2 * self.disp.dispsize[0] / 4), int(2 * self.disp.dispsize[1] / 4))
 
             while not self.kb.get_key(keylist=['space'], flush=False)[0]:
-                # TODO: What should we do when there are no gaze samples yet?
-                # Should we wait or raise an Exception to indicate that
-                # something went wrong.
                 if not self.gaze:
                     continue
                 gaze_sample = copy.copy(self.gaze[-1])
@@ -450,7 +446,7 @@ class TobiiProTracker(BaseEyeTracker):
 
                 for point in shuffled_points_to_calibrate:
                     self.screen.clear()
-                    # TODO tobii: make sure the target is drawn like in eyelink
+                    # TODO tobii: make sure the calibration target is drawn like in eyelink
                     self.screen.draw_circle(
                         colour=(255, 255, 255),
                         pos=point,
@@ -962,7 +958,7 @@ class TobiiProTracker(BaseEyeTracker):
                                 will be used"
                 )
 
-        # TODO tobii: check that this works
+        # TODO tobii: check that this works. It is used for the fixation trigger.
 
         # # # # #
         # PyGaze method
@@ -1354,3 +1350,18 @@ class TobiiProTracker(BaseEyeTracker):
         None		--	closes the log file.
         """
         self.datafile.close()
+
+    def is_recording(self) -> bool:
+        """
+        Returns whether the tracker is currently recording.
+        """
+        # return pylink.getEYELINK().isRecording()
+        # TODO tobii: the example above is from eyelink. It is used in the experiment and should also work fro tobii
+
+    def get_tracker(self):
+        """
+        Returns the tracker object.
+        """
+        # return pylink.getEYELINK()
+        # TODO tobii: the example above is from eyelink. It is used in the experiment and should work fro tobii.
+        #  Check the respective use cases in the experiment
