@@ -70,9 +70,9 @@ class TobiiProTracker(BaseEyeTracker):
         self.eye_used = 0  # 0=left, 1=right, 2=binocular
 
         if isinstance(calibration_points, list):
-            self.points_to_calibrate = [self._norm_2_px(2) for p in calibrations_points]
+            self.points_to_calibrate = [self._norm_2_px(2) for p in calibration_points]
         elif isinstance(calibration_points, int):
-            if calibration_points == ´5:
+            if calibration_points == 5:
                 # calibration and validation points
                 lb = 0.1  # left bound
                 xc = 0.5  # horizontal center
